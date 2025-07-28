@@ -1,6 +1,6 @@
-## `blog` 发布方法
+# `blog` 发布方法
 
-### 1. 本地不使用 hugo 的简单方式.
+## 1. 本地不使用 hugo 的简单方式.
 
 1. 在 `github` 界面 `fork` 本仓库.
 2. 在你的电脑上 `clone` 你 `fork` 下来的 `repo`. 
@@ -29,6 +29,7 @@ draft: true # draft不会被渲染
 ```
 
 5. 确认没有冲突.
+
 ```sh
 # 保存本地修改并将工作目录还原到当前HEAD提交状态
 git stash
@@ -54,5 +55,6 @@ git push --set-upstream origin delete-unused-link
 6. 创建合并请求 (Create a pull request)
 回到线上派生项目的工作区，会看到新分支和修改的合并提交信息，点击Compare & pull request, 选择你想并入的原项目分支，标题和描述信息. 点击 Create pull request ，就行了。不出意外，你提的 PR 就应该躺在下面了. 可以去 PUA 管理员 `merge` 你的blog.
 
-### 2. 使用 hugo 新建blog
+## 2. 使用 hugo 新建blog
+
 区别只在创建文件的部分, 使用 `hugo new content/posts/your_blog_name.md` 初始化 `blog`.
