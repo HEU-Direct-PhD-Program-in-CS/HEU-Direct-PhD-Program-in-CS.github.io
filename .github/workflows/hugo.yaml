@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Add .nojekyll
-      run: touch public/.nojekyll
-
     - name: Checkout source
       uses: actions/checkout@v4
       with:
@@ -33,3 +30,6 @@ jobs:
         github_token: ${{ secrets.GH_TOKEN }}
         publish_dir: ./public
         publish_branch: gh-pages  # 要部署到的分支
+
+    - name: Add .nojekyll
+      run: touch public/.nojekyll
