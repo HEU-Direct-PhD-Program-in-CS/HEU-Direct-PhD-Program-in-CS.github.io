@@ -5,7 +5,7 @@ license = "GNU GPLv3"
 licenselink = "https://github.com/gokarna-theme/gokarna-hugo/blob/main/LICENSE"
 
 homepage = "https://github.com/gokarna-theme/gokarna-hugo"
-demosite = "https://gokarna-hugo.netlify.app"
+demosite = "https://heu-direct-phd-program-in-cs.github.io/"
 
 tags = ["blog", "minimal", "dark", "light", "responsive", "personal", "portfolio"]
 
