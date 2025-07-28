@@ -24,6 +24,9 @@ jobs:
     - name: Build
       run: hugo --minify
 
+    - name: Add .nojekyll
+      run: touch public/.nojekyll
+      
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
@@ -31,5 +34,3 @@ jobs:
         publish_dir: ./public
         publish_branch: gh-pages  # 要部署到的分支
 
-    - name: Add .nojekyll
-      run: touch public/.nojekyll
