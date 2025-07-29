@@ -15,14 +15,13 @@
 ---
 title: "My First Draft"  # 一级标题
 description: "Sample article showcasing basic Markdown syntax and formatting for HTML elements."
-tags: ["draft", "111", "222"]
+tags: ["draft", "wiki", "post", "web", "sys", "arch", "AI", "ACM"]
 type: 'post'
 weight: 20
 showTableOfContents: true
 date: 2025-07-28T12:00:00+08:00
 lastmod: 2025-01-01
-showTableOfContents: false
-draft: true # draft不会被渲染
+draft: false # 设置为 draft: true 则不会渲染
 ---
 
 ## Level2
@@ -48,15 +47,15 @@ git stash pop
 
 ```sh
 # 保存本地修改并将工作目录还原到当前HEAD提交状态
-git commit -am 'Delete unused Link declaration'  
+git commit -am 'post message'  
 
 # 推到派生项目远端仓库，因为之前项目分支是在本地创建的，需要带上 '--set-upstream'
-git push --set-upstream origin delete-unused-link
+git push --set-upstream origin new_branch_name
 ```
 
 6. 创建合并请求 (Create a pull request)
-回到线上派生项目的工作区，会看到新分支和修改的合并提交信息，点击Compare & pull request, 选择你想并入的原项目分支，标题和描述信息. 点击 Create pull request ，就行了。不出意外，你提的 PR 就应该躺在下面了. 可以去 PUA 管理员 `merge` 你的blog.
+回到线上派生项目的工作区，会看到新分支和修改的合并提交信息，点击Compare & pull request, 选择你想并入的原项目分支，标题和描述信息. 点击 Create pull request ，就行了。不出意外，你提的 PR 就应该躺在下面了. 可以去 PUA 管理员 `merge` 你的 `blog`.
 
-### 2. 使用 hugo 新建blog
+### 2. 使用 `hugo` 新建 blog
 
 区别只在创建文件的部分, 使用 `hugo new content/posts/your_blog_name.md` 初始化 `blog`.
