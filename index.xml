@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/</link><description>Recent content on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Mon, 28 Jul 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Theme Documentation - Basics</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</link><pubDate>Fri, 06 Mar 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</guid><description>&lt;p>Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/</link><description>Recent content on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Wed, 13 Aug 2025 22:00:00 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Theme Documentation - Basics</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</link><pubDate>Fri, 06 Mar 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</guid><description>&lt;p>Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p>
 &lt;h2 id="installation">Installation&lt;/h2>
 &lt;p>Follow these steps to initialize your new website.&lt;/p>
 &lt;p>If you are new to &lt;a href="https://gohugo.io/">Hugo&lt;/a>, we suggest following this &lt;a href="https://gohugo.io/getting-started/quick-start/">great documentation for beginners&lt;/a>.&lt;/p>
@@ -25,7 +25,81 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># Hello World!
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>This is my blog.
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="page">Page&lt;/h3>
-&lt;p>We introduced this type to distinguish between blog posts and normal markdown pages. The reason to create this was to give the user complete freedom in creating their website. You can use this to create a portfolio of your projects or showcase your designs. The possibilities are endless and the choice is yours.&lt;/p></description></item><item><title>My First Post</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/my-first-post/</link><pubDate>Mon, 28 Jul 2025 16:36:39 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/my-first-post/</guid><description>&lt;h2 id="简介">简介&lt;/h2>
+&lt;p>We introduced this type to distinguish between blog posts and normal markdown pages. The reason to create this was to give the user complete freedom in creating their website. You can use this to create a portfolio of your projects or showcase your designs. The possibilities are endless and the choice is yours.&lt;/p></description></item><item><title>工程的研究方向和导师介绍</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%B7%A5%E7%A8%8B%E7%9A%84%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91%E5%92%8C%E5%AF%BC%E5%B8%88%E4%BB%8B%E7%BB%8D/</link><pubDate>Wed, 13 Aug 2025 22:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%B7%A5%E7%A8%8B%E7%9A%84%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91%E5%92%8C%E5%AF%BC%E5%B8%88%E4%BB%8B%E7%BB%8D/</guid><description>&lt;h2 id="主要研究方向">主要研究方向&lt;/h2>
+&lt;ul>
+&lt;li>有补充的欢迎随时向本文提交修改意见, 仓库主页位于&lt;a href="https://github.com/HEU-Direct-PhD-Program-in-CS/HEU-Direct-PhD-Program-in-CS.github.io">github&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;h3 id="人工智能-学院的主推方向-热门方向">人工智能 (学院的主推方向, 热门方向)&lt;/h3>
+&lt;p>人工智能作为当下最热门的方向, 有着大量教授与团队在该方向进行研究. 涵盖了人工智能算法, 人工智能+x交叉研究, 等非常多方向.&lt;/p>
+&lt;p>包含的二级方向:&lt;/p>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: center">方向&lt;/th>
+ &lt;th style="text-align: center">概述&lt;/th>
+ &lt;th style="text-align: center">相关团队/教授&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: center">机器视觉&lt;/td>
+ &lt;td style="text-align: center">TODO&lt;/td>
+ &lt;td>&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">&amp;hellip;&lt;/td>
+ &lt;td style="text-align: center">TODO&lt;/td>
+ &lt;td>&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="网络安全-学院的前主推方向">网络安全 (学院的前主推方向)&lt;/h3>
+&lt;h3 id="体系结构与嵌入式">体系结构与嵌入式&lt;/h3>
+&lt;p>作为计算机的看家专业与核心专业, 体系结构在任何时候都有其用武之地. 主要研究围绕如何让计算机更高效, 可靠, 通用, 易用.&lt;/p>
+&lt;p>包含的二级方向:&lt;/p>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: center">方向&lt;/th>
+ &lt;th style="text-align: center">概述&lt;/th>
+ &lt;th style="text-align: center">相关团队/教授&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: center">体系结构&lt;/td>
+ &lt;td style="text-align: center">围绕指令集和计算机系统的各子模块, 系统软件/库, 硬件模块设计, 软硬件交互等方向研究&lt;/td>
+ &lt;td style="text-align: center">TODO&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">传统编译&lt;/td>
+ &lt;td style="text-align: center">如何让人类编写的代码 &lt;strong>更高效&lt;/strong> 的转化成计算机可执行的指令&lt;/td>
+ &lt;td style="text-align: center">吴艳霞&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">算子优化&lt;/td>
+ &lt;td style="text-align: center">通过编译方法在计算机运行的各过程中, 提高神经网络算法的运行效率, 由于神经网络有着许多特殊之处, 处理方式和传统编译有较大区别, 因此单列&lt;/td>
+ &lt;td style="text-align: center">吴艳霞&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">&lt;code>GPGPU&lt;/code>/&lt;code>CPU&lt;/code>设计&lt;/td>
+ &lt;td style="text-align: center">计算机核心硬件设计(&lt;em>不是制造!&lt;/em>), 其中难度上: &lt;code>CPU&lt;/code> &amp;raquo; &lt;code>GPGPU&lt;/code>&lt;/td>
+ &lt;td style="text-align: center">TODO&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">存储系统&lt;/td>
+ &lt;td style="text-align: center">围绕计算机缓存, 内存, 磁盘, 数据库驱动软件等存储相关的模块进行研究, 目的是加速模块间的数据传输量和存储量&lt;/td>
+ &lt;td style="text-align: center">好像我们学校没有&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: center">&amp;hellip;&lt;/td>
+ &lt;td style="text-align: center">TODO&lt;/td>
+ &lt;td style="text-align: center">&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h3 id="微纳电子">微纳电子&lt;/h3>
+&lt;p>计算机相关的外周器件研究, 包括声卡, 采集卡, 加速卡等.&lt;/p></description></item><item><title>My First Post</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/my-first-post/</link><pubDate>Mon, 28 Jul 2025 16:36:39 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/my-first-post/</guid><description>&lt;h2 id="简介">简介&lt;/h2>
 &lt;p>这是 &lt;strong>粗体&lt;/strong> 文本，这是 &lt;em>斜体&lt;/em> 文本。&lt;/p>
 &lt;p>访问 &lt;a href="https://gohugo.io">Hugo&lt;/a> 网站！&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">#include&lt;/span> &lt;span style="color:#75715e">&amp;lt;iosteam&amp;gt;&lt;/span>&lt;span style="color:#75715e">
