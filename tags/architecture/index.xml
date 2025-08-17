@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Architecture on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/architecture/</link><description>Recent content in Architecture on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sun, 17 Aug 2025 17:57:33 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/architecture/index.xml" rel="self" type="application/rss+xml"/><item><title>pipeline-and-instruction-exceptions</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/pipeline-and-instruction-exceptions/</link><pubDate>Sun, 17 Aug 2025 17:57:33 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/pipeline-and-instruction-exceptions/</guid><description>&lt;h2 id="流水线">流水线&lt;/h2>
+&lt;h3 id="risc-五级流水">RISC 五级流水&lt;/h3>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: center">五级流水&lt;/th>
+ &lt;th style="text-align: center">&lt;/th>
+ &lt;th style="text-align: center">&lt;/th>
+ &lt;th style="text-align: center">&lt;/th>
+ &lt;th style="text-align: center">&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: center">IF(Instruction Fetch)&lt;/td>
+ &lt;td style="text-align: center">ID(Instruction Decoder)&lt;/td>
+ &lt;td style="text-align: center">EX(Execute)&lt;/td>
+ &lt;td style="text-align: center">MEM(Memory)&lt;/td>
+ &lt;td style="text-align: center">WB(Write)&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="异常源">异常源&lt;/h2>
+&lt;h3 id="if">IF&lt;/h3>
+&lt;p>Fetch 过程需要访存, 可能会导致非对齐访问, 物理内存越界, 虚拟地址没有被映射, 内存无执行权限(页表没有X权限, 或特权模式异常).&lt;/p>
+&lt;h3 id="id">ID&lt;/h3>
+&lt;p>ID 过程对指令格式进行解析, 为后续的选择器指定信号源(相当于配置cpu功能).&lt;/p>
+&lt;p>可能导致的异常包括: 非法指令, ECALL/EBREAK 等特权指令.&lt;/p>
+&lt;h3 id="ex">EX&lt;/h3>
+&lt;p>可能的异常包括: 算数异常(如: 除零).&lt;/p>
+&lt;h3 id="mem">MEM&lt;/h3>
+&lt;p>大部分的异常发生在访存阶段: 非对齐地址, 物理内存不存在(mmio异常), 页异常(页权限不足, 页不存在).&lt;/p>
+&lt;p>&lt;strong>同时, 注意:&lt;/strong> MEM 的行为是有副作用的, 例如某些外设寄存器被读/写之后的状态会改变.&lt;/p>
+&lt;h3 id="wb">WB&lt;/h3>
+&lt;p>WB 在几乎所有的 architecture 下都不会产生异常, 因为通用寄存器的数量, 一般和指令中寄存器编码的宽度一致.&lt;/p>
+&lt;p>WB 与 MEM 一样, 都是有副作用的过程.&lt;/p>
+&lt;h2 id="异常的处理">异常的处理&lt;/h2>
+&lt;p>一条指令的流水中有非常多的过程会产生异常. 一但触发异常, 需要通过 Trap 的方式进行处理(可恢复的异常)/终止执行(不可恢复的异常). riscv 规定, Trap 发生在指令执行完之后, 经过 Trap 流程后, 回到 m/sepc 处恢复之前的执行流程.&lt;/p></description></item></channel></rss>
