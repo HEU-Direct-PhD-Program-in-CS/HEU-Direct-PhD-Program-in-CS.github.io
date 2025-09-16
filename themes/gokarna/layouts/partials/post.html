@@ -46,6 +46,21 @@
         </ul>
     </div>
 
+    {{ with .Params.authors }}
+        <div class="post-authors">
+            <span>作者：</span>
+            {{ range $index, $author := . }}
+                {{ if $index }}, {{ end }}{{ $author }}
+            {{ end }}
+        </div>
+    {{ else }}
+        {{ with .Params.author }}
+            <div class="post-authors">
+                <span>作者：{{ . }}</span>
+            </div>
+        {{ end }}
+    {{ end }}
+
     <div class="post-content">
         {{ .Content }}
         {{ if .Site.Config.Services.Disqus.Shortname }}
