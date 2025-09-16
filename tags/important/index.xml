@@ -7,67 +7,70 @@
 &lt;p&gt;多种学习方法选适合当前自己的混合学：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;博客，技术论坛：前期可以用csdn这种，专业性很强会有专门的论坛
-csdn网址： &lt;a href="https://www.csdn.net/"&gt;https://www.csdn.net/&lt;/a&gt;
-利处：便捷，基本什么都有，全中文，而且有时有相关笔记
+&lt;p&gt;博客，技术论坛：前期可以用csdn这种，专业性很强会有专门的论坛:&lt;br&gt;
+csdn网址： &lt;a href="https://www.csdn.net/"&gt;https://www.csdn.net/&lt;/a&gt;&lt;br&gt;
+利处：便捷，基本什么都有，全中文，而且有时有相关笔记&lt;br&gt;
 弊处：什么神人都有，内容良莠不齐，一些好的资源要收费&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;看书，看技术文档：
-看书（线下水课的学习）
-注意，真正0基础新大一看不了大部分有“入门”含义的专业书籍
-这里推荐一下入门c语言的书籍（应对第一学期计算思维）
-《21天学通c语言》
-当然除了c语言更多书籍也可以去图书馆借阅
+&lt;p&gt;看书，看技术文档:&lt;br&gt;
+看书（线下水课的学习）&lt;br&gt;
+注意，真正0基础新大一看不了大部分有“入门”含义的专业书籍&lt;br&gt;
+这里推荐一下入门c语言的书籍（应对第一学期计算思维）&lt;br&gt;
+《21天学通c语言》&lt;br&gt;
+当然除了c语言更多书籍也可以去图书馆借阅&lt;br&gt;
 &lt;img src="https://heu-direct-phd-program-in-cs.github.io/data/posts/%E5%85%B3%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%93%E4%B8%9A/%E5%9B%BE%E4%B9%A6%E9%A6%86icon.png" alt=""&gt;&lt;/p&gt;
-&lt;p&gt;（微信公众号常用：扫码借书，馆藏查询）
+&lt;p&gt;（微信公众号常用：扫码借书，馆藏查询）&lt;br&gt;
 看技术文档或教程（线上学习）&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;关于技术文档：
-比如cpp ：&lt;a href="https://en.cppreference.com/index.html"&gt;cppreference&lt;/a&gt;, &lt;a href="https://legacy.cplusplus.com/"&gt;cplusplus&lt;/a&gt;;
-关于教程类网站：
-比如关于&lt;a href="https://www.runoob.com/vue3/vue3-tutorial.html"&gt;vue3&lt;/a&gt;
+&lt;p&gt;关于技术文档:&lt;br&gt;
+比如cpp ：&lt;a href="https://en.cppreference.com/index.html"&gt;cppreference&lt;/a&gt;, &lt;a href="https://legacy.cplusplus.com/"&gt;cplusplus&lt;/a&gt;;&lt;br&gt;
+关于教程类网站：&lt;br&gt;
+比如关于&lt;a href="https://www.runoob.com/vue3/vue3-tutorial.html"&gt;vue3&lt;/a&gt;&lt;br&gt;
 事实上github也有相当多教程类&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;查询检索
-这部分往往关于具体问题的更多挖掘，或者学一个东西前的调研追问，或了解某些特定信息
-视频网站：国内bilibili 国外Youtube （其他视频网站学习内容质量较低）
-咨询平台：如知乎
-校内讯息：校内群聊，校园集市等，部分学校官网比较难找（现在有AI小橙还好些）
-文章查询：
-国内：知网（注意校外访问输入学号登录下载文章就不花钱）
-（多看些会发现不少灌水，已经相对的失去专业性了）
-国外：https://liblsp.hrbeu.edu.cn/space/database 右侧栏
-SCI,IEEE,ACM还算比较常用的，但后期基本都上arXiv 上找了（ &lt;a href="https://arxiv.org/"&gt;https://arxiv.org/&lt;/a&gt; ）
-其他查询：AI（ai往往可以承担你一无所知领域或内容的查询）
-直接用：
-Kimi : &lt;a href="https://www.kimi.com/"&gt;https://www.kimi.com/&lt;/a&gt;
-Deepseek: &lt;a href="https://chat.deepseek.com/"&gt;https://chat.deepseek.com/&lt;/a&gt;
+&lt;p&gt;查询检索:&lt;br&gt;
+这部分往往关于具体问题的更多挖掘，或者学一个东西前的调研追问，或了解某些特定信息&lt;br&gt;
+视频网站：国内bilibili 国外Youtube （其他视频网站学习内容质量较低）&lt;br&gt;
+咨询平台：如知乎&lt;br&gt;
+校内讯息：校内群聊，校园集市等，部分学校官网比较难找（现在有AI小橙还好些）&lt;br&gt;
+文章查询：&lt;br&gt;
+国内：知网（注意校外访问输入学号登录下载文章就不花钱）&lt;br&gt;
+（多看些会发现不少灌水，已经相对的失去专业性了）&lt;br&gt;
+国外：https://liblsp.hrbeu.edu.cn/space/database 右侧栏&lt;br&gt;
+SCI,IEEE,ACM还算比较常用的，但后期基本都上arXiv 上找了（ &lt;a href="https://arxiv.org/"&gt;https://arxiv.org/&lt;/a&gt; ）&lt;br&gt;
+其他查询：AI（ai往往可以承担你一无所知领域或内容的查询）&lt;br&gt;
+直接用：&lt;br&gt;
+&lt;a href="https://www.kimi.com/"&gt;Kimi&lt;/a&gt;, &lt;a href="https://chat.deepseek.com/"&gt;Deepseek&lt;/a&gt; &lt;br&gt;
 当然，外国的GPT,Claude等也很好用（在写代码上Claude感觉更不错）&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;上手项目实践练习
+&lt;p&gt;上手项目实践练习&lt;br&gt;
 自己的一些想法，转变为有目标需求&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;h2 id="三编程语言与开发工具"&gt;三，编程语言与开发工具&lt;/h2&gt;
-&lt;p&gt;编程语言非常之多，分为高级语言，汇编语言，机器语言（对计算机不同层次视角说）
+&lt;p&gt;编程语言非常之多，分为高级语言，汇编语言，机器语言（对计算机不同层次视角说）&lt;br&gt;
 现在高级语言也非常多，首先认识的一点是 你学的语言经常不是你学习工作使用的，要习惯这一点，语言只是载体，意识与思想才是根本。不同语言间大体还是一致的，语言的部分特性注意一下即可。&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;C语言，编译语言，适合入门的高级语言，也是学校计算思维使用的语言&lt;/li&gt;
-&lt;li&gt;C++, cplusplus，C的延申扩展，加上了面向对象编程的思想，基础东西不难，细枝末节的语法学不完
-地位：悠久的C/C++至今仍因其运行效率的优势作为后端开发的主要语言
-适合的IDE：小规模Dev，更大一些 visual studio 2022 ，vscode也可（配置环境变量对新人并不友好）
+&lt;li&gt;C++, cplusplus，C的延申扩展，加上了面向对象编程的思想，基础东西不难，细枝末节的语法学不完&lt;br&gt;
+地位：悠久的C/C++至今仍因其运行效率的优势作为后端开发的主要语言&lt;br&gt;
+适合的IDE：小规模Dev，更大一些 visual studio 2022 ，vscode也可（配置环境变量对新人并不友好）&lt;br&gt;
 （IDE:集成开发环境，就好比写word文档而不是记事本一样）&lt;/li&gt;
-&lt;li&gt;Python，解释型语言，一行一行运行，因为各种可用库量大管饱，是现在科研（人工智能类）主要用的语言
+&lt;li&gt;Python，解释型语言，一行一行运行，因为各种可用库量大管饱，是现在科研（人工智能类）主要用的语言&lt;br&gt;
 IDE:pycharm,vscode等&lt;/li&gt;
 &lt;li&gt;Java 也是当今就业所常用的语言之一&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;线上开发工具：
-如colab (jupytor上云端)
-（jupytor notebook 交互式开发）&lt;/p&gt;</description></item><item><title>工程的研究方向和导师介绍</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%B7%A5%E7%A8%8B%E7%9A%84%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91%E5%92%8C%E5%AF%BC%E5%B8%88%E4%BB%8B%E7%BB%8D/</link><pubDate>Wed, 13 Aug 2025 22:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%B7%A5%E7%A8%8B%E7%9A%84%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91%E5%92%8C%E5%AF%BC%E5%B8%88%E4%BB%8B%E7%BB%8D/</guid><description>&lt;h2 id="主要研究方向"&gt;主要研究方向&lt;/h2&gt;
+&lt;p&gt;线上开发工具：&lt;br&gt;
+如colab (jupytor上云端)&lt;br&gt;
+（jupytor notebook 交互式开发）&lt;/p&gt;
+&lt;h2 id="四算法"&gt;四，算法&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Q: 怎么看待算法？&lt;/p&gt;</description></item><item><title>工程的研究方向和导师介绍</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%B7%A5%E7%A8%8B%E7%9A%84%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91%E5%92%8C%E5%AF%BC%E5%B8%88%E4%BB%8B%E7%BB%8D/</link><pubDate>Wed, 13 Aug 2025 22:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%B7%A5%E7%A8%8B%E7%9A%84%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91%E5%92%8C%E5%AF%BC%E5%B8%88%E4%BB%8B%E7%BB%8D/</guid><description>&lt;h2 id="主要研究方向"&gt;主要研究方向&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;有补充的欢迎随时向本文提交修改意见, 仓库主页位于&lt;a href="https://github.com/HEU-Direct-PhD-Program-in-CS/HEU-Direct-PhD-Program-in-CS.github.io"&gt;github&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
