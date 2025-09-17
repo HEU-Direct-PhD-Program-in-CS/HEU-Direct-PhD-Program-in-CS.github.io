@@ -1,6 +1,6 @@
 # 自动生成的文件
 public
-resources
+# resources
 .hugo_build.lock
 
 # hugo命令
