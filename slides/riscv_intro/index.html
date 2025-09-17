@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <!-- page title -->
+  <title>riscv 简介</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
+  <!-- 1. 高亮主题 CSS -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/atom-one-dark.min.css">
+  <!-- 2. 高亮插件 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/markdown/markdown.min.js"></script>
+
+  <!-- 加载 MathJax 库 -->
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    .reveal .sourceCode {
+      /* see #7635 */
+    }
+
+    code {
+      white-space: pre-wrap;
+    }
+
+    span.smallcaps {
+      font-variant: small-caps;
+    }
+
+    span.underline {
+      text-decoration: underline;
+    }
+
+    div.columns {
+      display: flex;
+      width: 100%;
+      gap: 5px;
+      /* 列间距 */
+    }
+
+    div.column {
+      display: inline-block;
+      vertical-align: top;
+      width: 50%;
+    }
+
+    div.hanging-indent {
+      margin-left: 1.5em;
+      text-indent: -1.5em;
+    }
+
+    ul.task-list {
+      list-style: none;
+    }
+
+    pre>code.sourceCode {
+      white-space: pre;
+      position: relative;
+    }
+
+    pre>code.sourceCode>span {
+      display: inline-block;
+      line-height: 1.25;
+    }
+
+    pre>code.sourceCode>span:empty {
+      height: 1.2em;
+    }
+
+    code.sourceCode>span {
+      color: inherit;
+      text-decoration: inherit;
+    }
+
+    div.sourceCode {
+      margin: 1em 0;
+    }
+
+    pre.sourceCode {
+      margin: 0;
+    }
+
+    @media screen {
+      div.sourceCode {
+        overflow: auto;
+      }
+    }
+
+    @media print {
+      pre>code.sourceCode {
+        white-space: pre-wrap;
+      }
+
+      pre>code.sourceCode>span {
+        text-indent: -5em;
+        padding-left: 5em;
+      }
+    }
+
+    pre.numberSource code {
+      counter-reset: source-line 0;
+    }
+
+    pre.numberSource code>span {
+      position: relative;
+      left: -4em;
+      counter-increment: source-line;
+    }
+
+    pre.numberSource code>span>a:first-child::before {
+      content: counter(source-line);
+      position: relative;
+      left: -1em;
+      text-align: right;
+      vertical-align: baseline;
+      border: none;
+      display: inline-block;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      padding: 0 4px;
+      width: 4em;
+      color: #aaaaaa;
+    }
+
+    pre.numberSource {
+      margin-left: 3em;
+      border-left: 1px solid #aaaaaa;
+      padding-left: 4px;
+    }
+
+    div.sourceCode {}
+
+    @media screen {
+      pre>code.sourceCode>span>a:first-child::before {
+        text-decoration: underline;
+      }
+    }
+  </style>
+
+  <link rel="stylesheet" href="theme.css" />
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Page1 -->
+      <section>
+        <!-- Page2.1 -->
+        <section id="welcome page" class="title-slide slide level1">
+          <div class="center">
+            <p style="font-size: 2em;">
+              RISC-V 指令集
+            </p>
+            <p style="font-size: 0.85em; margin-left: 50%; margin-top: 20%;">
+              <font style="color: #221122;">万德俊</font>
+            </p>
+            <p style="font-size: 0.85em; margin-left: 50%;">
+              <font style="color: #221122;">Email: wandejun666@gmail.com</font>
+            </p>
+          </div>
+        </section>
+
+        <!-- Page2.2 -->
+        <section id="目录" class="slide level2">
+          <h2> 目录 </h2>
+          <div style="margin-left: 3%; margin-right: 3%;">
+            <h3>1. 指令集究竟是什么, 和CPU有什么区别 </h3>
+            <h3>2. RISC和CISC </h3>
+            <h3>3. RISC-V </h3>
+          </div>
+        </section>
+
+        <!-- Page2.3 -->
+        <section id="目标" class="slide level2">
+          <h2> 目标 </h2>
+          <div style="margin-left: 3%; margin-right: 3%;">
+            <h3>1. 理解为什么CPU, 指令集, 代码都是状态机? </h3>
+            <h3>2. RISC 与 CISC 到底在争什么? </h3>
+            <h3>3. AI 背景下 RISC-V 的机会在哪? </h3>
+          </div>
+        </section>
+      </section>
+
+      <!-- Page2 -->
+      <section>
+        <!-- Page2.1 -->
+        <section id="什么是指令集" class="title-slide slide level1">
+          <h1>
+            什么是指令集
+          </h1>
+
+        </section>
+
+        <!-- Page2.2 -->
+        <section data-auto-animate class="slide level2">
+          <h2>课本上常见的定义</h2>
+
+          <div style="margin-left: 5%; margin-right: 3%;margin-top: 5%;margin-bottom: 5%;">
+            <font style="color: #301658"> "指令集是软件与硬件之间的接口。" </font>
+          </div>
+
+          <div style="margin-left: 3%; margin-right: 3%;">
+            如何理解这句话?
+            <div style="margin-left: 3%; margin-right: 3%;">
+              <p style="font-size: 0.8em;">
+                1. 软件和硬件分别指什么? <br>
+                2. 什么是接口? 是单纯约束汇编语言里有哪些指令吗? <br>
+                3. 我们常说电脑的 CPU 是 x86 架构, CPU 和指令集的关系是什么? <br>
+              </p>
+            </div>
+          </div>
+        </section>
+        <section data-auto-animate class="slide level2">
+          <h2>课本上常见的定义</h2>
+
+          <div style="margin-left: 5%; margin-right: 3%;margin-top: 5%;margin-bottom: 5%;">
+            <font style="color: #301658"> "指令集是软件与硬件之间的接口。" </font>
+          </div>
+
+          <div style="margin-left: 3%; margin-right: 3%;">
+            如何理解这句话?
+            <div style="margin-left: 3%; margin-right: 3%;">
+              <p style="font-size: 0.8em;">
+                1. 软件和硬件分别指什么? <br>
+                2. 什么是接口? 是单纯约束汇编语言里有哪些指令吗? <br>
+                3. 我们常说电脑的 CPU 是 x86 架构, CPU 和指令集的关系是什么? <br>
+              </p>
+            </div>
+          </div>
+
+          <div style="margin-left: 3%; margin-right: 3%;margin-top: 5%;margin-bottom: 5%;">
+            我的理解: <br>
+            <p style="margin-left: 3%; margin-right: 3%; font-size: 0.9em;">
+              指令集定义了CPU这个状态机(图灵机)的行为。就像C语言手册规定了C语言编译器的行为。
+            </p>
+          </div>
+        </section>
+
+
+        <!-- Page2.3 -->
+        <section class="slide level2">
+          <h2>如何理解 CPU 是一个状态机</h2>
+
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.85em">
+            <p>
+              在编译原理课上我们学过 NFA(不确定的有穷状态自动机) 和 DFA(有穷状态自动机).
+            </p>
+            <ul>状态集合: $S = \{S_1, S_2, ...\}$;</ul>
+            <ul>激励事件;</ul>
+            <ul>状态转移规则: $next: S * E -> S$;</ul>
+            <ul>初始状态: $S_0$;</ul>
+            <img src="resources/img/自动机.png"
+              style="display:block; margin-left: auto; margin-right: auto; width: 70%; height: auto;">
+          </div>
+        </section>
+
+        <!-- Page2.4 -->
+        <section class="slide level2">
+          <h2>如何理解 CPU 是一个状态机</h2>
+
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.85em;">
+            <p>
+              理论计算机的开端: 图灵机.<br>
+              从下图我们很容易看出: 图灵机由输入的 program 和一条无限长的纸带组成. <br>
+              输入的program 可以看作是激励(input), 纸带的内容和读写头的位置就可以看作是状态(state). <br>
+            </p>
+            <img src="resources/img/图灵机.jpg"
+              style="display:block; margin-left: auto; margin-right: auto; width: 55%; height: auto;">
+          </div>
+        </section>
+
+        <!-- Page2.5 -->
+        <section class="slide level2">
+          <h2>如何理解 CPU 是一个状态机</h2>
+
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.85em;">
+            <p>回到我们的cpu, 举个例子:</p>
+
+            <table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+              <th>
+                <img src="resources/img/add.c.png"
+                  style="display:block; margin-left: auto; margin-right: auto; width: 85%; height: auto;">
+              </th>
+              <th>
+                <img src="resources/img/add.ll.png"
+                  style="display:block; margin-left: auto; margin-right: auto; width: 60%; height: auto;">
+              </th>
+            </table>
+
+            <p> 假设我们的 CPU 只有5个寄存器, 和一个pc寄存器: {r1-r5; pc}, 指令长度为1 </p>
+            <p> 那么忽略掉alloc之后的状态转移如下:</p>
+            <div style="font-size: 0.8em; margin-left: 15%;">
+              <p> (0, 0, 0, 0, 0, 3) </p>
+              <p> --[store]-> (1, 0, 0 ,0, 0, 4) --[store]-> (1, 2, 0 ,0, 0, 5) </p>
+              <p> ---[load]-> (1, 2, 1 ,0, 0, 6) ---[load]-> (1, 2, 1 ,2, 0, 7) </p>
+              <p> ----[add]-> (1, 2, 1 ,2, 3, 8) ----[ret]-> output 3 </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Page2.6 -->
+        <section class="slide level2">
+          <h2>汇编指令是什么</h2>
+
+          <div style="margin-left: 3%; margin-right: 3%;">
+            <ul>
+              <li> 汇编指令 = 指令的符号化表示 </li>
+              <li> 汇编程序 = 驱动指令集状态机的输入</li>
+              <li> 执行汇编程序 = 指令集状态机发生状态转移 </li>
+              <li> 学汇编 = RTFM(指令集手册), 读懂每条指令会对状态机产生什么影响.</li>
+            </ul>
+
+            <p> &nbsp </p>
+
+            <p> 汇编语言就是这么简单 :), program 本质也是一个自动机. </p>
+          </div>
+        </section>
+
+        <!-- Page2.7 -->
+        <section class="slide level2">
+          <h2>看看标准里都写了什么</h2>
+
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.85em;margin-top: -2%  ;">
+            <table cellspacing="1" style="border-collapse: collapse; width: 100%;">
+              <tr>
+                <th>
+                  <img src="resources/img/riscv-manual1.png"
+                    style="display:block; margin-left: auto; margin-right: auto; width: 45%; height: auto;">
+                </th>
+                <th>
+                  <img src="resources/img/menu1.png"
+                    style="display:block; margin-left: auto; margin-right: auto; width: 68%; height: auto; margin-top: -10%;">
+                </th>
+              </tr>
+              <tr>
+                <th>
+                  <img src="resources/img/riscv-manual2.png"
+                    style="display:block; margin-left: auto; margin-right: auto; width: 45%; height: auto;">
+                </th>
+                <th style="margin-top: -3%;">
+                  <img src="resources/img/menu2.png"
+                    style="display:block; margin-left: auto; margin-right: auto; width: 78%; height: auto;">
+                </th>
+              </tr>
+            </table>
+        </section>
+
+        <!-- Page2.7 -->
+        <section class="slide level2">
+          <h2>CPU 是一个自动机</h2>
+
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.85em;margin-top: 0%  ;">
+            <p>
+              1. 指令集还定义了 CPU 这个状态机的激励. <br>
+              2. 指令集定义了 CPU 这个状态机的状态集合. <br>
+              3. 同一指令集, 可以有不同的实现(微架构). <br>
+            </p>
+
+            <p>
+              从这个状态机的视角来看, CPU 的性能优化无外乎就是对状态和激励的优化.
+              其中状态集合的数量影响性能的强弱和成本, 激励的转移延迟影响频率的高低 <br>
+            </p>
+          </div>
+        </section>
+      </section>
+
+
+      <!-- Page3 -->
+      <section>
+        <!-- Page3.1 -->
+        <section id="RISC-V" class="title-slide slide level1">
+          <h1>
+            RISC
+          </h1>
+        </section>
+
+        <!-- Page2.2 -->
+        <section class="slide level2">
+          <h2>RISC (Reduced Instruction Set Collection)</h2>
+          <div style="margin-left: 2%; margin-right: 2%; margin-top: 5%;">
+            <p> 根据我们刚才对 CPU 的理解, Reduced 的内容本质是减少状态和激励的数量来优化设计. </p>
+            <div style="margin-left: 2%; margin-right: 2%; font-size: 0.8em;">
+              <p> 常见的设计理念包括: </p>
+              <ul>1. 指令定长, 方便cpu前端设计;</ul>
+              <ul>2. 指令数量少, 方便cpu后端设计;</ul>
+              <ul>3. 简化寄存器和内存控制器的设计(不支持非对齐访存, 较为宽松的内存一致性要求);</ul>
+              <ul>4. 减少访存的方式, 方便 <font color="#0000ff">访存执行器</font> 的设计</ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Page2.3 -->
+        <section class="slide level2">
+          <h2> 为什么 x86 是CISC </h2>
+
+          <div style="margin-left: 5%; margin-right: 3%;">
+            <div style="margin-left: -2%;">
+              <p>x86 的 MOV 指令:</p>
+            </div>
+
+            <div style="display:flex; align-items:flex-start; gap:1em;">
+              <!-- 左边代码 -->
+              <div style="flex:1; max-width:50%;">
+                <pre style="font-size:0.6em; font-family:monospace; margin-left:3%; white-space:pre;">
+; 1. 寄存器 ← 寄存器
+mov rax, rbx    ; 64位
+mov eax, edx    ; 32位
+mov al, bl      ; 8位
+
+; 2. 寄存器 ← 立即数
+mov rax, 42
+mov eax, 0x1234
+mov al, 'A'
+
+; 3. 内存 ← 寄存器
+mov [rax], rbx
+mov DWORD PTR [rbp-4], eax
+
+; 4. 寄存器 ← 内存
+mov rax, [rbx]
+mov eax, DWORD PTR [rbp+8]
+
+; 5. 内存 ← 立即数
+mov QWORD PTR [rsp], 0
+mov BYTE PTR [rdi], 1
+                </pre>
+              </div>
+
+              <!-- 右边图片 -->
+              <div style="flex:1; text-align:center;">
+                <img src="resources/img/x86-move.png" style="width:90%; height:auto;">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Page2.3 -->
+        <section class="slide level2">
+          <h2> ARM 真的是 RISC 吗? </h2>
+          <div style="margin-left: 3%; margin-right: 3%;">
+            <ul>
+              <li>ARMv7 中的: ldmiaeq SP!, {R0-R12, PC}^指令:
+                <ul>
+                  <li>LoaD Mulpitle, Increment-Address, on EQual</li>
+                  <li>需要从内存中读取14个数据, 更新13个寄存器</li>
+                  <li>其中包括PC寄存器, 相当于间接跳转</li>
+                  <li>如果条件码eq不满足, 则不进行任何操作</li>
+                </ul>
+              </li>
+              <li>显然直接执行这一指令会和别的指令的执行时间有非常大的区别, 这会颠覆现有的流水线设计.</li>
+              <li>因此ARMv7选用了与x86类似的微码的方式处理这类指令😂 </li>
+              <li>还觉得ARM是RISC指令集吗? (ARM-v8重新设计, 去掉了这类指令)</li>
+            </ul>
+          </div>
+        </section>
+
+
+        <!-- Page2.4 -->
+        <section data-auto-animate class="slide level2">
+          <h2> 指令集的设计复杂度会影响什么? </h2>
+        </section>
+        <section data-auto-animate class="slide level2">
+          <h2>指令集的设计复杂度会影响什么</h2>
+          <div style="margin-left: 3%; margin-right: 3%;font-size: 0.9em;">
+            <ol style="margin-left: 5%;font-size: 0.8em;">
+              <li>芯片的面积 => 产品的成本.</li>
+              <li>芯片设计和验证所需的人力和时间.</li>
+              <li>编译器后端设计的复杂度.</li>
+            </ol>
+          </div>
+        </section>
+        <section data-auto-animate class="slide level2">
+          <h2>指令集的设计复杂度会影响什么</h2>
+          <div style="margin-left: 3%; margin-right: 3%;font-size: 0.9em;">
+            <ol style="margin-left: 5%;font-size: 0.8em;">
+              <li>芯片的面积 => 产品的成本.</li>
+              <li>芯片设计和验证所需的人力和时间.</li>
+              <li>编译器后端设计的复杂度.</li>
+            </ol>
+            <p>&nbsp</p>
+            <ul>
+              <li> RV64-IMA的指令数量只有 68条, 加上单双精度浮点扩展和短指令, 也仅仅在150条左右. </li>
+              <li> 而armv7 的 指令数量大约在 300-400 条. </li>
+            </ul>
+          </div>
+        </section>
+        <section data-auto-animate class="slide level2">
+          <h2>指令集的设计复杂度会影响什么</h2>
+          <div style="margin-left: 3%; margin-right: 3%;font-size: 0.9em;">
+            <ol style="margin-left: 5%;font-size: 0.8em;">
+              <li>芯片的面积 => 产品的成本.</li>
+              <li>芯片设计和验证所需的人力和时间.</li>
+              <li>编译器后端设计的复杂度.</li>
+            </ol>
+            <ul>
+              <li> RV64-IMA的指令数量只有 68条, 加上单双精度浮点扩展和短指令, 也仅仅在150条左右. </li>
+              <li> 而armv7 的 指令数量大约在 300-400 条. </li>
+              <li> 但是与 x86 的 2500+ 的指令数量相比呢. </li>
+            </ul>
+            <img src="resources/img/x86指令数量.png" style="margin-left: 25%; width: 50%; height: auto;">
+            <p> 指数级增长😂 </p>
+          </div>
+        </section>
+      </section>
+
+
+      <!-- Page3 -->
+      <section>
+        <!-- Page3.1 -->
+        <section id="回到正题 -- RISC-V" class="title-slide slide level1">
+          <h1>
+            回到正题 --- RISC-V
+          </h1>
+          <img src="resources/img/riscv.png"
+            style="display:block; margin-left: auto; margin-right: auto; width: 20%; height: auto; margin-top: -25%;">
+        </section>
+
+        <!-- Page3.2 -->
+        <section class="slide level2">
+          <h2>指令集模块化</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.9em;">
+            <p>riscv包含30+个指令扩展模块, 其中常用的包括 I, M, A, D, F, C, B(Bit), H(Hypervision), K(Cryptography), V(Vector)</p>
+            <p>&nbsp;</p>
+            <p>其中常用的 IMAFD 和 Zicsr + Zifencei 通用计算扩展组成成了 G 扩展</p>
+            <p>&nbsp;</p>
+
+            <p>
+              <font style="color: #fc4545;">优势:</font>
+            </p>
+            <ol style="font-size: 0.8em;">
+              <li>
+                方便芯片设计者根据自己的需求选择合适的扩展, 设计出适合自己应用场景的CPU.
+                <ul style="font-size: 0.7em;">
+                  <li>
+                    例如嵌入式设备可以选择 IMA + Zicsr + Zifencei + C, 设计出面积小, 功耗低的CPU;
+                  </li>
+                  <li>
+                    通用高性能计算可以选择 GCBHKV, 设计出高性能的CPU;
+                  </li>
+                  <li>
+                    由于 riscv 开源的性质, 可以方便的添加自己需要的扩展, 设计出适合自己应用场景的CPU;
+                  </li>
+                </ul>
+              </li>
+              <li>
+                设计CPU时, 可以将各个执行模块解耦, 方便设计和单元验证, 实现敏捷开发;
+              </li>
+              <li>
+                易于长期扩展和兼容性:
+                <ul style="font-size: 0.7em;">
+                  <li> armv7 用完了指令空间后为了添加 thumb 和 thumb2 扩展, 不得已添加了两个控制标志位, 用来区分 thumb 和普通指令模式.</li>
+                  <li> 而 riscv 可以通过不使用旧的扩展, 来实现为新指令集腾出空间的作用, 并且通过编译技术的支撑, 可以很轻易的为不同扩展的 riscv cpu 生成代码.</li>
+                </ul>
+              </li>
+              <li>x86的短指令 50% 以上是不常用指令, 而 riscv 的 C 扩展使用频率非常高, 能做到体积比 x86 更小.</li>
+            </ol>
+
+          </div>
+        </section>
+
+        <!-- Page3.3 -->
+        <section class="slide level2">
+          <h2>指令格式(1)</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.8em;">
+            <img src="resources/img/riscv指令模式.png"
+              style="display:block; margin-left: auto; margin-right: auto; width: 90%; height: auto;">
+            <ul>
+              <li> 指令格式固定
+                <ul>
+                  <li> opcode/func3/func7的位置固定.</li>
+                  <li> rs1/rs2/rd 位置固定, 可以减少一个选择器.</li>
+                </ul>
+              </li>
+              <li>
+                指令长度固定(除了C扩展)
+              </li>
+            </ul>
+
+          </div>
+        </section>
+
+        <!-- Page3.4 -->
+        <section class="slide level2">
+          <h2>指令格式(2)</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.7em;">
+            <img src="resources/img/riscv指令拆分.png"
+              style="display:block; margin-left: auto; margin-right: auto; width: 90%; height: auto;">
+            <p> 标识一条指令, 依次通过 opcode -> func3 -> func7 三级: </p>
+            <ul>
+              <li> opcode: 指令的类型, 决定了指令的基本操作, 以及指令的格式: 如寄存器算数运算, 分支运算, store, load...; </li>
+              <li> func3: 决定了指令的具体操作: 算数{加/减/乘/除}, 访存(byte/half_word/word); </li>
+              <li> func7: 指令的变体; </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Page3.5 -->
+        <section class="slide level2">
+          <h2>开源指令集</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 1em;">
+            <ul>
+              <li>
+                允许cpu厂商向指令集添加自定义指令.
+                <ul>
+                  <li>
+                    对于IoT厂商, 可以使用单独的指令控制外设, 规避mmap的延迟.
+                  </li>
+                  <li>
+                    对于高性能厂商, 可以添加更多的SIMD指令和访存指令, 提高性能, 同时可以继承原有的riscv生态.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                不需要授权费用, 嵌入式领域相比arm在成本上更有优势.
+                <ul>
+                  <li>
+                    截至2024年 riscv 出货量: 百亿颗;
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Page3.6 -->
+        <section class="slide level2">
+          <h2>寄存器模型</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 1em;">
+            <ul>
+              <li>
+                riscv 将寄存器区分为了 a, s, t 三类,
+                在函数调用时, t寄存器由调用者保存, s寄存器由被调用者保存, a寄存器用于传递参数.
+                通过更多的寄存器数量 (32个, arm/x86 只有16个, 并且寄存器数量增加
+                导致的性能损耗和成本增加几乎可以忽略不计) 简化了编译器的寄存器分配, 实现更高效的寄存器调度.
+              </li>
+              <li>
+                将 x0(zero) 寄存器固定为 0, 从而简化掉了与立即数0比较的指令, 减少了对指令空间(opcode编码)的使用.
+                <table style="margin-top: -2%;">
+                  <tr>
+                    <td>
+                      <img src="resources/img/compare_zero_c.png"
+                        style="display:block; margin-left: auto; margin-right: auto; width: 100%; height: auto;">
+                    </td>
+                    <td>
+                      <img src="resources/img/compare_zero_asm.png"
+                        style="display:block; margin-left: auto; margin-right: auto; width: 60%; height: auto;">
+                    </td>
+                  </tr>
+                </table>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+      </section>
+
+      <!-- Page4 -->
+      <section>
+        <!-- Page4.1 -->
+        <section id="Thanks" class="title-slide slide level1">
+          <h1>
+            RISC-V 的定位在哪
+          </h1>
+        </section>
+
+        <!-- Page4.2 -->
+        <section class="slide level2">
+          <h2>为什么x86依旧占领高性能CPU领域</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 1em;">
+            <ul>
+              <li>
+                x86 CPU 设计引入了 微指令架构, 将三千多条指令映射为几白条微指令, 这些微指令都是 risc-like 的,
+                因此大大降低了 流水线 设计的复杂度.
+              </li>
+              <li>
+                x86 的单条指令功能密度更高, 一条 x86 指令平均能产生 3-4 条微指令, 通过并行decoder 和 微操作缓存, 可以实现
+                更高的指令吞吐率.
+              </li>
+              <li>
+                x86 指令本身的兼容性极强, 对于老旧软件的支持非常好.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Page4.3 -->
+        <section class="slide level2">
+          <h2>RISC-V的机会</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.9em;">
+            <ul>
+              <li>
+                riscv的极简理念, 导致cpu的性能不占优势, 但是, 随着 AI和异构计算 的发展,
+                riscv的轻量/敏捷优势可以更方便的与NPU/TPU等协处理器协同工作,
+                通过专用协处理器来弥补指令集的不足, 从而实现更高的性能.
+              </li>
+              <li>
+                riscv的开源特性, 可以方便的添加自定义指令, 通过一些 "野路子" 实现更低的 io 延迟.
+              </li>
+              <li>
+                极简的设计可以让 riscv cpu 的成本更低, 开发更灵活, 适合大规模部署在边缘侧的设备中.
+              </li>
+            </ul>
+          </div>
+        </section>
+      </section>
+
+
+      <!-- Page4 -->
+      <section>
+        <section id="Thanks" class="title-slide slide level1">
+          <h1>
+            Thanks
+          </h1>
+        </section>
+      </section>
+    </div>
+  </div>
+
+
+  <!-- reveal.js plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/zoom/zoom.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/math/math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/search/search.js"></script>
+
+  <!-- control of slides -->
+  <script>
+    // Full list of configuration options available at:
+    // https://revealjs.com/config/
+    Reveal.initialize({
+      // Display controls in the bottom right corner
+      controls: true,
+
+      // Help the user learn the controls by providing hints, for example by
+      // bouncing the down arrow when they first encounter a vertical slide
+      controlsTutorial: true,
+
+      // Determines where controls appear, "edges" or "bottom-right"
+      controlsLayout: 'bottom-right',
+
+      // Visibility rule for backwards navigation arrows; "faded", "hidden"
+      // or "visible"
+      controlsBackArrows: 'faded',
+
+      // Display a presentation progress bar
+      progress: true,
+
+      // Display the page number of the current slide
+      slideNumber: false,
+
+      // 'all', 'print', or 'speaker'
+      showSlideNumber: 'all',
+
+      // Add the current slide number to the URL hash so that reloading the
+      // page/copying the URL will return you to the same slide
+      hash: true,
+
+      // Start with 1 for the hash rather than 0
+      hashOneBasedIndex: false,
+
+      // Flags if we should monitor the hash and change slides accordingly
+      respondToHashChanges: true,
+
+      // Push each slide change to the browser history
+      history: false,
+
+      // Enable keyboard shortcuts for navigation
+      keyboard: true,
+
+      // Enable the slide overview mode
+      overview: true,
+
+      // Disables the default reveal.js slide layout (scaling and centering)
+      // so that you can use custom CSS layout
+      disableLayout: false,
+
+      // Vertical centering of slides
+      center: true,
+
+      // Enables touch navigation on devices with touch input
+      touch: true,
+
+      // Loop the presentation
+      loop: false,
+
+      // Change the presentation direction to be RTL
+      rtl: false,
+
+      // see https://revealjs.com/vertical-slides/#navigation-mode
+      navigationMode: 'default',
+
+      // Randomizes the order of slides each time the presentation loads
+      shuffle: false,
+
+      // Turns fragments on and off globally
+      fragments: true,
+
+      // Flags whether to include the current fragment in the URL,
+      // so that reloading brings you to the same fragment position
+      fragmentInURL: true,
+
+      // Flags if the presentation is running in an embedded mode,
+      // i.e. contained within a limited portion of the screen
+      embedded: false,
+
+      // Flags if we should show a help overlay when the questionmark
+      // key is pressed
+      help: true,
+
+      // Flags if it should be possible to pause the presentation (blackout)
+      pause: true,
+
+      // Flags if speaker notes should be visible to all viewers
+      showNotes: false,
+
+      // Global override for autoplaying embedded media (null/true/false)
+      autoPlayMedia: null,
+
+      // Global override for preloading lazy-loaded iframes (null/true/false)
+      preloadIframes: null,
+
+      // Number of milliseconds between automatically proceeding to the
+      // next slide, disabled when set to 0, this value can be overwritten
+      // by using a data-autoslide attribute on your slides
+      autoSlide: 0,
+
+      // Stop auto-sliding after user input
+      autoSlideStoppable: true,
+
+      // Use this method for navigation when auto-sliding
+      autoSlideMethod: null,
+
+      // Specify the average time in seconds that you think you will spend
+      // presenting each slide. This is used to show a pacing timer in the
+      // speaker view
+      defaultTiming: null,
+
+      // Enable slide navigation via mouse wheel
+      mouseWheel: true,
+
+      // The display mode that will be used to show slides
+      display: 'block',
+
+      // Hide cursor if inactive
+      hideInactiveCursor: true,
+
+      // Time before the cursor is hidden (in ms)
+      hideCursorTime: 5000,
+
+      // Opens links in an iframe preview overlay
+      previewLinks: false,
+
+      // Transition style (none/fade/slide/convex/concave/zoom)
+      transition: 'slide',
+
+      // Transition speed (default/fast/slow)
+      transitionSpeed: 'default',
+
+      // Transition style for full page slide backgrounds
+      // (none/fade/slide/convex/concave/zoom)
+      backgroundTransition: 'fade',
+
+      // Number of slides away from the current that are visible
+      viewDistance: 3,
+
+      // Number of slides away from the current that are visible on mobile
+      // devices. It is advisable to set this to a lower number than
+      // viewDistance in order to save resources.
+      mobileViewDistance: 2,
+
+      // math: {
+      //   mathjax: 'resources/mathjax/MathJax.js',
+      //   config: 'TeX-AMS_HTML-full',
+      //   tex2jax: {
+      //     inlineMath: [['\\(', '\\)']],
+      //     displayMath: [['\\[', '\\]']],
+      //     balanceBraces: true,
+      //     processEscapes: false,
+      //     processRefs: true,
+      //     processEnvironments: true,
+      //     preview: 'TeX',
+      //     skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+      //     ignoreClass: 'tex2jax_ignore',
+      //     processClass: 'tex2jax_process'
+      //   },
+      // },
+
+      // reveal.js plugins
+      plugins: [
+        RevealMath,
+        RevealNotes,
+        RevealSearch,
+        RevealZoom,
+        RevealMarkdown,
+        RevealHighlight
+      ],
+      highlight: {
+        highlightOnLoad: true // 自动高亮
+      }
+    });
+  </script>
+
+  <!-- slideNumber -->
+  <script>
+    Reveal.configure({
+      slideNumber: "c/t",
+      center: false,
+      transitionSpeed: "fast",
+      /*  embedded: true */
+    });
+  </script>
+</body>
+
+</html>
