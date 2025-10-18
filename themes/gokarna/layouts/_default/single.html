@@ -2,6 +2,8 @@
     {{ if eq .Type "post" }}
         {{- partial "post.html" . -}}
         {{- partial "toc.html" . -}}
+        <!-- mermaid -->  
+        {{- partial "mermaid.html" . -}}
     {{ end }}
 
     {{ if eq .Type "page" }}

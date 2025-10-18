@@ -1,7 +1,7 @@
 ---
 title: "My First Draft"
 description: "Sample article showcasing basic Markdown syntax and formatting for HTML elements."
-tags: ["draft", "111", "222"]
+tags: ["draft"]
 type: 'post'
 weight: 20
 showTableOfContents: true

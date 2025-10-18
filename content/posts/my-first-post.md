@@ -8,7 +8,7 @@ showTableOfContents: false
 title: "My First Post"
 type: "post"
 draft: flase
-tags: ["draft", "111", "222"]
+tags: ["post"]
 weight: 20
 ---
 
