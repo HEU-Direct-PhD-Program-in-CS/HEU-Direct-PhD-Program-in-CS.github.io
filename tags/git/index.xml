@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Git on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/git/</link><description>Recent content in Git on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sat, 18 Oct 2025 15:00:00 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>git 的基础使用</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</link><pubDate>Sat, 18 Oct 2025 15:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</guid><description>&lt;p&gt;&lt;a href="https://git-scm.com/about"&gt;git&lt;/a&gt; 是一个版本控制工具, 具有: 开销小, 速度快, 分布式, 高安全性, 自由免费的特点.&lt;/p&gt;
+&lt;h2 id="什么是版本控制"&gt;什么是版本控制&lt;/h2&gt;
+&lt;p&gt;版本: 对工程文件的每一次保存都可以算作一个版本的记录, 例如vscode自带的 timeline, 对psd文件的每一次备份等. 小到每一次修改, 大到每一次发布的版本, 都是版本的一种.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;哪些版本需要管理?&lt;/li&gt;
+&lt;li&gt;虽然每次保存都会产生一个新的版本, 但是如果所有版本都被纳入管理, git记录就会变的非常臃肿. 因此, 一般来说, git的版本管理遵循最小事务原则, 即一次最小的有意义的完整改动, 被视为一次记录修改.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="作用"&gt;作用&lt;/h2&gt;
+&lt;h3 id="i-协作"&gt;I. 协作&lt;/h3&gt;
+&lt;p&gt;假设 a, b 两人现在手上都有一个 &lt;code&gt;v0.0.1&lt;/code&gt; 的项目代码, 此时 a 在 &lt;code&gt;v0.0.1&lt;/code&gt; 之上修复了一个 &lt;code&gt;bug&lt;/code&gt; , b 在 &lt;code&gt;v0.0.1&lt;/code&gt; 之上新增了一个功能, 此时&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code class="language-mermaid" data-lang="mermaid"&gt; flowchart TD;
+ raw([&amp;#34;v0.1.1&amp;#34;])
+ a[&amp;#34;v0.1.1&amp;#34; + A]
+ b[&amp;#34;v0.1.1&amp;#34; + B]
+
+ raw--&amp;gt;a
+ raw--&amp;gt;b
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;此时为两个版本取一个有意义的版本号显然并无太大意义, 一般要达到一定规模的修改, 才会发布一个新的版本号, 因此, &lt;code&gt;git&lt;/code&gt; 会自动产生一个用于标识的 &lt;code&gt;hash&lt;/code&gt; 值 (如: 663a4b235fe3df41c406346a80660ad4b5beb610 或简写为 &lt;code&gt;663a4b2&lt;/code&gt;).&lt;/p&gt;</description></item></channel></rss>

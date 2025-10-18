@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/</link><description>Recent content in Posts on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Tue, 16 Sep 2025 19:13:13 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>test by jfz</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/test/</link><pubDate>Sun, 07 Sep 2025 22:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/test/</guid><description>&lt;h2 id="这只是一个测试"&gt;这只是一个测试&lt;/h2&gt;</description></item><item><title>Theme Documentation - Basics</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</link><pubDate>Fri, 06 Mar 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</guid><description>&lt;p&gt;Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/</link><description>Recent content in Posts on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sat, 18 Oct 2025 15:00:00 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>test by jfz</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/test/</link><pubDate>Sun, 07 Sep 2025 22:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/test/</guid><description>&lt;h2 id="这只是一个测试"&gt;这只是一个测试&lt;/h2&gt;</description></item><item><title>Theme Documentation - Basics</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</link><pubDate>Fri, 06 Mar 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</guid><description>&lt;p&gt;Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p&gt;
 &lt;h2 id="installation"&gt;Installation&lt;/h2&gt;
 &lt;p&gt;Follow these steps to initialize your new website.&lt;/p&gt;
 &lt;p&gt;If you are new to &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt;, we suggest following this &lt;a href="https://gohugo.io/getting-started/quick-start/"&gt;great documentation for beginners&lt;/a&gt;.&lt;/p&gt;
@@ -25,7 +25,52 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;# Hello World!
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;This is my blog.
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="page"&gt;Page&lt;/h3&gt;
-&lt;p&gt;We introduced this type to distinguish between blog posts and normal markdown pages. The reason to create this was to give the user complete freedom in creating their website. You can use this to create a portfolio of your projects or showcase your designs. The possibilities are endless and the choice is yours.&lt;/p&gt;</description></item><item><title>关于计算机专业</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%85%B3%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%93%E4%B8%9A/</link><pubDate>Tue, 16 Sep 2025 19:13:13 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%85%B3%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%93%E4%B8%9A/</guid><description>&lt;h2 id="一未来规划"&gt;一，未来规划&lt;/h2&gt;
+&lt;p&gt;We introduced this type to distinguish between blog posts and normal markdown pages. The reason to create this was to give the user complete freedom in creating their website. You can use this to create a portfolio of your projects or showcase your designs. The possibilities are endless and the choice is yours.&lt;/p&gt;</description></item><item><title>git 的基础使用</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</link><pubDate>Sat, 18 Oct 2025 15:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</guid><description>&lt;p&gt;&lt;a href="https://git-scm.com/about"&gt;git&lt;/a&gt; 是一个版本控制工具, 具有: 开销小, 速度快, 分布式, 高安全性, 自由免费的特点.&lt;/p&gt;
+&lt;h2 id="什么是版本控制"&gt;什么是版本控制&lt;/h2&gt;
+&lt;p&gt;版本: 对工程文件的每一次保存都可以算作一个版本的记录, 例如vscode自带的 timeline, 对psd文件的每一次备份等. 小到每一次修改, 大到每一次发布的版本, 都是版本的一种.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;哪些版本需要管理?&lt;/li&gt;
+&lt;li&gt;虽然每次保存都会产生一个新的版本, 但是如果所有版本都被纳入管理, git记录就会变的非常臃肿. 因此, 一般来说, git的版本管理遵循最小事务原则, 即一次最小的有意义的完整改动, 被视为一次记录修改.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="作用"&gt;作用&lt;/h2&gt;
+&lt;h3 id="i-协作"&gt;I. 协作&lt;/h3&gt;
+&lt;p&gt;假设 a, b 两人现在手上都有一个 &lt;code&gt;v0.0.1&lt;/code&gt; 的项目代码, 此时 a 在 &lt;code&gt;v0.0.1&lt;/code&gt; 之上修复了一个 &lt;code&gt;bug&lt;/code&gt; , b 在 &lt;code&gt;v0.0.1&lt;/code&gt; 之上新增了一个功能, 此时&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code class="language-mermaid" data-lang="mermaid"&gt; flowchart TD;
+ raw([&amp;#34;v0.1.1&amp;#34;])
+ a[&amp;#34;v0.1.1&amp;#34; + A]
+ b[&amp;#34;v0.1.1&amp;#34; + B]
+
+ raw--&amp;gt;a
+ raw--&amp;gt;b
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;此时为两个版本取一个有意义的版本号显然并无太大意义, 一般要达到一定规模的修改, 才会发布一个新的版本号, 因此, &lt;code&gt;git&lt;/code&gt; 会自动产生一个用于标识的 &lt;code&gt;hash&lt;/code&gt; 值 (如: 663a4b235fe3df41c406346a80660ad4b5beb610 或简写为 &lt;code&gt;663a4b2&lt;/code&gt;).&lt;/p&gt;</description></item><item><title>计算机是如何发展至今的</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_1/</link><pubDate>Sat, 18 Oct 2025 15:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_1/</guid><description>&lt;h2 id="重视工科发展的一般规律-问题驱动"&gt;重视工科发展的一般规律: 问题驱动&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;in one word: 否定之否定, 螺旋上升&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;计算机的几个历史主线:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;操作系统&lt;/li&gt;
+&lt;li&gt;虚拟机(源于操作系统)&lt;/li&gt;
+&lt;li&gt;数据库管理系统&lt;/li&gt;
+&lt;li&gt;编译器&lt;/li&gt;
+&lt;li&gt;图形学&lt;/li&gt;
+&lt;li&gt;人工智能&lt;/li&gt;
+&lt;li&gt;体系结构&lt;/li&gt;
+&lt;li&gt;网络, 通讯与安全&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;它们在历史发展的脉络上是连续的, 任何一个技术的提出, 都一定是遇到了之前技术无法解决的问题. 课本上只会告诉你现在的, 或(&lt;em&gt;大概率&lt;/em&gt;)是编书时的主流技术, 但是一般都&lt;strong&gt;不会&lt;/strong&gt;告诉你这些技术的历史渊源, 只是以上帝视角, 按模块(手册)的方式叙述. 因此, 我认为, 一个好的课堂, 要顺着历史发展的脚步去讲述, 将历史上, 计算机行业遇到的问题依次放在学生面前, 可以让学生自己思考如何解决, 一个旧的解决方案遇到了什么新问题而失效; 一个技术是在什么背景下被提出.&lt;/p&gt;
+&lt;h2 id="第一性原理"&gt;第一性原理&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;从最基本的原理出发，通过逻辑推理来理解和解决问题的方法，强调回归事物本质。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;例如: 如何学习操作系统?&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;linux&lt;/code&gt; 内核代码进过三十多年的发展, 已经几千万行, 不把握好方向, 容易陷进某个细节.&lt;/p&gt;
+&lt;p&gt;先问自己, 至少满足那些要求的系统, 才能叫做操作系统?&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;管理硬件资源, 向软件提供一个简单的编程接口(api).&lt;/li&gt;
+&lt;li&gt;提高硬件的利用率: 允许多个软件同时运行在一个物理机器上, 并且软件开发者可以假设, 自己的软件独占了这个机器.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;从这两点出发, 看历史上 &lt;code&gt;单道批处理系统&lt;/code&gt; -&amp;gt; &lt;code&gt;多道批处理系统&lt;/code&gt; -&amp;gt; &lt;code&gt;分时系统&lt;/code&gt; -&amp;gt; &lt;code&gt;通用操作系统&lt;/code&gt; / &lt;code&gt;实时系统&lt;/code&gt; 等. 两两之间遇到了什么困境, 使用了哪些技术来解决的.&lt;/p&gt;
+&lt;p&gt;从历史发展角度学习, 不容易迷失方向, 从这个角度写代码(学习用的代码), 正反馈更高, 1k代码, 就能实现一个多道批处理系统, 能及时看到自己的成果.&lt;/p&gt;</description></item><item><title>关于计算机专业</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%85%B3%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%93%E4%B8%9A/</link><pubDate>Tue, 16 Sep 2025 19:13:13 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/%E5%85%B3%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%93%E4%B8%9A/</guid><description>&lt;h2 id="一未来规划"&gt;一，未来规划&lt;/h2&gt;
 &lt;p&gt;两条主方向：就业，科研升学.&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://heu-direct-phd-program-in-cs.github.io/posts_data/%E5%85%B3%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%93%E4%B8%9A/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91.png" alt=""&gt;&lt;/p&gt;
 &lt;p&gt;短期目标上，也就是本科阶段是按自己要走的箭头选择要学习的内容，计算机专业本身是包罗万象的专业，学校教学内容与科研内容与就业应掌握技能，三者完全不相干。&lt;/p&gt;
@@ -179,22 +224,11 @@ csdn网址： &lt;a href="https://www.csdn.net/"&gt;https://www.csdn.net/&lt;/a&
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;print(&lt;span style="color:#e6db74"&gt;&amp;#34;Hello World!&amp;#34;&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>Testing</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/hello-world/</link><pubDate>Mon, 28 Jul 2025 12:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/hello-world/</guid><description>&lt;h2 id="level2"&gt;Level2&lt;/h2&gt;
-&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p&gt;</description></item><item><title>Markdown Syntax Guide</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/markdown-syntax/</link><pubDate>Wed, 19 Jun 2019 00:00:00 +0000</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/markdown-syntax/</guid><description>&lt;p&gt;This article offers a sample of basic Markdown syntax that can be used in Hugo content files, also it shows whether basic HTML elements are decorated with CSS in a Hugo theme.&lt;/p&gt;
-&lt;h1 id="headings"&gt;Headings&lt;/h1&gt;
-&lt;p&gt;The following HTML &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt;—&lt;code&gt;&amp;lt;h6&amp;gt;&lt;/code&gt; elements represent six levels of section headings. &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt; is the highest section level while &lt;code&gt;&amp;lt;h6&amp;gt;&lt;/code&gt; is the lowest.&lt;/p&gt;
-&lt;h1 id="h1"&gt;H1&lt;/h1&gt;
-&lt;h2 id="h2"&gt;H2&lt;/h2&gt;
-&lt;h3 id="h3"&gt;H3&lt;/h3&gt;
-&lt;h4 id="h4"&gt;H4&lt;/h4&gt;
-&lt;h5 id="h5"&gt;H5&lt;/h5&gt;
-&lt;h6 id="h6"&gt;H6&lt;/h6&gt;
-&lt;h2 id="paragraph"&gt;Paragraph&lt;/h2&gt;
-&lt;p&gt;Xerum, quo qui aut unt expliquam qui dolut labo. Aque venitatiusda cum, voluptionse latur sitiae dolessi aut parist aut dollo enim qui voluptate ma dolestendit peritin re plis aut quas inctum laceat est volestemque commosa as cus endigna tectur, offic to cor sequas etum rerum idem sintibus eiur? Quianimin porecus evelectur, cum que nis nust voloribus ratem aut omnimi, sitatur? Quiatem. Nam, omnis sum am facea corem alique molestrunt et eos evelece arcillit ut aut eos eos nus, sin conecerem erum fuga. Ri oditatquam, ad quibus unda veliamenimin cusam et facea ipsamus es exerum sitate dolores editium rerore eost, temped molorro ratiae volorro te reribus dolorer sperchicium faceata tiustia prat.&lt;/p&gt;</description></item><item><title>Emoji Support</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</link><pubDate>Thu, 01 Oct 2020 17:55:28 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</guid><description>&lt;p&gt;Emoji can be enabled in a Hugo project in a number of ways.&lt;/p&gt;
+&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p&gt;</description></item><item><title>Emoji Support</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</link><pubDate>Thu, 01 Oct 2020 17:55:28 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</guid><description>&lt;p&gt;Emoji can be enabled in a Hugo project in a number of ways.&lt;/p&gt;
 &lt;p&gt;The &lt;a href="https://gohugo.io/functions/emojify/"&gt;&lt;code&gt;emojify&lt;/code&gt;&lt;/a&gt; function can be called directly in templates or &lt;a href="https://gohugo.io/templates/shortcode-templates#inline-shortcodes"&gt;Inline Shortcodes&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;To enable emoji globally, set &lt;code&gt;enableEmoji&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in your &lt;a href="https://gohugo.io/getting-started/configuration/"&gt;site configuration&lt;/a&gt; and then you can type emoji shorthand codes directly in content files.&lt;/p&gt;
 &lt;p&gt;These begin and end with a &lt;strong&gt;colon&lt;/strong&gt; and include the &lt;strong&gt;code&lt;/strong&gt; of an emoji:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Gone camping! {?:}tent: Be back soon.
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;That is so funny! {?:}joy:
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The rendered output looks like this:&lt;/p&gt;</description></item><item><title>Lorem Ipsum</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/lorem-ipsum/</link><pubDate>Thu, 15 Apr 2021 23:39:49 +0530</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/lorem-ipsum/</guid><description>&lt;h1 id="heading-1"&gt;Heading 1&lt;/h1&gt;
-&lt;p&gt;&amp;ldquo;Lorem ipsum dolor sit amet, consectetaur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&amp;rdquo;&lt;/p&gt;</description></item></channel></rss>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The rendered output looks like this:&lt;/p&gt;</description></item></channel></rss>
