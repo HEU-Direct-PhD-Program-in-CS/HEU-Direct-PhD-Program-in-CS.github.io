@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Markdown on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/markdown/</link><description>Recent content in Markdown on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Wed, 06 May 2020 21:29:01 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/markdown/index.xml" rel="self" type="application/rss+xml"/><item><title>Theme Documentation - Basics</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</link><pubDate>Fri, 06 Mar 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</guid><description>&lt;p&gt;Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Markdown on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/markdown/</link><description>Recent content in Markdown on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sun, 02 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/markdown/index.xml" rel="self" type="application/rss+xml"/><item><title>Theme Documentation - Basics</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</link><pubDate>Fri, 06 Mar 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</guid><description>&lt;p&gt;Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p&gt;
 &lt;h2 id="installation"&gt;Installation&lt;/h2&gt;
 &lt;p&gt;Follow these steps to initialize your new website.&lt;/p&gt;
 &lt;p&gt;If you are new to &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt;, we suggest following this &lt;a href="https://gohugo.io/getting-started/quick-start/"&gt;great documentation for beginners&lt;/a&gt;.&lt;/p&gt;
@@ -25,4 +25,23 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;# Hello World!
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;This is my blog.
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="page"&gt;Page&lt;/h3&gt;
-&lt;p&gt;We introduced this type to distinguish between blog posts and normal markdown pages. The reason to create this was to give the user complete freedom in creating their website. You can use this to create a portfolio of your projects or showcase your designs. The possibilities are endless and the choice is yours.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;We introduced this type to distinguish between blog posts and normal markdown pages. The reason to create this was to give the user complete freedom in creating their website. You can use this to create a portfolio of your projects or showcase your designs. The possibilities are endless and the choice is yours.&lt;/p&gt;</description></item><item><title>标记语言和排版系统</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_3/</link><pubDate>Sat, 01 Nov 2025 14:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_3/</guid><description>&lt;ul&gt;
+&lt;li&gt;本文重点讲 &lt;code&gt;markdown&lt;/code&gt;; 会提及: &lt;code&gt;html&lt;/code&gt;, &lt;code&gt;typst&lt;/code&gt;, &lt;code&gt;latex&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="标记语言"&gt;标记语言&lt;/h2&gt;
+&lt;p&gt;标记语言是一种文本格式, 负责将各种内容(文字, 图片, 视频等)统一编码.&lt;/p&gt;
+&lt;p&gt;常见的标记语言分为三类:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;描述性语言: &lt;code&gt;HTML&lt;/code&gt;, &lt;code&gt;XML&lt;/code&gt; -&amp;gt; 直接描述了一个页面布局.&lt;/li&gt;
+&lt;li&gt;可以被转换为 &lt;code&gt;HTML&lt;/code&gt; 的, 简化后的标记语言: &lt;code&gt;markdown&lt;/code&gt;, &lt;code&gt;ebook&lt;/code&gt; 等.&lt;/li&gt;
+&lt;li&gt;用于保存程序所需的配置文件: &lt;code&gt;json&lt;/code&gt;, &lt;code&gt;toml&lt;/code&gt;, &lt;code&gt;yaml&lt;/code&gt; 等.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="为什么要有标记语言"&gt;为什么要有标记语言&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;为了把你见到的内容更好的传递给别人&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;pdf&lt;/code&gt; 格式可以保证所有人在所有设备上看到的内容都是完全一样的, 这固然是好的, 但是有的时候, 我们希望自己编写的内容能适应各种设备: 在 pc 的 16:9 的横屏上 和 手机的竖屏上都能比较好的显示.&lt;/p&gt;
+&lt;p&gt;HTML 等标记语言不直接显示内容, 而是会通过着色器, 指导着色器如何显示内容. 这样在标记语言中, 我们就可以指定图片的相对屏幕宽度, 字体的大小也可以适配系统的大小(例如: 浏览器的字体设置和HTML的字体大小共同影响实际显示效果).&lt;/p&gt;
+&lt;h2 id="markdown"&gt;&lt;code&gt;Markdown&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;html&lt;/code&gt; 有着众多优势, 但是直接编写 &lt;code&gt;html&lt;/code&gt; 费时费力, 并且许多情况下, 我们并不需要 &lt;code&gt;html&lt;/code&gt; 的高级功能. 例如: 文档编写, 博客, 笔记等 -&amp;gt; &lt;code&gt;markdown&lt;/code&gt; 应运而生, 并迅速被计算机工作者广泛接受.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;markdown&lt;/code&gt; 的特点是:&lt;/p&gt;</description></item></channel></rss>
