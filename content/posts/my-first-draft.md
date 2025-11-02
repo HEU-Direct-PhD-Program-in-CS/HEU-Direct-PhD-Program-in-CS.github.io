@@ -7,7 +7,6 @@ weight: 20
 showTableOfContents: true
 date: 2025-07-28T16:48:07+08:00
 lastmod: 2025-07-28
-showTableOfContents: false
 draft: true
 ---
 
