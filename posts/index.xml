@@ -4,7 +4,7 @@
 &lt;p&gt;If you are new to &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt;, we suggest following this &lt;a href="https://gohugo.io/getting-started/quick-start/"&gt;great documentation for beginners&lt;/a&gt;.&lt;/p&gt;
 &lt;h3 id="create-your-project"&gt;a. Create Your Project&lt;/h3&gt;
 &lt;p&gt;Hugo provides a &lt;code&gt;new&lt;/code&gt; subcommand to create a new website:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;hugo new site my-website
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;hugo new site my-website
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cd my-website
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="install-the-theme"&gt;b. Install the Theme&lt;/h3&gt;
 &lt;p&gt;The theme&amp;rsquo;s repository is: &lt;a href="https://github.com/gokarna-theme/gokarna-hugo"&gt;https://github.com/gokarna-theme/gokarna-hugo&lt;/a&gt;.&lt;/p&gt;
@@ -13,7 +13,7 @@
 &lt;p&gt;This theme supports two types of content types: &lt;code&gt;post&lt;/code&gt; and &lt;code&gt;page&lt;/code&gt;. To specify them, you need to add them in your markdown metadata.&lt;/p&gt;
 &lt;h3 id="post"&gt;Post&lt;/h3&gt;
 &lt;p&gt;This is the default blog post type which will be shown in your &amp;ldquo;Posts&amp;rdquo; section and who&amp;rsquo;s tags will be indexed. Basically, a normal blog post.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;---
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;---
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;title: &amp;#34;Hello, world!&amp;#34;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;date: 2021-01-01
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;description: &amp;#34;A blog post&amp;#34;
@@ -295,18 +295,63 @@ SCI,IEEE,ACM还算比较常用的，但后期基本都上arXiv 上找了（ &lt;
 &lt;p&gt;计算机相关的外周器件研究, 包括声卡, 采集卡, 加速卡等.&lt;/p&gt;</description></item><item><title>My First Post</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/my-first-post/</link><pubDate>Mon, 28 Jul 2025 16:36:39 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/my-first-post/</guid><description>&lt;h2 id="简介"&gt;简介&lt;/h2&gt;
 &lt;p&gt;这是 &lt;strong&gt;粗体&lt;/strong&gt; 文本，这是 &lt;em&gt;斜体&lt;/em&gt; 文本。&lt;/p&gt;
 &lt;p&gt;访问 &lt;a href="https://gohugo.io"&gt;Hugo&lt;/a&gt; 网站！&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-cpp" data-lang="cpp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;#include&lt;/span&gt; &lt;span style="color:#75715e"&gt;&amp;lt;iosteam&amp;gt;&lt;/span&gt;&lt;span style="color:#75715e"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-cpp" data-lang="cpp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;#include&lt;/span&gt; &lt;span style="color:#75715e"&gt;&amp;lt;iosteam&amp;gt;&lt;/span&gt;&lt;span style="color:#75715e"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;int&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;main&lt;/span&gt;() {
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; std&lt;span style="color:#f92672"&gt;::&lt;/span&gt;cout &lt;span style="color:#f92672"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;Hello World!&amp;#34;&lt;/span&gt; &lt;span style="color:#f92672"&gt;&amp;lt;&amp;lt;&lt;/span&gt; std&lt;span style="color:#f92672"&gt;::&lt;/span&gt;endl;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;print(&lt;span style="color:#e6db74"&gt;&amp;#34;Hello World!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;print(&lt;span style="color:#e6db74"&gt;&amp;#34;Hello World!&amp;#34;&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>Testing</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/hello-world/</link><pubDate>Mon, 28 Jul 2025 12:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/hello-world/</guid><description>&lt;h2 id="level2"&gt;Level2&lt;/h2&gt;
-&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p&gt;</description></item><item><title>Emoji Support</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</link><pubDate>Thu, 01 Oct 2020 17:55:28 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</guid><description>&lt;p&gt;Emoji can be enabled in a Hugo project in a number of ways.&lt;/p&gt;
+&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p&gt;</description></item><item><title>动态链接机制</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/</link><pubDate>Thu, 16 Apr 2026 22:30:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/</guid><description>&lt;h2 id="全局偏移表-got-global-offset-table"&gt;全局偏移表 GOT (Global Offset Table)&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;elf&lt;/code&gt; 文件中的一个段 (.got), 权限为 &lt;code&gt;rw-&lt;/code&gt;. 该段与动态链接器共享, 当动态库想要获得某个只有动态链接器才知道的地址，就会把它预留好位置放到 .got 表当中, 例如外部函数/变量的地址, 以及其他链接器产生的, 运行时需要的变量.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;.got&lt;/code&gt; 还有一个子段 &lt;code&gt;.got.plt&lt;/code&gt;, &lt;code&gt;.got&lt;/code&gt; 中是外部全局变量, &lt;code&gt;.got.plt&lt;/code&gt; 是外部函数, &lt;code&gt;.got.plt&lt;/code&gt; 会进行 &lt;code&gt;plt&lt;/code&gt; 的 lazy 操作(后续会讲).&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;.got.plt[0]&lt;/code&gt;：address of &lt;code&gt;.dynamic&lt;/code&gt; section 也就是本ELF动态段(.dynamic段)的装载地址&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.got.plt[1]&lt;/code&gt;：address of &lt;code&gt;link_map&lt;/code&gt; object (编译时填充0) 也就是本ELF的link_map数据结构描述符地址，作用：link_map结构，结合.rel.plt段的偏移量，才能真正找到该elf的.rel.plt&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.got.plt[2]&lt;/code&gt;：address of &lt;code&gt;_dl_runtime_resolve&lt;/code&gt; function (编译时填充为0) &lt;code&gt;也就是_dl_runtime_resolve&lt;/code&gt; 函数的地址，来得到真正的函数地址，回写到对应的got表位置中。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="dynamic-段"&gt;&lt;code&gt;.dynamic&lt;/code&gt; 段&lt;/h3&gt;
+&lt;p&gt;用于为动态链接器提供必要的元数据, 其结构可以在 &lt;code&gt;elf.h&lt;/code&gt; 中找到:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;typedef&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;struct&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Elf64_Sxword d_tag;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;union&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Elf64_Xword d_val;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Elf64_Addr d_ptr;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } d_un;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;} Elf64_Dyn;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;详见 dynamic-section 文章.&lt;/p&gt;</description></item><item><title>线程本地变量</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/thread-local-storage/</link><pubDate>Thu, 16 Apr 2026 22:30:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/thread-local-storage/</guid><description>&lt;h2 id="线程本地变量"&gt;线程本地变量&lt;/h2&gt;
+&lt;p&gt;在多线程应用开发中, 对于不希望在现场间共享, 但是又希望全局可见的变量, 我们提供了一种 &lt;code&gt;tls&lt;/code&gt; 变量的实现机制, 允许定义线程本地的全局变量. 在c/cpp中, 可以使用 &lt;code&gt;__thread int data&lt;/code&gt; 来定义一个线程本地变量, 该变量在编译后会记录在 &lt;code&gt;.tbss, .tdata&lt;/code&gt; 两个段中, 与 &lt;code&gt;.bss, .data&lt;/code&gt; 段对应. 由于 &lt;code&gt;.rodata&lt;/code&gt; 段不可写入, 因此线程本地的 read-only 对象没有意义.&lt;/p&gt;
+&lt;p&gt;为了让每个变量只能访问自己线程的 &lt;code&gt;tls&lt;/code&gt; 变量, 需要将其保存在进程上下文中, 在 &lt;code&gt;x86_64&lt;/code&gt; 架构中, 与线程相关的变量均被保存与 &lt;code&gt;%fs&lt;/code&gt; 寄存器指向的 (Thread Control Block中):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;struct&lt;/span&gt; pthread {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#75715e"&gt;/* Part 1 -- these fields may be external or
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;	 * internal (accessed via asm) ABI. Do not change. */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;struct&lt;/span&gt; pthread &lt;span style="color:#f92672"&gt;*&lt;/span&gt;self;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;#ifndef TLS_ABOVE_TP
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;uintptr_t&lt;/span&gt; &lt;span style="color:#f92672"&gt;*&lt;/span&gt;dtv;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;#endif
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;struct&lt;/span&gt; pthread &lt;span style="color:#f92672"&gt;*&lt;/span&gt;prev, &lt;span style="color:#f92672"&gt;*&lt;/span&gt;next; &lt;span style="color:#75715e"&gt;/* non-ABI */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;uintptr_t&lt;/span&gt; sysinfo;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#75715e"&gt;/* Part 2 -- implementation details, non-ABI. */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;int&lt;/span&gt; tid;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;int&lt;/span&gt; errno_val;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; ...
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#75715e"&gt;/* Part 3 -- the positions of these fields relative to
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;	 * the end of the structure is external and internal ABI. */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;#ifdef TLS_ABOVE_TP
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;uintptr_t&lt;/span&gt; canary;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;	&lt;span style="color:#66d9ef"&gt;uintptr_t&lt;/span&gt; &lt;span style="color:#f92672"&gt;*&lt;/span&gt;dtv;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;#endif
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其中 &lt;code&gt;uintptr_t *dtv;&lt;/code&gt; 用于维护 &lt;code&gt;tls&lt;/code&gt; 变量信息, 由于每个动态链接单元都可能有自己的 &lt;code&gt;tls&lt;/code&gt; 变量, 他们散步在虚拟内存空间的不同地方, 因此需要一个机制来访问这些变量.&lt;/p&gt;</description></item><item><title>Emoji Support</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</link><pubDate>Thu, 01 Oct 2020 17:55:28 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/emoji-support/</guid><description>&lt;p&gt;Emoji can be enabled in a Hugo project in a number of ways.&lt;/p&gt;
 &lt;p&gt;The &lt;a href="https://gohugo.io/functions/emojify/"&gt;&lt;code&gt;emojify&lt;/code&gt;&lt;/a&gt; function can be called directly in templates or &lt;a href="https://gohugo.io/templates/shortcode-templates#inline-shortcodes"&gt;Inline Shortcodes&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;To enable emoji globally, set &lt;code&gt;enableEmoji&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in your &lt;a href="https://gohugo.io/getting-started/configuration/"&gt;site configuration&lt;/a&gt; and then you can type emoji shorthand codes directly in content files.&lt;/p&gt;
 &lt;p&gt;These begin and end with a &lt;strong&gt;colon&lt;/strong&gt; and include the &lt;strong&gt;code&lt;/strong&gt; of an emoji:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Gone camping! {?:}tent: Be back soon.
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Gone camping! {?:}tent: Be back soon.
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;That is so funny! {?:}joy:
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The rendered output looks like this:&lt;/p&gt;</description></item></channel></rss>

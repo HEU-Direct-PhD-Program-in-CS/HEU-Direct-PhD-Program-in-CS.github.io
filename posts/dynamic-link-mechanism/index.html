@@ -1,0 +1,201 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{--accent-color:#FF4D4D;--font-size:1.1rem}</style><title>动态链接机制</title><meta name=description content="动态链接的PLT和GOT机制"><meta name=keywords content='blog,gokarna,hugo,post,C语言,动态链接'><meta property="og:url" content="https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/"><meta property="og:type" content="website"><meta property="og:title" content="动态链接机制"><meta property="og:description" content="动态链接的PLT和GOT机制"><meta property="og:image" content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><meta property="og:image:secure_url" content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="动态链接机制"><meta name=twitter:description content="动态链接的PLT和GOT机制"><meta property="twitter:domain" content="https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/"><meta property="twitter:url" content="https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/"><meta name=twitter:image content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><link rel=canonical href=https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/><link rel=stylesheet type=text/css href=/css/normalize.min.css media=print><link rel=stylesheet type=text/css href=/css/main.min.css><link id=dark-theme rel=stylesheet href=/css/dark.min.css><script src=/js/bundle.min.7136b4abac7b277aba8bc933917f4602d39a5c44f5590be687244bc86ef4f162.js integrity="sha256-cTa0q6x7J3q6i8kzkX9GAtOaXET1WQvmhyRLyG708WI="></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css integrity=sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js integrity=sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js integrity=sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],throwOnError:!1})})</script></head><body><script>setThemeByUserPref()</script><header class=header><nav class=header-nav><div class=avatar><a href=https://heu-direct-phd-program-in-cs.github.io/><img src=/images/avatar.webp alt=avatar></a></div><div class=nav-title><a class=nav-brand href=https://heu-direct-phd-program-in-cs.github.io/>HEU本博班's Blog</a></div><div class=nav-links><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/ aria-label><span data-feather=home></span> Home</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/posts/ aria-label><span data-feather=book></span> Posts</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/projects/ aria-label><span data-feather=code></span> Projects</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/tags/ aria-label><span data-feather=tag></span> Tags</a></div><div class=nav-link><a href=https://github.com/HEU-Direct-PhD-Program-in-CS aria-label=github><span data-feather=github></span></a></div><div class=nav-link><a href=https://example.com aria-label=buymeacoffee><span data-feather=coffee></span></a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/index.xml aria-label=rss><span data-feather=rss></span></a></div><span class=nav-icons-divider></span><div class="nav-link dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
+<a aria-hidden=true role=switch><span class=theme-toggle-icon data-feather=moon></span></a></div><div class=nav-link id=hamburger-menu-toggle><span class="sr-only hamburger-menu-toggle-screen-reader-target">menu</span>
+<a aria-checked=false aria-labelledby=hamburger-menu-toggle id=hamburger-menu-toggle-target role=switch><span data-feather=menu></span></a></div><ul class="nav-hamburger-list visibility-hidden"><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/><span data-feather=home></span> Home</a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/posts/><span data-feather=book></span> Posts</a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/projects/><span data-feather=code></span> Projects</a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/tags/><span data-feather=tag></span> Tags</a></li><li class=nav-item><a href=https://github.com/HEU-Direct-PhD-Program-in-CS><span data-feather=github></span></a></li><li class=nav-item><a href=https://example.com><span data-feather=coffee></span></a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/index.xml><span data-feather=rss></span></a></li><li class="nav-item dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
+<a role=switch><span class=theme-toggle-icon data-feather=moon></span></a></li></ul></div></nav></header><main id=content><div class="post container"><div class=post-header-section><h1>动态链接机制</h1><small role=doc-subtitle>动态链接的PLT和GOT机制</small><p class=post-date>April 16, 2026</p><ul class=post-tags><li class=post-tag><a href=https://heu-direct-phd-program-in-cs.github.io/tags/post>post</a></li><li class=post-tag><a href=https://heu-direct-phd-program-in-cs.github.io/tags/c%E8%AF%AD%E8%A8%80>C语言</a></li><li class=post-tag><a href=https://heu-direct-phd-program-in-cs.github.io/tags/%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5>动态链接</a></li></ul></div><div class=post-content><h2 id=全局偏移表-got-global-offset-table>全局偏移表 GOT (Global Offset Table)</h2><p><code>elf</code> 文件中的一个段 (.got), 权限为 <code>rw-</code>. 该段与动态链接器共享, 当动态库想要获得某个只有动态链接器才知道的地址，就会把它预留好位置放到 .got 表当中, 例如外部函数/变量的地址, 以及其他链接器产生的, 运行时需要的变量.</p><p><code>.got</code> 还有一个子段 <code>.got.plt</code>, <code>.got</code> 中是外部全局变量, <code>.got.plt</code> 是外部函数, <code>.got.plt</code> 会进行 <code>plt</code> 的 lazy 操作(后续会讲).</p><ul><li><code>.got.plt[0]</code>：address of <code>.dynamic</code> section 也就是本ELF动态段(.dynamic段)的装载地址</li><li><code>.got.plt[1]</code>：address of <code>link_map</code> object (编译时填充0) 也就是本ELF的link_map数据结构描述符地址，作用：link_map结构，结合.rel.plt段的偏移量，才能真正找到该elf的.rel.plt</li><li><code>.got.plt[2]</code>：address of <code>_dl_runtime_resolve</code> function (编译时填充为0) <code>也就是_dl_runtime_resolve</code> 函数的地址，来得到真正的函数地址，回写到对应的got表位置中。</li></ul><h3 id=dynamic-段><code>.dynamic</code> 段</h3><p>用于为动态链接器提供必要的元数据, 其结构可以在 <code>elf.h</code> 中找到:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>  Elf64_Sxword d_tag;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>union</span> {
+</span></span><span style=display:flex><span>      Elf64_Xword d_val;
+</span></span><span style=display:flex><span>      Elf64_Addr d_ptr;
+</span></span><span style=display:flex><span>  } d_un;
+</span></span><span style=display:flex><span>} Elf64_Dyn;
+</span></span></code></pre></div><p>详见 dynamic-section 文章.</p><h2 id=过程链接表-plt-procedure-linkage-table>过程链接表 PLT (Procedure Linkage Table)</h2><p><code>elf</code> 文件中的一个段 (.plt), 权限为 <code>--x</code>. 由于外部符号可能很多, 为了避免 <code>dlopen</code> 时突发延迟, <code>glibc</code> 做了一套 lazy 机制, 在函数被实际 <code>call</code> 的时候, 再通过 <code>PLT0</code> 函数进行符号解析, 将解析后的地址填入 <code>.got</code> 对应的项中, 后续的 <code>call</code> 则会直接命中 <code>.got</code> 中的函数.</p><h2 id=来看一段代码>来看一段代码</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>// a.c -&gt; a.so
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdint.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>uint32_t</span> data1 <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>uint32_t</span> data2 <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>uint32_t</span> <span style=color:#a6e22e>get_data1</span>(<span style=color:#66d9ef>void</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> data1;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>uint32_t</span> <span style=color:#a6e22e>get_data2</span>(<span style=color:#66d9ef>void</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> data2;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>// main.c -&gt; main.o --(a.so)--&gt; main.elf
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdint.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdio.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;dlfcn.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>uint32_t</span> <span style=color:#a6e22e>get_data1</span>(<span style=color:#66d9ef>void</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>uint32_t</span> <span style=color:#a6e22e>get_data2</span>(<span style=color:#66d9ef>void</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>dlopen</span>(<span style=color:#e6db74>&#34;./liba.so&#34;</span>, RTLD_LAZY);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>extern</span> <span style=color:#66d9ef>uint32_t</span> data1, data2;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#a6e22e>get_data1</span>() <span style=color:#f92672>+</span> data2);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;%d</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#a6e22e>get_data2</span>() <span style=color:#f92672>+</span> data1);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>在 <code>a.c</code> 中定义两个 <code>extern</code> 变量, 并给出两个访问函数, 在 <code>main.c</code> 中访问. 我们关注 <code>get_data</code> 和 直接访问 <code>data</code> 两者的区别, 查看 main.elf 的反汇编:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -fPIC -Wall -Wextra main.c -c -o main.o
+</span></span><span style=display:flex><span>$ gcc -fPIC -Wall -Wextra main.o -L. -la -Wl,-rpath<span style=color:#f92672>=</span>. -o main.elf
+</span></span><span style=display:flex><span>$ objdump -D -R main.elf &gt; main.elf.dump
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001169</span> &lt;main&gt;:
+</span></span><span style=display:flex><span>    1169:	<span style=color:#ae81ff>55</span>                   	push   %rbp
+</span></span><span style=display:flex><span>    116a:	<span style=color:#ae81ff>48</span> <span style=color:#ae81ff>89</span> e5             	mov    %rsp,%rbp
+</span></span><span style=display:flex><span>    116d:	<span style=color:#ae81ff>48</span> 8d <span style=color:#ae81ff>05</span> <span style=color:#ae81ff>90</span> 0e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> 	lea    0xe90<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rax        <span style=color:#75715e># 2004 &lt;_IO_stdin_used+0x4&gt;</span>
+</span></span><span style=display:flex><span>    1174:	be <span style=color:#ae81ff>01</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       	mov    $0x1,%esi
+</span></span><span style=display:flex><span>    1179:	<span style=color:#ae81ff>48</span> <span style=color:#ae81ff>89</span> c7             	mov    %rax,%rdi
+</span></span><span style=display:flex><span>    117c:	e8 cf fe ff ff       	call   <span style=color:#ae81ff>1050</span> &lt;dlopen@plt&gt;
+</span></span><span style=display:flex><span>    1181:	e8 aa fe ff ff       	call   <span style=color:#ae81ff>1030</span> &lt;get_data1@plt&gt;
+</span></span><span style=display:flex><span>    1186:	<span style=color:#ae81ff>48</span> 8b <span style=color:#ae81ff>15</span> <span style=color:#ae81ff>43</span> 2e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> 	mov    0x2e43<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rdx        <span style=color:#75715e># 3fd0 &lt;data2&gt;</span>
+</span></span><span style=display:flex><span>    118d:	8b <span style=color:#ae81ff>12</span>                	mov    <span style=color:#f92672>(</span>%rdx<span style=color:#f92672>)</span>,%edx
+</span></span><span style=display:flex><span>    118f:	<span style=color:#ae81ff>01</span> c2                	add    %eax,%edx
+</span></span><span style=display:flex><span>    1191:	<span style=color:#ae81ff>48</span> 8d <span style=color:#ae81ff>05</span> <span style=color:#ae81ff>76</span> 0e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> 	lea    0xe76<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rax        <span style=color:#75715e># 200e &lt;_IO_stdin_used+0xe&gt;</span>
+</span></span><span style=display:flex><span>    1198:	<span style=color:#ae81ff>89</span> d6                	mov    %edx,%esi
+</span></span><span style=display:flex><span>    ...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Disassembly of section .got:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>0000000000003fb0 &lt;.got&gt;:
+</span></span><span style=display:flex><span>	...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Disassembly of section .got.plt:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>0000000000003fe8 &lt;_GLOBAL_OFFSET_TABLE_&gt;:
+</span></span><span style=display:flex><span>    3fe8:	b0 3d                	mov    $0x3d,%al
+</span></span></code></pre></div><h3 id=动态链接的外部变量>动态链接的外部变量</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>    1186:	<span style=color:#ae81ff>48</span> 8b <span style=color:#ae81ff>15</span> <span style=color:#ae81ff>43</span> 2e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> 	mov    0x2e43<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rdx        <span style=color:#75715e># 3fd0 &lt;data2&gt;</span>
+</span></span><span style=display:flex><span>    118d:	8b <span style=color:#ae81ff>12</span>                	mov    <span style=color:#f92672>(</span>%rdx<span style=color:#f92672>)</span>,%edx
+</span></span></code></pre></div><p>第一行从 <code>%rip (=0x118d) + 0x2e43 = 0x3fd0 &lt;data2></code> 地址 <code>load</code> 了一个值到 <code>%rdx</code> 中, 该地址是 <code>.got</code> 表中, 指向 <code>load</code> 的地址, 随后将 <code>%rdx</code> 指向的值 (<code>data1</code>) load 到 <code>%edx</code>.</p><p>查看 <code>liba.so</code> 的反汇编:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -S -fPIC -Wall -Wextra a.c -o a.s
+</span></span><span style=display:flex><span>$ gcc -c -fPIC -Wall -Wextra a.s -o a.o
+</span></span><span style=display:flex><span>$ ld -shared a.o -o liba.so
+</span></span><span style=display:flex><span>$ objdump -D -R liba.so &gt; liba.dump
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>$Disassembly of section .got:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>0000000000003fd8 &lt;.got&gt;:
+</span></span><span style=display:flex><span>	...
+</span></span><span style=display:flex><span>			3fd8: R_X86_64_GLOB_DAT	data1
+</span></span><span style=display:flex><span>			3fe0: R_X86_64_GLOB_DAT	data2
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    ...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000004000</span> &lt;data1&gt;:
+</span></span><span style=display:flex><span>    4000:	<span style=color:#ae81ff>01</span> <span style=color:#ae81ff>00</span>                	add    %eax,<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>
+</span></span><span style=display:flex><span>	...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000004004</span> &lt;data2&gt;:
+</span></span><span style=display:flex><span>    4004:	<span style=color:#ae81ff>02</span> <span style=color:#ae81ff>00</span>                	add    <span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>,%al
+</span></span><span style=display:flex><span>	...
+</span></span></code></pre></div><p><code>data1, data2</code> 实际的值都在 <code>liba.so</code> 的 <code>.data</code> 段, 并在 <code>.got</code> 段预留了两个条目(<code>.got</code> 段的 <strong>外部变量(不包括函数)</strong> 会在初始化时填入0). 这两个条目在与 <code>main.o</code> 链接时会被附加到 <code>main.elf</code> 的 <code>.got</code> 段中:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ cat main.elf.dump
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Disassembly of section .got:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>0000000000003fb0 &lt;.got&gt;:
+</span></span><span style=display:flex><span>	...
+</span></span><span style=display:flex><span>			3fb0: R_X86_64_GLOB_DAT	__libc_start_main@GLIBC_2.34
+</span></span><span style=display:flex><span>			3fb8: R_X86_64_GLOB_DAT	_ITM_deregisterTMCloneTable
+</span></span><span style=display:flex><span>			3fc0: R_X86_64_GLOB_DAT	data1
+</span></span><span style=display:flex><span>			3fc8: R_X86_64_GLOB_DAT	__gmon_start__
+</span></span><span style=display:flex><span>			3fd0: R_X86_64_GLOB_DAT	data2
+</span></span><span style=display:flex><span>			3fd8: R_X86_64_GLOB_DAT	_ITM_registerTMCloneTable
+</span></span><span style=display:flex><span>			3fe0: R_X86_64_GLOB_DAT	__cxa_finalize@GLIBC_2.2.5
+</span></span></code></pre></div><p>接下来思考: <code>3fc0: R_X86_64_GLOB_DAT data1</code> 的值原本为 <code>0</code>, 但是在访问 <code>data1</code> 时, 该地址应当被填入正确的值. 然而显然我们没有做这件事, 因此又可以开始研究动态链接器了(<del>伟大无需多言</del>). 在 <code>main.elf</code> 中还有一个特殊的段:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ readelf -r main.elf
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Relocation section <span style=color:#e6db74>&#39;.rela.dyn&#39;</span> at offset 0x5d8 contains <span style=color:#ae81ff>10</span> entries:
+</span></span><span style=display:flex><span>  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+</span></span><span style=display:flex><span>000000003da0  <span style=color:#ae81ff>000000000008</span> R_X86_64_RELATIVE                    <span style=color:#ae81ff>1160</span>
+</span></span><span style=display:flex><span>000000003da8  <span style=color:#ae81ff>000000000008</span> R_X86_64_RELATIVE                    <span style=color:#ae81ff>1110</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>000000004028</span>  <span style=color:#ae81ff>000000000008</span> R_X86_64_RELATIVE                    <span style=color:#ae81ff>4028</span>
+</span></span><span style=display:flex><span>000000003fb0  <span style=color:#ae81ff>000100000006</span> R_X86_64_GLOB_DAT <span style=color:#ae81ff>0000000000000000</span> __libc_start_main@GLIBC_2.34 + <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>000000003fb8  <span style=color:#ae81ff>000200000006</span> R_X86_64_GLOB_DAT <span style=color:#ae81ff>0000000000000000</span> _ITM_deregisterTM<span style=color:#f92672>[</span>...<span style=color:#f92672>]</span> + <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>000000003fc0  <span style=color:#ae81ff>000500000006</span> R_X86_64_GLOB_DAT <span style=color:#ae81ff>0000000000000000</span> data1 + <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>000000003fc8  <span style=color:#ae81ff>000700000006</span> R_X86_64_GLOB_DAT <span style=color:#ae81ff>0000000000000000</span> __gmon_start__ + <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>000000003fd0  <span style=color:#ae81ff>000800000006</span> R_X86_64_GLOB_DAT <span style=color:#ae81ff>0000000000000000</span> data2 + <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>000000003fd8  000a00000006 R_X86_64_GLOB_DAT <span style=color:#ae81ff>0000000000000000</span> _ITM_registerTMCl<span style=color:#f92672>[</span>...<span style=color:#f92672>]</span> + <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>000000003fe0  000b00000006 R_X86_64_GLOB_DAT <span style=color:#ae81ff>0000000000000000</span> __cxa_finalize@GLIBC_2.2.5 + <span style=color:#ae81ff>0</span>
+</span></span></code></pre></div><p>用于在 main.elf 启动时, 通知动态链接器, <code>000000003fc0</code> 地址处, 有一个名为 <code>data1</code> 的 <code>R_X86_64_GLOB_DAT</code> 类型符号, 在 <code>dlopen</code> 时, 若发现该符号, 则写入该地址.</p><h3 id=动态链接的外部函数>动态链接的外部函数</h3><p><code>1181: e8 aa fe ff ff call 1030 &lt;get_data1@plt></code> 通过访问了 plt 函数, <code>实现lazy</code> 加载机制.</p><p><code>.plt</code> 是一个函数表, 记录了动态链接的外部函数. 前面提到, 外部变量的地址会在 <code>.so</code> 载入时被填入 <code>.got</code> 中对应的项, 但是外部函数的数量远多于变量, 因此如果全部在动态链接时修改, 则载入延迟可能会非常大. 因此, 通过 <code>plt</code> 函数当作跳板(<code>plt</code> 函数仅有几条指令, 且不包含栈操作, 因此开销可以忽略), 每个外部函数都会自动生成一个对应的 <code>plt</code> 函数, 如 <code>get_data1</code> 会实际调用 <code>get_data1@plt</code>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ cat main.elf.dump
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Disassembly of section .plt:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001020</span> &lt;get_data1@plt-0x10&gt;:
+</span></span><span style=display:flex><span>    1020:	ff <span style=color:#ae81ff>35</span> ca 2f <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    	push   0x2fca<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>        <span style=color:#75715e># 3ff0 &lt;_GLOBAL_OFFSET_TABLE_+0x8&gt;</span>
+</span></span><span style=display:flex><span>    1026:	ff <span style=color:#ae81ff>25</span> cc 2f <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    	jmp    *0x2fcc<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>        <span style=color:#75715e># 3ff8 &lt;_GLOBAL_OFFSET_TABLE_+0x10&gt;</span>
+</span></span><span style=display:flex><span>    102c:	0f 1f <span style=color:#ae81ff>40</span> <span style=color:#ae81ff>00</span>          	nopl   0x0<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001030</span> &lt;get_data1@plt&gt;:
+</span></span><span style=display:flex><span>    1030:	ff <span style=color:#ae81ff>25</span> ca 2f <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    	jmp    *0x2fca<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>        <span style=color:#75715e># 4000 &lt;get_data1&gt;</span>
+</span></span><span style=display:flex><span>    1036:	<span style=color:#ae81ff>68</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       	push   $0x0
+</span></span><span style=display:flex><span>    103b:	e9 e0 ff ff ff       	jmp    <span style=color:#ae81ff>1020</span> &lt;_init+0x20&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001040</span> &lt;printf@plt&gt;:
+</span></span><span style=display:flex><span>    1040:	ff <span style=color:#ae81ff>25</span> c2 2f <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    	jmp    *0x2fc2<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>        <span style=color:#75715e># 4008 &lt;printf@GLIBC_2.2.5&gt;</span>
+</span></span><span style=display:flex><span>    1046:	<span style=color:#ae81ff>68</span> <span style=color:#ae81ff>01</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       	push   $0x1
+</span></span><span style=display:flex><span>    104b:	e9 d0 ff ff ff       	jmp    <span style=color:#ae81ff>1020</span> &lt;_init+0x20&gt;
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    ...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Disassembly of section .got.plt:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>0000000000003fe8 &lt;_GLOBAL_OFFSET_TABLE_&gt;:
+</span></span><span style=display:flex><span>    3fe8:	b0 3d                	mov    $0x3d,%al
+</span></span><span style=display:flex><span>	...
+</span></span><span style=display:flex><span>    3ffe:	<span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>                	add    %al,<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>
+</span></span><span style=display:flex><span>    4000:	<span style=color:#ae81ff>36</span> <span style=color:#ae81ff>10</span> <span style=color:#ae81ff>00</span>             	ss adc %al,<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>
+</span></span><span style=display:flex><span>			4000: *unknown*	get_data1
+</span></span></code></pre></div><p><code>get_data1@plt-0x10</code> 也被称为 <code>plt0</code>. 伪代码如下:</p><pre tabindex=0><code class=language-assembly data-lang=assembly>plt0:
+1020    push    link_map
+1026    jmp     _dl_runtime_resolve
+
+get_data1@plt:
+jmp     *(.got.plt[get_data])
+push    get_data.reloc_index
+jmp     plt0
+</code></pre><p><code>get_data1@plt</code> 首先跳转到 <code>.got.plt</code> 中 <code>get_data1</code> 字段指向的地址 <code>(jmp *(0x4000))</code></p><ol><li>非第一次执行时, 实际跳转到 <code>get_data1</code> 执行, <code>jmp</code> 指令为 <code>get_data1@plt</code> 的第一条指令, 并通过 <code>jmp</code> 进行跳转, 因此没有产生除pc改变外的任何副作用, <code>get_data1</code> 中的 <code>ret</code> 指令会直接返回 <code>call get_data1@plt</code> 的下一条指令, 全程没有额外分支指令, 避免流水线中断, 只有一次仿存, 性能开销几乎可以忽略不计.</li><li>第一次执行时, 该字段地址的值为 <code>get_data1@plt + 6</code>, 即 <code>jmp *0x2fca(%rip)</code> 下一条指令, <code>push $0x0</code>. <code>get_data1</code> 是该 elf 中第一个动态链接的外部函数符号, <code>reloc_index</code> 为0, 将 0x0 压入栈中, 调用 <code>jmp 1020 (plt0)</code>, 由于每个 <code>elf</code> 的每个 <code>@plt</code> 函数都需要调用 plt0 中的这段代码, 因此被提取为 <code>plt0</code>, 而每个 <code>elf</code> 的 <code>plt0</code> 都需要调用查找实际函数地址并写回 <code>.got.plt</code> 的功能 (<code>_dl_runtime_resolve</code> 函数), 因此被进一步提取. 简而言之, 首次调用时会将当前 <code>elf</code> 的 <code>.got.plt[1](link_map)</code> 节点的地址, 和当前请求函数的编号压入栈中, 然后调用 <code>*(.got.plt[2])即(_dl_runtime_resolve)</code> 去解析外部符号.</li></ol><h4 id=_dl_runtime_resolve><code>_dl_runtime_resolve</code></h4><ul><li>该章节建议配合源码食用</li></ul><p><code>_dl_runtime_resolve</code> 函数在 <code>ld.so</code> 库中, 本身也是外部函数, 因此 <code>_dl_runtime_resolve</code> 本身肯定不能走这套流程解析, 因此在 <code>ld.so</code> 加载时, 操作系统 (可能是?) 会将这个函数的实际地址写入 <code>.got.plt[2]</code>.</p><p><code>_dl_runtime_resolve</code> 代码位于 <code>glibc: sysdeps/x86_64/dl-trampoline.h</code>, 是一段平台相关的汇编函数. 此时栈为:</p><pre tabindex=0><code>| reloc_index |
+| link_map    |
+| return addr |
+</code></pre><p><code>_dl_runtime_resolve</code> 保存了一大堆上下文之后调用一个 c 函数:</p><pre tabindex=0><code># 压栈
+call _dl_fixup  # Call resolver.
+# 恢复栈
+jmp *%r11       # Jump to function address.
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>// sysdeps/hppa/dl-fptr.h
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>struct</span> fdesc
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>ElfW</span>(Addr) ip;	<span style=color:#75715e>/* code entry point */</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>ElfW</span>(Addr) gp;	<span style=color:#75715e>/* global pointer */</span>
+</span></span><span style=display:flex><span>  };
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// sysdeps/hppa/dl-lookupcfg.h
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#define DL_FIXUP_VALUE_TYPE struct fdesc
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// elf/dl-runtime.c
+</span></span></span><span style=display:flex><span>DL_FIXUP_VALUE_TYPE
+</span></span><span style=display:flex><span>attribute_hidden <span style=color:#a6e22e>__attribute</span> ((noinline)) DL_ARCH_FIXUP_ATTRIBUTE
+</span></span><span style=display:flex><span><span style=color:#a6e22e>_dl_fixup</span> (
+</span></span><span style=display:flex><span>	   <span style=color:#66d9ef>struct</span> link_map <span style=color:#f92672>*</span>l, <span style=color:#a6e22e>ElfW</span>(Word) reloc_arg)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    ...
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>先读取段信息:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span>symtab <span style=color:#f92672>=</span> DT_SYMTAB   <span style=color:#75715e>// 符号表 (.dynsym)
+</span></span></span><span style=display:flex><span>strtab <span style=color:#f92672>=</span> DT_STRTAB   <span style=color:#75715e>// 字符串表 (.dynstr)
+</span></span></span><span style=display:flex><span>pltgot <span style=color:#f92672>=</span> DT_PLTGOT   <span style=color:#75715e>// GOT 基址
+</span></span></span><span style=display:flex><span>reloc <span style=color:#f92672>=</span> DT_JMPREL <span style=color:#f92672>+</span> <span style=color:#a6e22e>offset</span>(reloc_arg) <span style=color:#f92672>=</span> .rela.plt[reloc_index]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>ElfW</span>(Sym) <span style=color:#f92672>*</span>sym <span style=color:#f92672>=</span> <span style=color:#f92672>&amp;</span>symtab[<span style=color:#a6e22e>ELFW</span>(R_SYM) (reloc<span style=color:#f92672>-&gt;</span>r_info)]; <span style=color:#75715e>// 符号项
+</span></span></span></code></pre></div><p>查找 <code>.rela.plt</code>, <code>.dynsym</code> 得到 <code>get_data1</code> 的符号项, 再从 <code>.dynstr</code>, 即可得到 <code>0x0</code> 对应的符号为 <code>get_data1</code>, 然后拿着 <code>get_data1</code> 字符串调用 <code>_dl_lookup_symbol_x</code> 查找符号所在的 <code>.so</code> 模块和具体地址.</p><pre tabindex=0><code>Relocation section &#39;.rela.plt&#39; at offset 0x6c8 contains 4 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000004000  000300000007 R_X86_64_JUMP_SLO 0000000000000000 get_data1 + 0
+000000004008  000400000007 R_X86_64_JUMP_SLO 0000000000000000 printf@GLIBC_2.2.5 + 0
+000000004010  000600000007 R_X86_64_JUMP_SLO 0000000000000000 dlopen@GLIBC_2.34 + 0
+000000004018  000900000007 R_X86_64_JUMP_SLO 0000000000000000 get_data2 + 0
+</code></pre><p>顺序为 current_elf, DT_NEEDED, 递归查找依赖(依赖树, 如果子库中的 <code>.got.plt</code> 表已经有了该符号的地址, 则无须继续递归):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span><span style=color:#66d9ef>const</span> rel_addr <span style=color:#f92672>=</span> (<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>)(l<span style=color:#f92672>-&gt;</span>l_addr <span style=color:#f92672>+</span> reloc<span style=color:#f92672>-&gt;</span>r_offset); <span style=color:#75715e>// get_data1 在 .got.plt 表中地址(上述的0x4000)
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>lookup_t</span> result;
+</span></span><span style=display:flex><span>result <span style=color:#f92672>=</span> <span style=color:#a6e22e>_dl_lookup_symbol_x</span> (strtab <span style=color:#f92672>+</span> sym<span style=color:#f92672>-&gt;</span>st_name, l, <span style=color:#f92672>&amp;</span>sym, l<span style=color:#f92672>-&gt;</span>l_scope,
+</span></span><span style=display:flex><span>				    version, ELF_RTYPE_CLASS_PLT, flags, NULL); <span style=color:#75715e>// 查找符号
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>SYMBOL_ADDRESS</span>(result, sym); <span style=color:#75715e>// 计算实际地址
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>elf_machine_fixup_plt</span> (l, result, refsym, sym, reloc, rel_addr, value); <span style=color:#75715e>// 回写 .got.plt 并返回 result
+</span></span></span></code></pre></div><p>随后程序从 <code>_dl_fixup</code> 返回 <code>_dl_runtime_resolve</code>, 恢复现场之后调用 <code>_dl_runtime_resolve</code> 返回值指向的 <code>real function</code>. 完成 lazy 解析与执行机制.</p><p>其中又涉及到一个比较关键的数据结构: <code>link_map</code>.</p><h4 id=link_map>link_map</h4><blockquote><p>TODO: 本章节待补充</p></blockquote><ul><li><code>link_map</code> 是动态链接器的核心数据结构, 几乎所有与动态链接器的操作都需要 <code>link_map</code>. 每个动态链接的单元都有一个对应的 <code>link_map</code>, 里边包含了当前 <code>.so</code> 的所有重定向相关信息, 如 <code>Dynamic section</code> 的起始地址, 当前库的完整文件名等一大堆信息(<code>musl</code> 的实现会比 <code>glibc</code> 精简非常多).</li></ul><h2 id=其他问题>其他问题</h2><h3 id=musl-libc>musl libc</h3><p><code>glibc</code> 实现了 <code>plt</code> 的 lazy binding 机制, 但是 <code>musl libc</code> 选择抛弃该机制, 这样可以避免 <code>_dl_runtime_resolve</code> 这一非常复杂的实现方式, 以及在 link_map 中添加巨量符号相关信息. 在 <code>musl libc</code> 中, 外部函数与外部变量一样, 在动态链接时, 直接修改 <code>.got</code> 中的实际值, 即调用 <code>@plt</code> 函数的时候, 不会发生跳转 <code>plt0</code> 的情况. 同时 musl libc 这一设计也避免了接下来 <code>.got</code> 失效的问题</p><h3 id=卸载后-got-失效>卸载后 <code>.got</code> 失效</h3><ul><li>如果一个库在运行时通过 <code>dlclose</code> 被卸载了, 然后之后又重新 <code>dlopen</code>, 此时该 <code>elf</code> 所在的地址很可能与之前不一样. (我们假设 <code>a.so</code> 调用了 <code>b.so</code> 的函数). <code>a.so</code> 的 <code>.got.plt</code> 表中之前已经被填入了之前 <code>b.so</code> 中符号的地址, 因此, 再次调用 <code>plt stub</code> 函数时, 不会进入 <code>plt0</code> 中. 但是 <code>.got.plt</code> 表中的地址是错误的, 需要重新解析符号, 否则其中 <code>.got.plt</code> 指向的地址是个无效地址, 会导致 plt 机制发生错误. 因此 glibc 提供了 <code>dlsym</code> 方法, 用于重新解析符号, <code>musl libc</code> 在 reopen 时必定会触发重新写入 <code>.got</code> 的行为. 同时为了避免 <code>.got</code> 失效后带来的开销, <code>glibc</code> 和 <code>musl libc</code> 的默认行为都是禁止一个动态链接的库被close.</li></ul><h2 id=end>END</h2><p>自此, 整个动态链接过程, 除了 <code>_dl_lookup_symbol_x()</code> 函数细节, 其余部分已经大致了解了一遍, 啥时候有空了再来补充吧 &#x2764;&#xfe0f;</p></div><div class=prev-next></div><svg id="btt-button" class="arrow-logo" height="1em" viewBox="0 0 384 512" onclick="scrollToTop()" title="Go to top"><path d="M177 159.7l136 136c9.4 9.4 9.4 24.6.0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9.0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9.0L7 329.7c-9.4-9.4-9.4-24.6.0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/></svg>
+<script>let backToTopButton=document.getElementById("btt-button");window.onscroll=function(){scrollFunction()};function scrollFunction(){document.body.scrollTop>20||document.documentElement.scrollTop>20?backToTopButton.style.display="block":backToTopButton.style.display="none"}function scrollToTop(){window.scrollTo(0,0)}</script></div><aside class=post-toc><nav id=toc><nav id=TableOfContents><ul><li><ul><li><a href=#全局偏移表-got-global-offset-table>全局偏移表 GOT (Global Offset Table)</a><ul><li><a href=#dynamic-段><code>.dynamic</code> 段</a></li></ul></li><li><a href=#过程链接表-plt-procedure-linkage-table>过程链接表 PLT (Procedure Linkage Table)</a></li><li><a href=#来看一段代码>来看一段代码</a><ul><li><a href=#动态链接的外部变量>动态链接的外部变量</a></li><li><a href=#动态链接的外部函数>动态链接的外部函数</a><ul><li><a href=#_dl_runtime_resolve><code>_dl_runtime_resolve</code></a></li><li><a href=#link_map>link_map</a></li></ul></li></ul></li><li><a href=#其他问题>其他问题</a><ul><li><a href=#musl-libc>musl libc</a></li><li><a href=#卸载后-got-失效>卸载后 <code>.got</code> 失效</a></li></ul></li><li><a href=#end>END</a></li></ul></li></ul></nav></nav></aside></main><footer class=footer><span>&copy; 2026 The Marauders</span>
+<span>Made with &#10084;&#65039; using <a target=_blank href=https://github.com/gokarna-theme/gokarna-hugo>Gokarna</a></span></footer></body></html>

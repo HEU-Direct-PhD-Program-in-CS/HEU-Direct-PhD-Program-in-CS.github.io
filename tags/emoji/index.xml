@@ -2,7 +2,7 @@
 &lt;p&gt;The &lt;a href="https://gohugo.io/functions/emojify/"&gt;&lt;code&gt;emojify&lt;/code&gt;&lt;/a&gt; function can be called directly in templates or &lt;a href="https://gohugo.io/templates/shortcode-templates#inline-shortcodes"&gt;Inline Shortcodes&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;To enable emoji globally, set &lt;code&gt;enableEmoji&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in your &lt;a href="https://gohugo.io/getting-started/configuration/"&gt;site configuration&lt;/a&gt; and then you can type emoji shorthand codes directly in content files.&lt;/p&gt;
 &lt;p&gt;These begin and end with a &lt;strong&gt;colon&lt;/strong&gt; and include the &lt;strong&gt;code&lt;/strong&gt; of an emoji:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Gone camping! {?:}tent: Be back soon.
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Gone camping! {?:}tent: Be back soon.
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;That is so funny! {?:}joy:
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The rendered output looks like this:&lt;/p&gt;</description></item></channel></rss>

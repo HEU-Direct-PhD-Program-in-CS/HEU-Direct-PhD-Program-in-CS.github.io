@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>动态链接 on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/</link><description>Recent content in 动态链接 on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sun, 02 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/index.xml" rel="self" type="application/rss+xml"/><item><title>动态链接机制</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/</link><pubDate>Thu, 16 Apr 2026 22:30:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/dynamic-link-mechanism/</guid><description>&lt;h2 id="全局偏移表-got-global-offset-table"&gt;全局偏移表 GOT (Global Offset Table)&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;elf&lt;/code&gt; 文件中的一个段 (.got), 权限为 &lt;code&gt;rw-&lt;/code&gt;. 该段与动态链接器共享, 当动态库想要获得某个只有动态链接器才知道的地址，就会把它预留好位置放到 .got 表当中, 例如外部函数/变量的地址, 以及其他链接器产生的, 运行时需要的变量.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;.got&lt;/code&gt; 还有一个子段 &lt;code&gt;.got.plt&lt;/code&gt;, &lt;code&gt;.got&lt;/code&gt; 中是外部全局变量, &lt;code&gt;.got.plt&lt;/code&gt; 是外部函数, &lt;code&gt;.got.plt&lt;/code&gt; 会进行 &lt;code&gt;plt&lt;/code&gt; 的 lazy 操作(后续会讲).&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;.got.plt[0]&lt;/code&gt;：address of &lt;code&gt;.dynamic&lt;/code&gt; section 也就是本ELF动态段(.dynamic段)的装载地址&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.got.plt[1]&lt;/code&gt;：address of &lt;code&gt;link_map&lt;/code&gt; object (编译时填充0) 也就是本ELF的link_map数据结构描述符地址，作用：link_map结构，结合.rel.plt段的偏移量，才能真正找到该elf的.rel.plt&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.got.plt[2]&lt;/code&gt;：address of &lt;code&gt;_dl_runtime_resolve&lt;/code&gt; function (编译时填充为0) &lt;code&gt;也就是_dl_runtime_resolve&lt;/code&gt; 函数的地址，来得到真正的函数地址，回写到对应的got表位置中。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="dynamic-段"&gt;&lt;code&gt;.dynamic&lt;/code&gt; 段&lt;/h3&gt;
+&lt;p&gt;用于为动态链接器提供必要的元数据, 其结构可以在 &lt;code&gt;elf.h&lt;/code&gt; 中找到:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;typedef&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;struct&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Elf64_Sxword d_tag;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;union&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Elf64_Xword d_val;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; Elf64_Addr d_ptr;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; } d_un;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;} Elf64_Dyn;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;详见 dynamic-section 文章.&lt;/p&gt;</description></item></channel></rss>
