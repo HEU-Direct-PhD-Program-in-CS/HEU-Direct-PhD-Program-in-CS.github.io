@@ -2,17 +2,26 @@
 <div class="container tags-list">
 
     <h1 class="list-title">{{ i18n "tags" }}</h1>
-    {{if eq (len $.Site.Taxonomies.tags) 0}}
+    {{ $visibleTags := 0 }}
+    {{ range $.Site.Taxonomies.tags.ByCount }}
+        {{ if gt (len (where .Pages "Draft" false)) 0 }}
+            {{ $visibleTags = add $visibleTags 1 }}
+        {{ end }}
+    {{ end }}
+    {{ if eq $visibleTags 0 }}
         {{ i18n "nothing" }}
-    {{else}}
+    {{ else }}
     <ul class="post-tags">
         {{ range $.Site.Taxonomies.tags.ByCount }}
+        {{ $visiblePages := where .Pages "Draft" false }}
+        {{ if gt (len $visiblePages) 0 }}
         <li class="post-tag">
             <a href="{{ .Page.RelPermalink }}">
                 <div class="tag-name">{{ .Name }}</div>
-                <div class="tag-posts-count">{{ .Count }}</div>
+                <div class="tag-posts-count">{{ len $visiblePages }}</div>
             </a>
         </li>
+        {{ end }}
         {{ end }}
     </ul>
     {{ end }}

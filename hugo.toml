@@ -3,6 +3,9 @@ defaultContentLanguage = "zh_cn"
 enableEmoji = true
 enableRobotsTXT = true
 languageCode = "zh"
+# Build draft pages so that their URLs still render. The theme layouts remove
+# them from every navigational/indexing surface.
+buildDrafts = true
 # Choose one of emacs, trac or perldoc
 pygmentsStyle = "monokai"
 theme = "gokarna"

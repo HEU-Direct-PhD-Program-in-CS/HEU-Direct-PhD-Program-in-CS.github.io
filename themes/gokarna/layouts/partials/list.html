@@ -2,7 +2,9 @@
 
     <h1 class="list-title">{{ i18n .Name }}</h1>
 
-    {{ range (where .Pages "Params.type" "post" ).GroupByDate "2006" }}
+    {{ $posts := where .Pages "Params.type" "post" }}
+    {{ $posts = where $posts "Draft" false }}
+    {{ range $posts.GroupByDate "2006" }}
 
     <h2 class="posts-year">{{ .Key }}</h2>
 

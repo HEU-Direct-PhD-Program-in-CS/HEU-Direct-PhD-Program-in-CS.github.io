@@ -21,7 +21,7 @@ weight: 20
 showTableOfContents: true
 date: 2025-07-28T12:00:00+08:00
 lastmod: 2025-01-01
-draft: false # 设置为 draft: true 则不会渲染
+draft: false # draft: true 仍会渲染，但不会出现在文章/标签列表中
 ---
 
 ## Level2
