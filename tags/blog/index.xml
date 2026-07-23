@@ -1,2 +1,60 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blog on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/blog/</link><description>Recent content in Blog on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Wed, 01 Jan 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Testing</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/hello-world/</link><pubDate>Mon, 28 Jul 2025 12:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/hello-world/</guid><description>&lt;h2 id="level2"&gt;Level2&lt;/h2&gt;
-&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p&gt;
+&lt;h2 id="二级标题"&gt;二级标题&lt;/h2&gt;
+&lt;h3 id="三级标题"&gt;三级标题&lt;/h3&gt;
+&lt;h4 id="四级标题"&gt;四级标题&lt;/h4&gt;
+&lt;h5 id="五级标题"&gt;五级标题&lt;/h5&gt;
+&lt;h6 id="六级标题"&gt;六级标题&lt;/h6&gt;
+&lt;blockquote&gt;
+&lt;p&gt;提示块标签&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;嵌套提示块&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;无序列表1&lt;/li&gt;
+&lt;li&gt;无序列表2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol&gt;
+&lt;li&gt;有序列表1&lt;/li&gt;
+&lt;li&gt;有序列表2&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;加粗&lt;/strong&gt;，&lt;em&gt;斜体&lt;/em&gt;，&lt;del&gt;删除线&lt;/del&gt;，&lt;u&gt;下划线&lt;/u&gt;。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-c++" data-lang="c++"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;printf(&lt;span style="color:#e6db74"&gt;&amp;#34;hello world&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-c++" data-lang="c++"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cout &lt;span style="color:#f92672"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;hello world&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;System.&lt;span style="color:#a6e22e"&gt;out&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;println&lt;/span&gt;(&lt;span style="color:#e6db74"&gt;&amp;#34;hello world&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;Console.WriteLine(&lt;span style="color:#e6db74"&gt;&amp;#34;hello world&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;$$
+(\bigcup_{n}S_{n}) ^{c} =\bigcap_{n}S^{c}_{n}
+$$&lt;/p&gt;
+&lt;p&gt;$$
+\begin{equation}
+x = a_0 + \cfrac{1}{a_1
++ \cfrac{1}{a_2
++ \cfrac{1}{a_3 + \cfrac{1}{a_4} } } }
+\end{equation}
+$$&lt;/p&gt;
+&lt;p&gt;试试行内公式 $e^{ix} = \cos x + i \cdot \sin x$&lt;/p&gt;
+&lt;p&gt;[^这是脚注]&lt;/p&gt;
+&lt;p&gt;这也是脚注[^1]&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;title&lt;/th&gt;
+					&lt;th style="text-align: left"&gt;an English long long title&lt;/th&gt;
+					&lt;th&gt;一个中文长长长长标题~&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;content&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/td&gt;
+					&lt;td&gt;中文内容&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;markdown&lt;/strong&gt;&lt;del&gt;测试&lt;/del&gt;&lt;/td&gt;
+					&lt;td style="text-align: left"&gt;公式测试: $(a+b)^2=a^2+2ab+b^2$&lt;/td&gt;
+					&lt;td&gt;使用HTML 转义字符如: | (&lt;code&gt;&amp;amp;#124;&lt;/code&gt;)&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;</description></item></channel></rss>
