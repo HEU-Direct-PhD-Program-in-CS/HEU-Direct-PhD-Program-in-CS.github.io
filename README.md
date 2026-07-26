@@ -59,3 +59,18 @@ git push --set-upstream origin new_branch_name
 ### 2. 使用 `hugo` 新建 blog
 
 区别只在创建文件的部分, 使用 `hugo new content/posts/your_blog_name.md` 初始化 `blog`.
+
+### 3. 添加项目文档
+
+在 `content/projects/<project-name>/` 下添加 `_index.md` 作为项目导览页，项目文章放在同一目录中。Projects 根页和项目导览页会自动生成下一级目录，不需要手写链接。
+
+文章通过 `weight` 控制排列顺序；设置 `draft: true` 后页面仍可通过 URL 访问，但不会出现在 Projects 目录、RSS 或 sitemap 中。
+
+```text
+content/projects/
+├── _index.md
+└── example-project/
+    ├── _index.md
+    ├── chapter-1.md
+    └── chapter-2.md
+```

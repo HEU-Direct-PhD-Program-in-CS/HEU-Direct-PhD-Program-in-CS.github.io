@@ -1,0 +1,45 @@
+<div class="post container">
+    <div class="post-header-section">
+        <h1>{{ .Title | markdownify }}</h1>
+        {{ with .Description }}
+            <small role="doc-subtitle">{{ . }}</small>
+        {{ end }}
+    </div>
+
+    {{ with .Content }}
+    <div class="post-content">
+        {{ . }}
+    </div>
+    {{ end }}
+
+    {{ $sections := where .Sections "Draft" false }}
+    {{ $pages := where .RegularPages "Draft" false }}
+
+    <div class="list-posts">
+        {{ if gt (len $sections) 0 }}
+            <h2 class="posts-year">项目</h2>
+            {{ range $sections.ByWeight }}
+                <div class="post-title">
+                    <a href="{{ .RelPermalink }}" class="post-link">{{ .Title | markdownify }}</a>
+                </div>
+            {{ end }}
+        {{ end }}
+
+        {{ if gt (len $pages) 0 }}
+            <h2 class="posts-year">{{ if gt (len $sections) 0 }}其他页面{{ else }}目录{{ end }}</h2>
+            {{ range $pages.ByWeight }}
+                <div class="post-title">
+                    <a href="{{ .RelPermalink }}" class="post-link">{{ .Title | markdownify }}</a>
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+
+    {{ if and (eq (len $sections) 0) (eq (len $pages) 0) }}
+        <p>{{ i18n "nothing" }}</p>
+    {{ end }}
+
+    {{ if .Site.Params.ShowBackToTopButton }}
+        {{ partial "back-to-top.html" . }}
+    {{ end }}
+</div>

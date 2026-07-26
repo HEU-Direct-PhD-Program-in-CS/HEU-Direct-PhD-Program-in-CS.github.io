@@ -6,7 +6,7 @@
         {{- partial "mermaid.html" . -}}
     {{ end }}
 
-    {{ if eq .Type "page" }}
+    {{ if or (eq .Type "page") (eq .Section "projects") }}
         {{- partial "page.html" . -}}
         {{- partial "toc.html" . -}}
     {{ end }}
