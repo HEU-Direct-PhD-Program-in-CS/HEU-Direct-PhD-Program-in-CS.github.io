@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Git on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/git/</link><description>Recent content in Git on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sat, 18 Oct 2025 15:00:00 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>git 的基础使用</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</link><pubDate>Sat, 18 Oct 2025 15:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</guid><description>&lt;p&gt;&lt;a href="https://git-scm.com/about"&gt;git&lt;/a&gt; 是一个版本控制工具, 具有: 开销小, 速度快, 分布式, 高安全性, 自由免费的特点.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Git on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/git/</link><description>Recent content in Git on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sat, 18 Oct 2025 15:00:00 +0800</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>git 的基础使用</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</link><pubDate>Sat, 18 Oct 2025 15:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_2/</guid><description>&lt;p&gt;&lt;a href="https://git-scm.com/about"&gt;git&lt;/a&gt;
+ 是一个版本控制工具, 具有: 开销小, 速度快, 分布式, 高安全性, 自由免费的特点.&lt;/p&gt;
 &lt;h2 id="什么是版本控制"&gt;什么是版本控制&lt;/h2&gt;
 &lt;p&gt;版本: 对工程文件的每一次保存都可以算作一个版本的记录, 例如vscode自带的 timeline, 对psd文件的每一次备份等. 小到每一次修改, 大到每一次发布的版本, 都是版本的一种.&lt;/p&gt;
 &lt;ul&gt;
@@ -102,7 +103,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; git submodule update &lt;span style="color:#75715e"&gt;# 更新子模块&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="iii-advanced-usage"&gt;III. Advanced Usage&lt;/h3&gt;
 &lt;p&gt;&lt;strong&gt;STFW and RTFM&lt;/strong&gt;&lt;/p&gt;
-&lt;h2 id="github"&gt;&lt;a href="https://github.com/"&gt;Github&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id="github"&gt;&lt;a href="https://github.com/"&gt;Github&lt;/a&gt;
+&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;del&gt;全球最大的同性交友网站&lt;/del&gt;&lt;/li&gt;
 &lt;/ul&gt;

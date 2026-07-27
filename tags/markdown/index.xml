@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Markdown on HEU本博班's Blog</title><link>https://heu-direct-phd-program-in-cs.github.io/tags/markdown/</link><description>Recent content in Markdown on HEU本博班's Blog</description><generator>Hugo</generator><language>zh</language><lastBuildDate>Sun, 02 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://heu-direct-phd-program-in-cs.github.io/tags/markdown/index.xml" rel="self" type="application/rss+xml"/><item><title>Theme Documentation - Basics</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</link><pubDate>Fri, 06 Mar 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-basics/</guid><description>&lt;p&gt;Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p&gt;
 &lt;h2 id="installation"&gt;Installation&lt;/h2&gt;
 &lt;p&gt;Follow these steps to initialize your new website.&lt;/p&gt;
-&lt;p&gt;If you are new to &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt;, we suggest following this &lt;a href="https://gohugo.io/getting-started/quick-start/"&gt;great documentation for beginners&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you are new to &lt;a href="https://gohugo.io/"&gt;Hugo&lt;/a&gt;
+, we suggest following this &lt;a href="https://gohugo.io/getting-started/quick-start/"&gt;great documentation for beginners&lt;/a&gt;
+.&lt;/p&gt;
 &lt;h3 id="create-your-project"&gt;a. Create Your Project&lt;/h3&gt;
 &lt;p&gt;Hugo provides a &lt;code&gt;new&lt;/code&gt; subcommand to create a new website:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;hugo new site my-website
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cd my-website
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="install-the-theme"&gt;b. Install the Theme&lt;/h3&gt;
-&lt;p&gt;The theme&amp;rsquo;s repository is: &lt;a href="https://github.com/gokarna-theme/gokarna-hugo"&gt;https://github.com/gokarna-theme/gokarna-hugo&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The theme&amp;rsquo;s repository is: &lt;a href="https://github.com/gokarna-theme/gokarna-hugo"&gt;https://github.com/gokarna-theme/gokarna-hugo&lt;/a&gt;
+.&lt;/p&gt;
 &lt;p&gt;Make this repository a submodule of your Git project:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;git init
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;git submodule add https://github.com/gokarna-theme/gokarna-hugo.git themes/gokarna
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="basic-configuration"&gt;c. Basic Configuration&lt;/h3&gt;
-&lt;p&gt;A simple Hugo &lt;a href="https://gohugo.io/getting-started/configuration/#configuration-file"&gt;configuration file&lt;/a&gt; with &lt;a href="https://gohugo.io/content-management/menus/#properties-front-matter"&gt;menu items&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Gokarna supports &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#icons-in-header"&gt;adding Feather icons to the header&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A simple Hugo &lt;a href="https://gohugo.io/getting-started/configuration/#configuration-file"&gt;configuration file&lt;/a&gt;
+ with &lt;a href="https://gohugo.io/content-management/menus/#properties-front-matter"&gt;menu items&lt;/a&gt;
+.&lt;/p&gt;
+&lt;p&gt;Gokarna supports &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#icons-in-header"&gt;adding Feather icons to the header&lt;/a&gt;
+.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;baseURL&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;https://example.org/&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;defaultContentLanguage&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;en&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;# Automatically generate robots.txt&lt;/span&gt;
@@ -53,44 +59,69 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;pre&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;&amp;lt;span data-feather=&amp;#39;github&amp;#39;&amp;gt;&amp;lt;/span&amp;gt;&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;post&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="create-your-first-post"&gt;d. Create Your First Post&lt;/h3&gt;
-&lt;p&gt;Use the &lt;a href="https://gohugo.io/commands/hugo_new/#hugo-new"&gt;&lt;code&gt;new&lt;/code&gt; subcommand&lt;/a&gt; to create a post (in &lt;a href="https://gohugo.io/content-management/organization/#organization-of-content-source"&gt;the &lt;code&gt;content/&lt;/code&gt; directory&lt;/a&gt;):&lt;/p&gt;
+&lt;p&gt;Use the &lt;a href="https://gohugo.io/commands/hugo_new/#hugo-new"&gt;&lt;code&gt;new&lt;/code&gt; subcommand&lt;/a&gt;
+ to create a post (in &lt;a href="https://gohugo.io/content-management/organization/#organization-of-content-source"&gt;the &lt;code&gt;content/&lt;/code&gt; directory&lt;/a&gt;
+):&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;hugo new posts/&lt;span style="color:#e6db74"&gt;&amp;#39;My First Post&amp;#39;&lt;/span&gt;.md
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Two &lt;a href="https://gohugo.io/content-management/types/"&gt;content types&lt;/a&gt; are supported in Gokarna:&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Two &lt;a href="https://gohugo.io/content-management/types/"&gt;content types&lt;/a&gt;
+ are supported in Gokarna:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;code&gt;type: &amp;quot;post&amp;quot;&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;A blog post consisting of a &lt;a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title#page_titles_and_seo"&gt;page title&lt;/a&gt;, &lt;a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML#adding_an_author_and_description"&gt;meta description&lt;/a&gt;, creation/last modified dates, &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#seo-keywords"&gt;SEO keywords (tags)&lt;/a&gt;, and Markdown content.&lt;/p&gt;
-&lt;p&gt;Read more about Posts in the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#post"&gt;advanced documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A blog post consisting of a &lt;a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title#page_titles_and_seo"&gt;page title&lt;/a&gt;
+, &lt;a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML#adding_an_author_and_description"&gt;meta description&lt;/a&gt;
+, creation/last modified dates, &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#seo-keywords"&gt;SEO keywords (tags)&lt;/a&gt;
+, and Markdown content.&lt;/p&gt;
+&lt;p&gt;Read more about Posts in the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#post"&gt;advanced documentation&lt;/a&gt;
+.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;code&gt;type: &amp;quot;page&amp;quot;&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;A standalone page which only renders Markdown. Best used for custom pages (e.g. your &lt;a href="https://heu-direct-phd-program-in-cs.github.io/projects/"&gt;portfolio&lt;/a&gt;) which should not feature in your &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/"&gt;Posts&lt;/a&gt; timeline.&lt;/p&gt;
-&lt;p&gt;Read more about Pages in the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#page"&gt;advanced documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A standalone page which only renders Markdown. Best used for custom pages (e.g. your &lt;a href="https://heu-direct-phd-program-in-cs.github.io/projects/"&gt;portfolio&lt;/a&gt;
+) which should not feature in your &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/"&gt;Posts&lt;/a&gt;
+ timeline.&lt;/p&gt;
+&lt;p&gt;Read more about Pages in the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#page"&gt;advanced documentation&lt;/a&gt;
+.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;h4 id="using-archetypes"&gt;Using archetypes&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;hugo new&lt;/code&gt; will automatically use an appropriate &lt;a href="https://gohugo.io/content-management/archetypes/#lookup-order"&gt;archetype&lt;/a&gt; (see &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/tree/main/archetypes"&gt;&lt;code&gt;archetypes/&lt;/code&gt;&lt;/a&gt;) and insert &lt;a href="https://gohugo.io/content-management/front-matter/"&gt;front matter&lt;/a&gt; depending on the location of your content:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;hugo new&lt;/code&gt; will automatically use an appropriate &lt;a href="https://gohugo.io/content-management/archetypes/#lookup-order"&gt;archetype&lt;/a&gt;
+ (see &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/tree/main/archetypes"&gt;&lt;code&gt;archetypes/&lt;/code&gt;&lt;/a&gt;
+) and insert &lt;a href="https://gohugo.io/content-management/front-matter/"&gt;front matter&lt;/a&gt;
+ depending on the location of your content:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;hugo new posts/$post-name.md&lt;/code&gt; automatically sets &lt;code&gt;type: &amp;quot;post&amp;quot;&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;hugo new $page-name.md&lt;/code&gt; automatically sets &lt;code&gt;type: &amp;quot;page&amp;quot;&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Gokarna employs &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#content-types"&gt;custom front matter&lt;/a&gt;, which is included in the archetypes:&lt;/p&gt;
+&lt;p&gt;Gokarna employs &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#content-types"&gt;custom front matter&lt;/a&gt;
+, which is included in the archetypes:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The creation date of the file is automatically set (e.g. &lt;code&gt;date: 2023-12-25&lt;/code&gt;)&lt;/li&gt;
 &lt;li&gt;The file name is used as the default title (e.g. &lt;code&gt;title: &amp;quot;My First Post&amp;quot;&lt;/code&gt;)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="launching-the-website-locally"&gt;e. Launching the Website Locally&lt;/h3&gt;
-&lt;p&gt;Use the &lt;a href="https://gohugo.io/commands/hugo_server/#synopsis"&gt;&lt;code&gt;server&lt;/code&gt; subcommand&lt;/a&gt; to view your site.&lt;/p&gt;
+&lt;p&gt;Use the &lt;a href="https://gohugo.io/commands/hugo_server/#synopsis"&gt;&lt;code&gt;server&lt;/code&gt; subcommand&lt;/a&gt;
+ to view your site.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;hugo server
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Go to &lt;a href="http://localhost:1313/"&gt;&lt;code&gt;http://localhost:1313&lt;/code&gt;&lt;/a&gt; (if no other Hugo servers are running; Hugo will use an &lt;a href="https://en.wikipedia.org/wiki/Ephemeral_port"&gt;ephemeral port&lt;/a&gt; if one or more servers are running concurrently on the host).&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Go to &lt;a href="http://localhost:1313/"&gt;&lt;code&gt;http://localhost:1313&lt;/code&gt;&lt;/a&gt;
+ (if no other Hugo servers are running; Hugo will use an &lt;a href="https://en.wikipedia.org/wiki/Ephemeral_port"&gt;ephemeral port&lt;/a&gt;
+ if one or more servers are running concurrently on the host).&lt;/p&gt;
 &lt;h3 id="build-the-website"&gt;f. Build the Website&lt;/h3&gt;
 &lt;p&gt;Use the &lt;code&gt;hugo&lt;/code&gt; command to build your site.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;hugo
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;A &lt;code&gt;public&lt;/code&gt; folder will be generated, containing all static content and assets for your website. It can be hosted on any web server.&lt;/p&gt;
-&lt;p&gt;The website can be automatically published and hosted with &lt;a href="https://www.netlify.com/"&gt;Netlify&lt;/a&gt;, &lt;a href="https://gohugo.io/hosting-and-deployment/hosting-on-aws-amplify/"&gt;AWS Amplify&lt;/a&gt;, &lt;a href="https://gohugo.io/hosting-and-deployment/hosting-on-github/"&gt;GitHub Pages&lt;/a&gt;, &lt;a href="https://gohugo.io/hosting-and-deployment/hosting-on-render/"&gt;Render&lt;/a&gt;, and more&amp;hellip;&lt;/p&gt;
+&lt;p&gt;The website can be automatically published and hosted with &lt;a href="https://www.netlify.com/"&gt;Netlify&lt;/a&gt;
+, &lt;a href="https://gohugo.io/hosting-and-deployment/hosting-on-aws-amplify/"&gt;AWS Amplify&lt;/a&gt;
+, &lt;a href="https://gohugo.io/hosting-and-deployment/hosting-on-github/"&gt;GitHub Pages&lt;/a&gt;
+, &lt;a href="https://gohugo.io/hosting-and-deployment/hosting-on-render/"&gt;Render&lt;/a&gt;
+, and more&amp;hellip;&lt;/p&gt;
 &lt;h2 id="configuration"&gt;Configuration&lt;/h2&gt;
-&lt;p&gt;In addition to &lt;a href="https://gohugo.io/overview/configuration/"&gt;Hugo global configuration&lt;/a&gt; and &lt;a href="#basic-configuration"&gt;menu configuration&lt;/a&gt;, Gokarna lets you define the following &lt;a href="https://gohugo.io/methods/site/params/"&gt;parameters&lt;/a&gt; in your site configuration.&lt;/p&gt;
-&lt;p&gt;See this sample &lt;code&gt;hugo.toml&lt;/code&gt;, which uses Gokarna&amp;rsquo;s default values, and &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/blob/main/exampleSite/hugo.toml"&gt;exampleSite&amp;rsquo;s &lt;code&gt;hugo.toml&lt;/code&gt;&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;In addition to &lt;a href="https://gohugo.io/overview/configuration/"&gt;Hugo global configuration&lt;/a&gt;
+ and &lt;a href="#basic-configuration"&gt;menu configuration&lt;/a&gt;
+, Gokarna lets you define the following &lt;a href="https://gohugo.io/methods/site/params/"&gt;parameters&lt;/a&gt;
+ in your site configuration.&lt;/p&gt;
+&lt;p&gt;See this sample &lt;code&gt;hugo.toml&lt;/code&gt;, which uses Gokarna&amp;rsquo;s default values, and &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/blob/main/exampleSite/hugo.toml"&gt;exampleSite&amp;rsquo;s &lt;code&gt;hugo.toml&lt;/code&gt;&lt;/a&gt;
+:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#75715e"&gt;# Choose the color shown when hyperlinks are hovered over&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;accentColor&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;#FF4D4D&amp;#34;&lt;/span&gt;
@@ -138,12 +169,17 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#75715e"&gt;# Incompatible with Weight&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;togglePreviousAndNextButtons&lt;/span&gt; = &lt;span style="color:#66d9ef"&gt;false&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="accent-color"&gt;Accent color&lt;/h3&gt;
-&lt;p&gt;The color displayed when a user hovers over hyperlinks (&lt;code&gt;&amp;lt;a&amp;gt;&lt;/code&gt; tags), expressed as a &lt;a href="https://developer.mozilla.org/en-US/docs/Web/CSS/hex-color"&gt;hexadecimal&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The color displayed when a user hovers over hyperlinks (&lt;code&gt;&amp;lt;a&amp;gt;&lt;/code&gt; tags), expressed as a &lt;a href="https://developer.mozilla.org/en-US/docs/Web/CSS/hex-color"&gt;hexadecimal&lt;/a&gt;
+.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;accentColor&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;#FF4D4D&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="avatar-url"&gt;Avatar URL&lt;/h3&gt;
-&lt;p&gt;The avatar&amp;rsquo;s resource URL, displayed on the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/"&gt;home page&lt;/a&gt; and header (top-left).&lt;/p&gt;
-&lt;p&gt;Images are typically placed into the &lt;a href="https://gohugo.io/getting-started/directory-structure/#assets"&gt;&lt;code&gt;assets/&lt;/code&gt;&lt;/a&gt; or &lt;a href="https://gohugo.io/getting-started/directory-structure/#static"&gt;&lt;code&gt;static/&lt;/code&gt;&lt;/a&gt; directories (which are copied to the top-level directory &lt;a href="#build-the-website"&gt;at build time&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;The avatar&amp;rsquo;s resource URL, displayed on the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/"&gt;home page&lt;/a&gt;
+ and header (top-left).&lt;/p&gt;
+&lt;p&gt;Images are typically placed into the &lt;a href="https://gohugo.io/getting-started/directory-structure/#assets"&gt;&lt;code&gt;assets/&lt;/code&gt;&lt;/a&gt;
+ or &lt;a href="https://gohugo.io/getting-started/directory-structure/#static"&gt;&lt;code&gt;static/&lt;/code&gt;&lt;/a&gt;
+ directories (which are copied to the top-level directory &lt;a href="#build-the-website"&gt;at build time&lt;/a&gt;
+).&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;avatarURL&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;/images/avatar.webp&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="avatar-size"&gt;Avatar size&lt;/h3&gt;
@@ -151,16 +187,21 @@
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;avatarSize&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;size-m&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="custom-head-html"&gt;Custom Head HTML&lt;/h3&gt;
-&lt;p&gt;Add arbitrary HTML code to the &lt;a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head"&gt;&lt;code&gt;&amp;lt;head&amp;gt;&lt;/code&gt; element&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Add arbitrary HTML code to the &lt;a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head"&gt;&lt;code&gt;&amp;lt;head&amp;gt;&lt;/code&gt; element&lt;/a&gt;
+.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;customHeadHTML&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;&amp;lt;script&amp;gt;console.log(&amp;#39;Any HTML&amp;#39;)&amp;lt;/script&amp;gt;&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Examples are available in the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#bring-your-own-scripts"&gt;advanced documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Examples are available in the &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/#bring-your-own-scripts"&gt;advanced documentation&lt;/a&gt;
+.&lt;/p&gt;
 &lt;h3 id="date-format"&gt;Date format&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://gohugo.io/functions/time/format/"&gt;Configure how posts date are displayed&lt;/a&gt;, using &lt;a href="https://pkg.go.dev/time#pkg-constants"&gt;date strings&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://gohugo.io/functions/time/format/"&gt;Configure how posts date are displayed&lt;/a&gt;
+, using &lt;a href="https://pkg.go.dev/time#pkg-constants"&gt;date strings&lt;/a&gt;
+.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;dateFormat&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;2 January, 2006&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="description"&gt;Description&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML#adding_an_author_and_description"&gt;Meta description&lt;/a&gt; to display on the home page, below the title and avatar.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML#adding_an_author_and_description"&gt;Meta description&lt;/a&gt;
+ to display on the home page, below the title and avatar.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;description&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;Sky above, sand below &amp;amp; peace within&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="display-content-on-the-home-page"&gt;Display content on the home page&lt;/h3&gt;
@@ -169,11 +210,14 @@
 &lt;p&gt;Recent and popular posts can be shown on the home page:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;code&gt;popular&lt;/code&gt;: Sort posts in ascending order of their &lt;a href="https://gohugo.io/methods/page/weight/"&gt;Weight&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;If any post on your site defines &lt;code&gt;weight&lt;/code&gt;, you cannot enable &lt;a href="#previous-and-next-buttons"&gt;Previous and Next buttons&lt;/a&gt;.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;popular&lt;/code&gt;: Sort posts in ascending order of their &lt;a href="https://gohugo.io/methods/page/weight/"&gt;Weight&lt;/a&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;If any post on your site defines &lt;code&gt;weight&lt;/code&gt;, you cannot enable &lt;a href="#previous-and-next-buttons"&gt;Previous and Next buttons&lt;/a&gt;
+.&lt;/strong&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;code&gt;recent&lt;/code&gt;: Sort posts in ascending order of &lt;a href="https://gohugo.io/methods/page/date/"&gt;Date&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;recent&lt;/code&gt;: Sort posts in ascending order of &lt;a href="https://gohugo.io/methods/page/date/"&gt;Date&lt;/a&gt;
+&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Do not show anything if the variable is:&lt;/p&gt;
@@ -197,29 +241,38 @@
 &lt;li&gt;&lt;code&gt;android-chrome-192x192.png&lt;/code&gt; (192x192)&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;android-chrome-512x512.png&lt;/code&gt; (512x512)&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Favicons can be generated using services such as &lt;a href="https://favicon.io"&gt;favicon.io&lt;/a&gt;, or &lt;a href="https://realfavicongenerator.net/"&gt;realfavicongenerator.net&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Favicons can be generated using services such as &lt;a href="https://favicon.io"&gt;favicon.io&lt;/a&gt;
+, or &lt;a href="https://realfavicongenerator.net/"&gt;realfavicongenerator.net&lt;/a&gt;
+.&lt;/p&gt;
 &lt;h3 id="font-size"&gt;Font size&lt;/h3&gt;
-&lt;p&gt;Set the content &lt;a href="https://developer.mozilla.org/en-US/docs/Web/CSS/font-size"&gt;&lt;code&gt;font-size&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Note that &amp;lsquo;&lt;a href="https://developer.mozilla.org/en-US/docs/Web/CSS/font-size#pixels"&gt;defining font sizes in px is not accessible&lt;/a&gt;&amp;rsquo;.&lt;/p&gt;
+&lt;p&gt;Set the content &lt;a href="https://developer.mozilla.org/en-US/docs/Web/CSS/font-size"&gt;&lt;code&gt;font-size&lt;/code&gt;&lt;/a&gt;
+.&lt;/p&gt;
+&lt;p&gt;Note that &amp;lsquo;&lt;a href="https://developer.mozilla.org/en-US/docs/Web/CSS/font-size#pixels"&gt;defining font sizes in px is not accessible&lt;/a&gt;
+&amp;rsquo;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;fontSize&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;1.1rem&amp;#34;&lt;/span&gt; &lt;span style="color:#75715e"&gt;# equal to 17.6px&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="footer"&gt;Footer&lt;/h3&gt;
 &lt;p&gt;Text to display in the footer section, typically the name of the author or project.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;footer&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;The Marauders&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;footer&lt;/code&gt; can include &lt;a href="https://www.markdownguide.org/tools/hugo/"&gt;Markdown syntax&lt;/a&gt; - best used for including hyperlinks, emoji, or text formatting.&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;footer&lt;/code&gt; can include &lt;a href="https://www.markdownguide.org/tools/hugo/"&gt;Markdown syntax&lt;/a&gt;
+ - best used for including hyperlinks, emoji, or text formatting.&lt;/p&gt;
 &lt;h3 id="previous-and-next-buttons"&gt;Previous and Next buttons&lt;/h3&gt;
 &lt;p&gt;At the bottom of a post, show the previous and next post chronologically.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Warning&lt;/strong&gt;: Not compatible with the &lt;code&gt;.Weight&lt;/code&gt; parameter.&lt;/p&gt;
-&lt;p&gt;If any post front matter contains &lt;code&gt;weight&lt;/code&gt;, the posts will not appear by Date. See &lt;a href="https://gohugo.io/templates/lists#default-weight--date--linktitle--filepath"&gt;Hugo&amp;rsquo;s default sort&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If any post front matter contains &lt;code&gt;weight&lt;/code&gt;, the posts will not appear by Date. See &lt;a href="https://gohugo.io/templates/lists#default-weight--date--linktitle--filepath"&gt;Hugo&amp;rsquo;s default sort&lt;/a&gt;
+.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;togglePreviousAndNextButtons&lt;/span&gt; = &lt;span style="color:#66d9ef"&gt;false&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="reading-time"&gt;Reading time&lt;/h3&gt;
-&lt;p&gt;Display a post&amp;rsquo;s &lt;a href="https://gohugo.io/methods/page/readingtime/"&gt;estimated reading time&lt;/a&gt; in minutes.&lt;/p&gt;
+&lt;p&gt;Display a post&amp;rsquo;s &lt;a href="https://gohugo.io/methods/page/readingtime/"&gt;estimated reading time&lt;/a&gt;
+ in minutes.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;displayReadingTime&lt;/span&gt; = &lt;span style="color:#66d9ef"&gt;false&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="robotstxt"&gt;robots.txt&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://gohugo.io/templates/robots/"&gt;Automatically generate&lt;/a&gt; a &lt;code&gt;robots.txt&lt;/code&gt; file, used to &lt;a href="https://developers.google.com/search/docs/crawling-indexing/robots/intro"&gt;&amp;lsquo;manage crawler traffic to your site&amp;rsquo;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://gohugo.io/templates/robots/"&gt;Automatically generate&lt;/a&gt;
+ a &lt;code&gt;robots.txt&lt;/code&gt; file, used to &lt;a href="https://developers.google.com/search/docs/crawling-indexing/robots/intro"&gt;&amp;lsquo;manage crawler traffic to your site&amp;rsquo;&lt;/a&gt;
+.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;enableRobotsTXT&lt;/span&gt; = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>Theme Documentation - Advanced</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/</link><pubDate>Wed, 06 May 2020 21:29:01 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/theme-documentation-advanced/</guid><description>&lt;p&gt;Gokarna is an opinionated theme with a focus on minimalism and simplicity.&lt;/p&gt;
 &lt;h2 id="content-types"&gt;Content Types&lt;/h2&gt;
@@ -261,7 +314,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#f92672"&gt;type&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;page&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#f92672"&gt;showTableOfContents&lt;/span&gt;: &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;---
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Detailed configuration can be found on &lt;a href="https://gohugo.io/getting-started/configuration-markup/#table-of-contents"&gt;Hugo&amp;rsquo;s official documentation&lt;/a&gt;&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Detailed configuration can be found on &lt;a href="https://gohugo.io/getting-started/configuration-markup/#table-of-contents"&gt;Hugo&amp;rsquo;s official documentation&lt;/a&gt;
+&lt;/p&gt;
 &lt;h2 id="weights"&gt;Weights&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;weight&lt;/code&gt; attribute can be added in the markdown metadata for &lt;code&gt;post&lt;/code&gt; types. We have an option in our hugo.toml: &lt;code&gt;params.showPostsOnHomePage&lt;/code&gt; which allows you to:&lt;/p&gt;
 &lt;ol&gt;
@@ -288,10 +342,13 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Having the above about section in place, results in the following homepage:&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://heu-direct-phd-program-in-cs.github.io/images/theme-documentation-advanced/homepage-markdown-about-description.png" alt="Markdown about description" title="Markdown about description"&gt;&lt;/p&gt;
 &lt;h2 id="icons"&gt;Icons&lt;/h2&gt;
-&lt;p&gt;Gokarna supports popular social media icons (Github, Linkedin, Twitter, StackOverflow, Dribbble, etc.) out of the box. See full list of supported icons &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/tree/main/static/icons"&gt;on GitHub&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Gokarna supports popular social media icons (Github, Linkedin, Twitter, StackOverflow, Dribbble, etc.) out of the box. See full list of supported icons &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/tree/main/static/icons"&gt;on GitHub&lt;/a&gt;
+.&lt;/p&gt;
 &lt;h3 id="icons-on-homepage"&gt;Icons on homepage&lt;/h3&gt;
-&lt;p&gt;To display icons on the homepage, simply update the &lt;code&gt;socialIcons&lt;/code&gt; config param with a list of name and url of each icon. The specified &lt;code&gt;name&lt;/code&gt; should exactly match one of the names from &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/tree/main/static/svg/icons"&gt;the &lt;code&gt;icons&lt;/code&gt; directory&lt;/a&gt;.
-If you want to add more icons, you can download the svg directly from &lt;a href="https://simpleicons.org/"&gt;Simple Icons&amp;rsquo; website&lt;/a&gt; and place them in your local icons directory (&lt;code&gt;/static/svg/icons/&lt;/code&gt;)&lt;/p&gt;
+&lt;p&gt;To display icons on the homepage, simply update the &lt;code&gt;socialIcons&lt;/code&gt; config param with a list of name and url of each icon. The specified &lt;code&gt;name&lt;/code&gt; should exactly match one of the names from &lt;a href="https://github.com/gokarna-theme/gokarna-hugo/tree/main/static/svg/icons"&gt;the &lt;code&gt;icons&lt;/code&gt; directory&lt;/a&gt;
+.
+If you want to add more icons, you can download the svg directly from &lt;a href="https://simpleicons.org/"&gt;Simple Icons&amp;rsquo; website&lt;/a&gt;
+ and place them in your local icons directory (&lt;code&gt;/static/svg/icons/&lt;/code&gt;)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; [&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;socialIcons&lt;/span&gt; = [
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {&lt;span style="color:#a6e22e"&gt;name&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;twitter&amp;#34;&lt;/span&gt;, &lt;span style="color:#a6e22e"&gt;url&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;https://example.com&amp;#34;&lt;/span&gt;},
@@ -301,7 +358,8 @@ If you want to add more icons, you can download the svg directly from &lt;a href
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Preview:&lt;/p&gt;
 &lt;p&gt;&lt;img src="https://heu-direct-phd-program-in-cs.github.io/images/theme-documentation-advanced/icons-homepage-preview.png" alt="Icons on homepage Preview" title="Icons on homepage Preview"&gt;&lt;/p&gt;
 &lt;h3 id="icons-in-header"&gt;Icons in header&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://feathericons.com"&gt;Feather&lt;/a&gt; icons has a comprehensive list of icons which are more general purpose and not limited to social media.
+&lt;p&gt;&lt;a href="https://feathericons.com"&gt;Feather&lt;/a&gt;
+ icons has a comprehensive list of icons which are more general purpose and not limited to social media.
 Therefore, we use feather as an additional source of icons. Here is an example of how to add custom icons in the header using feather:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; [[&lt;span style="color:#a6e22e"&gt;menu&lt;/span&gt;.&lt;span style="color:#a6e22e"&gt;main&lt;/span&gt;]]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;identifier&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;github&amp;#34;&lt;/span&gt;
@@ -353,14 +411,17 @@ Therefore, we use feather as an additional source of icons. Here is an example o
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="analytics"&gt;Analytics&lt;/h3&gt;
 &lt;p&gt;Integration with any analytics tool: This was a personal pet peeve. User privacy is our primary concern and this meant not using Google Analytics or any of the popular tools.&lt;/p&gt;
-&lt;p&gt;We preferred privacy friendly tools like &lt;a href="https://umami.is/"&gt;Umami&lt;/a&gt; &amp;amp; &lt;a href="https://usefathom.com/"&gt;Fathom Analytics&lt;/a&gt;, but the downside was that no theme supported them out of the box which led to either changing the theme source code or contributing supporting code to the original theme (both of which are good ways to extend the theme, but not our ideal choice)&lt;/p&gt;
+&lt;p&gt;We preferred privacy friendly tools like &lt;a href="https://umami.is/"&gt;Umami&lt;/a&gt;
+ &amp;amp; &lt;a href="https://usefathom.com/"&gt;Fathom Analytics&lt;/a&gt;
+, but the downside was that no theme supported them out of the box which led to either changing the theme source code or contributing supporting code to the original theme (both of which are good ways to extend the theme, but not our ideal choice)&lt;/p&gt;
 &lt;p&gt;Giving users the freedom to add anything in the HTML via hugo.toml seemed like an elegant way to solve the problem.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;customHeadHTML&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#39;&amp;#39;&amp;#39;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;lt;script async defer data-website-id=&amp;#34;website-id&amp;#34; src=&amp;#34;https://analytics.example.com/script.js&amp;#34;&amp;gt;&amp;lt;/script&amp;gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="katex"&gt;KaTeX&lt;/h3&gt;
-&lt;p&gt;KaTeX is a math typesetting library for the web which lets you write beautiful equations. To use it, add the javascript as mentioned in &lt;a href="https://katex.org/docs/browser.html"&gt;their documentation&lt;/a&gt; in our &lt;code&gt;params.customHeadHTML&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;KaTeX is a math typesetting library for the web which lets you write beautiful equations. To use it, add the javascript as mentioned in &lt;a href="https://katex.org/docs/browser.html"&gt;their documentation&lt;/a&gt;
+ in our &lt;code&gt;params.customHeadHTML&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;params&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;customHeadHTML&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#39;&amp;#39;&amp;#39;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;lt;link rel=&amp;#34;stylesheet&amp;#34; href=&amp;#34;https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css&amp;#34; integrity=&amp;#34;sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP&amp;#34; crossorigin=&amp;#34;anonymous&amp;#34;&amp;gt;
@@ -383,7 +444,8 @@ Therefore, we use feather as an additional source of icons. Here is an example o
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;lt;/script&amp;gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
-&lt;p&gt;Note: Make sure you use the latest version of KaTeX and use the correct script tags as described in &lt;a href="https://katex.org/docs/browser.html"&gt;their documentation&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Note: Make sure you use the latest version of KaTeX and use the correct script tags as described in &lt;a href="https://katex.org/docs/browser.html"&gt;their documentation&lt;/a&gt;
+&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Then the equation &lt;code&gt;$$y_t = \beta_0 + \beta_1 x_t + \epsilon_t$$&lt;/code&gt; wrapped by double &lt;code&gt;$$&lt;/code&gt; is displayed as:&lt;/p&gt;
 &lt;p&gt;$$y_t = \beta_0 + \beta_1 x_t + \epsilon_t$$
@@ -398,10 +460,12 @@ ihl equation &lt;code&gt;$y_t = \beta_0 + \beta_1 x_t + \epsilon_t$&lt;/code&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;lt;noscript&amp;gt;Please enable JavaScript to load the comments.&amp;lt;/noscript&amp;gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#e6db74"&gt; &amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="syntax-highlighting"&gt;Syntax Highlighting&lt;/h2&gt;
-&lt;p&gt;Hugo lets you choose the color scheme for the codeblocks. You can choose from the options here: &lt;a href="https://xyproto.github.io/splash/docs/all.html"&gt;https://xyproto.github.io/splash/docs/all.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Hugo lets you choose the color scheme for the codeblocks. You can choose from the options here: &lt;a href="https://xyproto.github.io/splash/docs/all.html"&gt;https://xyproto.github.io/splash/docs/all.html&lt;/a&gt;
+&lt;/p&gt;
 &lt;p&gt;After choosing your theme, just update the &lt;code&gt;pygmentsStyle&lt;/code&gt; attribute in hugo.toml.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;pygmentsStyle&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;monokai&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You can read more about syntax highlighting on the &lt;a href="https://gohugo.io/content-management/syntax-highlighting/"&gt;official hugo docs&lt;/a&gt;.&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You can read more about syntax highlighting on the &lt;a href="https://gohugo.io/content-management/syntax-highlighting/"&gt;official hugo docs&lt;/a&gt;
+.&lt;/p&gt;
 &lt;h2 id="site-metadata"&gt;Site Metadata&lt;/h2&gt;
 &lt;p&gt;Gokarna enables you to improve the SEO performance of your website with minimal effort.&lt;/p&gt;
 &lt;h3 id="image-preview"&gt;Image preview&lt;/h3&gt;
@@ -455,7 +519,9 @@ A post&amp;rsquo;s date and description can be hidden if it has at least one tag
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;name&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;Blog&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;weight&lt;/span&gt; = &lt;span style="color:#ae81ff"&gt;2&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="site-wide-copyright-notice"&gt;Site-wide copyright notice&lt;/h2&gt;
-&lt;p&gt;Define the &lt;a href="https://gohugo.io/methods/site/copyright/"&gt;copyright notice for your site&lt;/a&gt;. The notice will only be displayed on &lt;a href="#content-types"&gt;page Kinds&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Define the &lt;a href="https://gohugo.io/methods/site/copyright/"&gt;copyright notice for your site&lt;/a&gt;
+. The notice will only be displayed on &lt;a href="#content-types"&gt;page Kinds&lt;/a&gt;
+.&lt;/p&gt;
 &lt;p&gt;For example, the following configuration in &lt;code&gt;hugo.toml&lt;/code&gt; and front matter respectively&amp;hellip;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;copyright&lt;/span&gt; = &lt;span style="color:#e6db74"&gt;&amp;#34;Verbatim copying and distribution of this entire article are permitted worldwide, without royalty, in any medium, provided this notice is preserved.&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;pre tabindex="0"&gt;&lt;code&gt;date: 2020-06-17
@@ -464,10 +530,13 @@ lastmod: 2024-02-05
 &lt;blockquote&gt;
 &lt;p&gt;© 2020-2024 The Marauders Verbatim copying and distribution of this entire article are permitted worldwide, without royalty, in any medium, provided this notice is preserved.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;copyright&lt;/code&gt; can include &lt;a href="https://www.markdownguide.org/tools/hugo/"&gt;Markdown syntax&lt;/a&gt;. This is best used for including hyperlinks, emoji, or text formatting.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;copyright&lt;/code&gt; can include &lt;a href="https://www.markdownguide.org/tools/hugo/"&gt;Markdown syntax&lt;/a&gt;
+. This is best used for including hyperlinks, emoji, or text formatting.&lt;/p&gt;
 &lt;p&gt;The years of &lt;code&gt;.Date&lt;/code&gt; and &lt;code&gt;.Lastmod&lt;/code&gt; are used to create a date range for your copyrighted material.&lt;/p&gt;
 &lt;h2 id="minification"&gt;Minification&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;hugo&lt;/code&gt;&amp;rsquo;s HTML output can be &lt;a href="https://gohugo.io/hugo-pipes/minification/#usage"&gt;minified&lt;/a&gt;, resulting in smaller files. This makes your site more performant (especially when paired with compression), and may confer a better &lt;a href="https://pagespeed.web.dev/"&gt;Google Lighthouse&lt;/a&gt; score.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;hugo&lt;/code&gt;&amp;rsquo;s HTML output can be &lt;a href="https://gohugo.io/hugo-pipes/minification/#usage"&gt;minified&lt;/a&gt;
+, resulting in smaller files. This makes your site more performant (especially when paired with compression), and may confer a better &lt;a href="https://pagespeed.web.dev/"&gt;Google Lighthouse&lt;/a&gt;
+ score.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-toml" data-lang="toml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;[&lt;span style="color:#a6e22e"&gt;minify&lt;/span&gt;]
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#a6e22e"&gt;minifyOutput&lt;/span&gt; = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description></item><item><title>标记语言和排版系统</title><link>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_3/</link><pubDate>Sat, 01 Nov 2025 14:00:00 +0800</pubDate><guid>https://heu-direct-phd-program-in-cs.github.io/posts/to_freshman_3/</guid><description>&lt;ul&gt;
@@ -500,7 +569,8 @@ lastmod: 2024-02-05
 &lt;li&gt;但是一个叫 &lt;code&gt;word&lt;/code&gt; 的软件, 并没有将这一设计模式放在关键位置. 并且非纯文本, 输入公式非常麻烦.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="markdown-语法"&gt;&lt;code&gt;markdown&lt;/code&gt; 语法&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://github.com/HEU-Direct-PhD-Program-in-CS/HEU-Direct-PhD-Program-in-CS.github.io/blob/master/content/posts/hello-world.md"&gt;blog&lt;/a&gt; 内查看.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/HEU-Direct-PhD-Program-in-CS/HEU-Direct-PhD-Program-in-CS.github.io/blob/master/content/posts/hello-world.md"&gt;blog&lt;/a&gt;
+ 内查看.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;插入普通图片: &lt;code&gt;![替代文本](url &amp;quot;标题&amp;quot;)&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;插入base64图片:

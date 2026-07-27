@@ -14,7 +14,8 @@
 &lt;ol&gt;
 &lt;li&gt;防止内存竞争: 计算机的物理内存编码唯一, 但是多个软件会运行在同一个计算机上, 为了防止多个应用程序争夺内存, 操作系统和硬件将物理内存 &lt;strong&gt;抽象&lt;/strong&gt; 为虚拟内存, 应用程序开发过程可以假设整个内存空间只有自己一个程序在运行.&lt;/li&gt;
 &lt;li&gt;方便管理内存资源, 和内存安全(r/w/x/privilage), 现在采用页表(过去还有段式/段页式), 将内存分为4k(2m/1g)大小的页.&lt;/li&gt;
-&lt;li&gt;虚拟内存的演示代码: &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts_data/linux_and_shell/code.tar.gz"&gt;下载&lt;/a&gt;, 请在 &lt;code&gt;linux&lt;/code&gt; 下运行.&lt;/li&gt;
+&lt;li&gt;虚拟内存的演示代码: &lt;a href="https://heu-direct-phd-program-in-cs.github.io/posts_data/linux_and_shell/code.tar.gz"&gt;下载&lt;/a&gt;
+, 请在 &lt;code&gt;linux&lt;/code&gt; 下运行.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/li&gt;
 &lt;li&gt;文件系统: 将磁盘抽象为文件目录层次, 同时管理磁盘缓存等, 高级的文件系统还有 cow, 快照, RAID, 透明压缩, 冷热文件管理等功能.&lt;/li&gt;
