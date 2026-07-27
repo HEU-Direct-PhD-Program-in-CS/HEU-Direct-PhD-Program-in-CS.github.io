@@ -6,8 +6,6 @@ draft: false
 showTableOfContents: true
 ---
 
-[REPO]: https://github.com/here-emulator/here
-
 ## 本章概览
 
 随着端侧 AI（Edge AI）、本地大模型（Local LLM）推理、计算机视觉与音视频处理技术的爆发式发展，传统的标量处理架构（Scalar Processing）在面对海量高吞吐量的数据计算时显得力不从心。**SIMD（Single Instruction Multiple Data，单指令多数据）** 及其演进出的**矢量计算（Vector Processing）** 与 **矩阵计算（Matrix Engine）** 架构，成为了现代芯片算力提升的关键所在。
@@ -16,7 +14,7 @@ RISC-V 体系结构通过 **V 扩展（Vector Extension）**、处于草案阶�
 
 通过本章学习与实验，你将完成以下内容：
 1. 理解 SIMD 与 RISC-V V 扩展（VLA 可变向量长度）的核心原理及其在端侧 AI 算力加速中的关键作用。
-2. 了解 RISC-V Packed-SIMD (P) 扩展与 AME 矩阵扩展的设计初衷与应用场景（相关手册仓库见 [Appendix_A.md](REPO/tree/master/rv-exp/Appendix_A.md)）。
+2. 了解 RISC-V Packed-SIMD (P) 扩展与 AME 矩阵扩展的设计初衷与应用场景（相关手册仓库见 [Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)）。
 3. 掌握模拟器当前对 RVV 1.0 整型向量指令集的支持情况。
 4. **实验任务**：编写简单的 RISC-V 向量 C/汇编程序（如向量点积 Dot Product、整型 GEMM 矩阵乘法算子），并在模拟器中运行验证。
 
@@ -71,7 +69,7 @@ vsetvli t0, a0, e32, m1, ta, ma
 
 ### 3. 本模拟器对 V 扩展的支持状态说明
 
-在本项目模拟器中（源码位于 [src/isa/riscv/vector/](REPO/tree/master/src/isa/riscv/vector/)）：
+在本项目模拟器中（源码位于 [src/isa/riscv/vector/]($env.repo/tree/master/src/isa/riscv/vector/)）：
 
 > [!IMPORTANT]
 > **模拟器向量扩展实现状态**：
@@ -82,7 +80,7 @@ vsetvli t0, a0, e32, m1, ta, ma
 
 ## 二、 衍生扩展：AME 矩阵扩展与 P 扩展
 
-除了通用 1D 向量扩展（V 扩展）外，RISC-V 社区还在火热推进行业专用的并行扩展提案（手册规范已收录于 [Appendix_A.md](REPO/tree/master/rv-exp/Appendix_A.md)）：
+除了通用 1D 向量扩展（V 扩展）外，RISC-V 社区还在火热推进行业专用的并行扩展提案（手册规范已收录于 [Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)）：
 
 ```mermaid
 flowchart TD
@@ -159,7 +157,7 @@ $$C_{i,j} = \sum_{k} A_{i,k} \times B_{k,j}$$
 
 ### 3. 在模拟器与单元测试中验证
 
-项目在 [src/isa/riscv/vector/arithmetic/integer_test.rs](REPO/tree/master/src/isa/riscv/vector/arithmetic/integer_test.rs) 中提供了大量整型向量算术测试用例（如 `test_vector_op_vadd_vv`）。
+项目在 [src/isa/riscv/vector/arithmetic/integer_test.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/integer_test.rs) 中提供了大量整型向量算术测试用例（如 `test_vector_op_vadd_vv`）。
 
 你可以通过以下命令在模拟器上运行向量单元测试：
 
@@ -171,9 +169,9 @@ cargo test vector_op
 
 ## 项目导览
 
-- **向量寄存器与类型定义**：[src/isa/riscv/vector/types.rs](REPO/tree/master/src/isa/riscv/vector/types.rs)（定义 `Vlmul`, `Vsew`, `Vector` 结构体）
-- **向量模块核心调度**：[src/isa/riscv/vector/mod.rs](REPO/tree/master/src/isa/riscv/vector/mod.rs)
-- **整型向量指令实现**：[src/isa/riscv/vector/arithmetic/integer_impl.rs](REPO/tree/master/src/isa/riscv/vector/arithmetic/integer_impl.rs)
-- **定点向量指令实现**：[src/isa/riscv/vector/arithmetic/fix_point_impl.rs](REPO/tree/master/src/isa/riscv/vector/arithmetic/fix_point_impl.rs)
-- **向量单元测试套件**：[src/isa/riscv/vector/arithmetic/integer_test.rs](REPO/tree/master/src/isa/riscv/vector/arithmetic/integer_test.rs)
-- **附录拓展资料库**：[Appendix_A.md](REPO/tree/master/rv-exp/Appendix_A.md)
+- **向量寄存器与类型定义**：[src/isa/riscv/vector/types.rs]($env.repo/tree/master/src/isa/riscv/vector/types.rs)（定义 `Vlmul`, `Vsew`, `Vector` 结构体）
+- **向量模块核心调度**：[src/isa/riscv/vector/mod.rs]($env.repo/tree/master/src/isa/riscv/vector/mod.rs)
+- **整型向量指令实现**：[src/isa/riscv/vector/arithmetic/integer_impl.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/integer_impl.rs)
+- **定点向量指令实现**：[src/isa/riscv/vector/arithmetic/fix_point_impl.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/fix_point_impl.rs)
+- **向量单元测试套件**：[src/isa/riscv/vector/arithmetic/integer_test.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/integer_test.rs)
+- **附录拓展资料库**：[Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)

@@ -66,6 +66,15 @@ git push --set-upstream origin new_branch_name
 
 文章通过 `weight` 控制排列顺序；设置 `draft: true` 后页面仍可通过 URL 访问，但不会出现在 Projects 目录、RSS 或 sitemap 中。
 
+项目文章需要引用同一个 GitHub 仓库时，在项目的 `_index.md` front matter 中声明一次仓库基址：
+
+```yaml
+cascade:
+  repo: "https://github.com/example/example"
+```
+
+`cascade` 中的参数会由该项目的所有子页面继承。链接中的 `$env.<参数名>` 会替换为对应参数值，例如 `[源码]($env.repo/tree/master/src/main.rs)`。该规则同样适用于 `$env.docs/...` 等其他自定义参数；单篇文章也可以在自己的 front matter 中声明同名参数，覆盖继承值。
+
 ```text
 content/projects/
 ├── _index.md

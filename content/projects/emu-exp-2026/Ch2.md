@@ -6,8 +6,6 @@ draft: false
 showTableOfContents: true
 ---
 
-[REPO]: https://github.com/here-emulator/here
-
 ## 本章概览
 
 本章将深入 RISC-V 体系结构的**指令编码规范**与模拟器的**前端译码/执行架构**。模拟器如何从一段二进制指令数据中，快速且准确地识别出指令类型、提取操作数（寄存器编号、立即数），并最终分发给后端执行逻辑，是理解处理器硬件设计与模拟器实现的核心。
@@ -110,8 +108,8 @@ flowchart TD
 ### 1. 从 JSON 到 Rust 代码生成
 
 模拟器避免了手工编写繁琐且易错的按位 mask 拆解代码，而是将所有指令的编码规则统一存储在 JSON 文件中：
-- [data/instr_dict.json](REPO/tree/master/data/instr_dict.json)：包含 RISC-V 标准指令集，该文件实际上由 [riscv-opcodes](https://github.com/riscv/riscv-opcodes) 项目生成。
-- [data/instr_dict_custom.json](REPO/tree/master/data/instr_dict_custom.json)：包含用户自定义扩展指令。
+- [data/instr_dict.json]($env.repo/tree/master/data/instr_dict.json)：包含 RISC-V 标准指令集，该文件实际上由 [riscv-opcodes](https://github.com/riscv/riscv-opcodes) 项目生成。
+- [data/instr_dict_custom.json]($env.repo/tree/master/data/instr_dict_custom.json)：包含用户自定义扩展指令。
 
 JSON 描述项示例：
 ```json
@@ -128,13 +126,13 @@ JSON 描述项示例：
 - `match` 为固定位的期望匹配值，`mask` 掩码用于过滤掉变量位（计算公式：`raw_instr & mask == match`）。
 - `variable_fields` 声明包含的操作数。
 
-在编译阶段，[build.rs](REPO/tree/master/build.rs) 会读取并解析这些 JSON 文件，根据指令的变量字段自动推导其所属格式 `InstrFormat`（如 `R`, `I`, `S`, `B`, `U`, `J`），并在 `OUT_DIR` 下自动生成 `rvinstr_gen.rs`。生成的代码包含：
+在编译阶段，[build.rs]($env.repo/tree/master/build.rs) 会读取并解析这些 JSON 文件，根据指令的变量字段自动推导其所属格式 `InstrFormat`（如 `R`, `I`, `S`, `B`, `U`, `J`），并在 `OUT_DIR` 下自动生成 `rvinstr_gen.rs`。生成的代码包含：
 - `RiscvInstr` 枚举类型（包含所有已定义的指令枚举值）。
 - 各扩展指令数组表（如 `TABLE_RV32I`, `TABLE_RVCUSTOM0` 等）。
 
 ### 2. 双级译码器结构 (`Decoder`)
 
-在 [src/isa/riscv/decoder/mod.rs](REPO/tree/master/src/isa/riscv/decoder/mod.rs) 中，`Decoder` 结合了两种不同特性的译码子系统：
+在 [src/isa/riscv/decoder/mod.rs]($env.repo/tree/master/src/isa/riscv/decoder/mod.rs) 中，`Decoder` 结合了两种不同特性的译码子系统：
 
 ```mermaid
 flowchart TD
@@ -164,7 +162,7 @@ flowchart TD
 
 ### 3. CPU 主循环中的译码阶段 (`step_impl`)
 
-在 [src/isa/riscv/executor.rs](REPO/tree/master/src/isa/riscv/executor.rs) 中，`RVCPU::step_impl()` 负责控制单个时钟周期的指令推进流程：
+在 [src/isa/riscv/executor.rs]($env.repo/tree/master/src/isa/riscv/executor.rs) 中，`RVCPU::step_impl()` 负责控制单个时钟周期的指令推进流程：
 
 ```rust
 fn step_impl(&mut self) {
@@ -230,7 +228,7 @@ flowchart LR
 
 ### 2. 在模拟器中注册与开启扩展
 
-步骤一：在 [data/instr_dict_custom.json](REPO/tree/master/data/instr_dict_custom.json) 中加入你的指令定义：
+步骤一：在 [data/instr_dict_custom.json]($env.repo/tree/master/data/instr_dict_custom.json) 中加入你的指令定义：
 
 ```json
 {
@@ -250,9 +248,9 @@ flowchart LR
 }
 ```
 
-步骤二：启用模拟器的 `custom-instr` 功能特性。在 [Cargo.toml](REPO/tree/master/Cargo.toml) 中，`custom-instr` feature 会在编译时激活 `instr_dict_custom.json` 的解析，并将 `TABLE_RVCUSTOM0` 注入到 CPU `Decoder` 中。
+步骤二：启用模拟器的 `custom-instr` 功能特性。在 [Cargo.toml]($env.repo/tree/master/Cargo.toml) 中，`custom-instr` feature 会在编译时激活 `instr_dict_custom.json` 的解析，并将 `TABLE_RVCUSTOM0` 注入到 CPU `Decoder` 中。
 
-步骤三：在后端执行点（如 [src/isa/riscv/executor.rs](REPO/tree/master/src/isa/riscv/executor.rs) 的 `execute` 方法或匹配分支中）添加初步的后端日志响应。作为阶段性验证，无需立即实现复杂的算术，直接打印 log 确认指令被成功触发即可：
+步骤三：在后端执行点（如 [src/isa/riscv/executor.rs]($env.repo/tree/master/src/isa/riscv/executor.rs) 的 `execute` 方法或匹配分支中）添加初步的后端日志响应。作为阶段性验证，无需立即实现复杂的算术，直接打印 log 确认指令被成功触发即可：
 
 ```rust
 log::info!("[Custom-Instr] Executed PADD8: rd={}, rs1={}, rs2={}", rd, rs1, rs2);
@@ -271,7 +269,7 @@ cargo build --features custom-instr
 
 ### 1. 模拟器测试构件介绍
 
-在 [src/isa/riscv/cpu_tester.rs](REPO/tree/master/src/isa/riscv/cpu_tester.rs) 中，项目提供了一套极为方便的测试链式构建器：
+在 [src/isa/riscv/cpu_tester.rs]($env.repo/tree/master/src/isa/riscv/cpu_tester.rs) 中，项目提供了一套极为方便的测试链式构建器：
 
 - **`TestCPUBuilder`**：用于初始化一个仅含 RAM 的纯净测试 CPU。
   - `.reg(idx, val)`：初始化通用寄存器。
@@ -284,7 +282,7 @@ cargo build --features custom-instr
 
 ### 2. 编写单元测试用例
 
-在 [src/isa/riscv/cpu_test.rs](REPO/tree/master/src/isa/riscv/cpu_test.rs) 中添加属于你的测试函数（使用 `run_test_exec_decode` 或 `run_test_cpu_step`）：
+在 [src/isa/riscv/cpu_test.rs]($env.repo/tree/master/src/isa/riscv/cpu_test.rs) 中添加属于你的测试函数（使用 `run_test_exec_decode` 或 `run_test_cpu_step`）：
 
 ```rust
 #[test]
@@ -387,12 +385,12 @@ int main() {
 
 ## 项目导览
 
-- **指令描述 JSON 文件**：[data/instr_dict.json](REPO/tree/master/data/instr_dict.json) 与 [data/instr_dict_custom.json](REPO/tree/master/data/instr_dict_custom.json)
-- **代码生成脚本**：[build.rs](REPO/tree/master/build.rs)
-- **前端译码器实现**：[src/isa/riscv/decoder/mod.rs](REPO/tree/master/src/isa/riscv/decoder/mod.rs)（`funct_decoder`, `mask_decoder`）
-- **CPU 步进与指令分发**：[src/isa/riscv/executor.rs](REPO/tree/master/src/isa/riscv/executor.rs)（`step_impl`, `execute`）
-- **单元测试构件与用例**：[src/isa/riscv/cpu_tester.rs](REPO/tree/master/src/isa/riscv/cpu_tester.rs) 与 [src/isa/riscv/cpu_test.rs](REPO/tree/master/src/isa/riscv/cpu_test.rs)
-- **C 裸机程序测试资源**：[test_resources/](REPO/tree/master/test_resources/)
+- **指令描述 JSON 文件**：[data/instr_dict.json]($env.repo/tree/master/data/instr_dict.json) 与 [data/instr_dict_custom.json]($env.repo/tree/master/data/instr_dict_custom.json)
+- **代码生成脚本**：[build.rs]($env.repo/tree/master/build.rs)
+- **前端译码器实现**：[src/isa/riscv/decoder/mod.rs]($env.repo/tree/master/src/isa/riscv/decoder/mod.rs)（`funct_decoder`, `mask_decoder`）
+- **CPU 步进与指令分发**：[src/isa/riscv/executor.rs]($env.repo/tree/master/src/isa/riscv/executor.rs)（`step_impl`, `execute`）
+- **单元测试构件与用例**：[src/isa/riscv/cpu_tester.rs]($env.repo/tree/master/src/isa/riscv/cpu_tester.rs) 与 [src/isa/riscv/cpu_test.rs]($env.repo/tree/master/src/isa/riscv/cpu_test.rs)
+- **C 裸机程序测试资源**：[test_resources/]($env.repo/tree/master/test_resources/)
 
 ---
 
@@ -401,7 +399,7 @@ int main() {
 请构思一条符合你自己需求的扩展指令（例如：打包点积计算、求绝对值、自定义日志打印指令等），并完成以下步骤：
 
 1. **确定指令语义与编码**：设计操作数类型（R 型/I 型等），在 `custom-0` 或 `custom-1` 空间选择合适的 match/mask。
-2. **修改 JSON 元数据**：在 [data/instr_dict_custom.json](REPO/tree/master/data/instr_dict_custom.json) 中添加配置。
+2. **修改 JSON 元数据**：在 [data/instr_dict_custom.json]($env.repo/tree/master/data/instr_dict_custom.json) 中添加配置。
 3. **模拟器后端响应**：在模拟器执行端响应该指令，使用 `log::info!` 报告指令被成功触发和执行。
 4. **编写 Rust 单元测试**：使用 `TestCPUBuilder` 和 `run_test_exec_decode` 编写单元测试，使用 `cargo test --features custom-instr` 确保测试通过。
 5. **C 语言封装与裸机测试**：编写包含 `.insn` 内嵌汇编的 C 语言函数，在裸机 C 程序中调用它，使用 `cargo run --features custom-instr -- ./test_resources/bin/main.elf` 运行程序并验证 log 打印输出。

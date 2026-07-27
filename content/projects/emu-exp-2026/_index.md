@@ -1,6 +1,8 @@
 ---
 title: "RISC-V Emulator 实验指导 (2026)"
 description: "围绕 RISC-V 模拟器的体系结构与系统软件实验手册。"
+cascade:
+  repo: "https://github.com/here-emulator/here"
 weight: 1
 draft: false
 ---

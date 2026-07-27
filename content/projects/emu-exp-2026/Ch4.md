@@ -6,8 +6,6 @@ draft: false
 showTableOfContents: true
 ---
 
-[REPO]: https://github.com/here-emulator/here
-
 ## 本章概览
 
 在现代计算机系统架构中，CPU 绝非孤立运转的算术引擎，它需要时刻与丰富的外围设备（Peripherals）交互：通过串口（UART）输出调试日志、通过定时器（Timer）触发任务调度、通过网卡与磁盘进行高速 I/O。
@@ -111,7 +109,7 @@ sequenceDiagram
 
 ### 1. 基础基础设施与 Trait 体系
 
-在 [src/device/mod.rs](REPO/tree/master/src/device/mod.rs) 中，模拟器定义了核心的外设接口抽象：
+在 [src/device/mod.rs]($env.repo/tree/master/src/device/mod.rs) 中，模拟器定义了核心的外设接口抽象：
 
 1. **`DeviceTrait`（通用外设接口）**：
    ```rust
@@ -132,7 +130,7 @@ sequenceDiagram
 
 ### 2. SamplerTimer 异步架构源码解析
 
-[src/device/sample_timer.rs](REPO/tree/master/src/device/sample_timer.rs) 是模拟器提供的一个完整的毫秒级测试定时器外设。它清晰地演示了**主线程 MMIO 响应**与**后台 `AsyncWorker` 异步计时**的协作关系：
+[src/device/sample_timer.rs]($env.repo/tree/master/src/device/sample_timer.rs) 是模拟器提供的一个完整的毫秒级测试定时器外设。它清晰地演示了**主线程 MMIO 响应**与**后台 `AsyncWorker` 异步计时**的协作关系：
 
 ```mermaid
 flowchart TD
@@ -306,26 +304,26 @@ timeline
 ### 2. 实验要求与实现指导
 
 1. **设备映射与注册**：
-   在 [src/device/config.rs](REPO/tree/master/src/device/config.rs) 中配置新外设的 MMIO 基地址 `BASE` 与 `SIZE`，并实现 `MemMappedDeviceTrait`。
+   在 [src/device/config.rs]($env.repo/tree/master/src/device/config.rs) 中配置新外设的 MMIO 基地址 `BASE` 与 `SIZE`，并实现 `MemMappedDeviceTrait`。
 2. **使用 `AsyncWorker` 异步解耦**：
    外设中涉及耗时 I/O（如文件读写、网络收发、定时器等待）的操作，**必须**重写 `get_async_worker()` 方法，将耗时任务放入 `AsyncWorker` 线程中执行，严禁阻塞模拟器主 CPU 线程。
 3. **保证内存屏障与可见性**：
    若外设直接向模拟器物理 RAM 写入数据（如 DMA 或 Virtqueue 写入），必须在触发 PLIC 中断前使用 `Ordering::Release` 原子屏障，确保内存数据对 Guest OS 完全可见。
 4. **中断管线接入**：
-   实现 `PlicIRQSource`，在 [src/board/virt.rs](REPO/tree/master/src/board/virt.rs) 或设备构建逻辑中将外设的 IRQ 线连接至 PLIC。
+   实现 `PlicIRQSource`，在 [src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs) 或设备构建逻辑中将外设的 IRQ 线连接至 PLIC。
 
 ---
 
 ## 项目导览
 
-- **外设 Trait 抽象定义**：[src/device/mod.rs](REPO/tree/master/src/device/mod.rs)（定义 `DeviceTrait`、`MemMappedDeviceTrait` 与 `PlicDeviceHandler`）
-- **MMIO 总线与地址映射**：[src/device/mmio.rs](REPO/tree/master/src/device/mmio.rs)（`MemoryMapIO` 实现物理地址重定向与读写分发）
-- **外设地址布局配置**：[src/device/config.rs](REPO/tree/master/src/device/config.rs)（定义基地址 `BASE` 与内存大小 `SIZE`）
-- **异步 Task 框架**：[src/async_worker.rs](REPO/tree/master/src/async_worker.rs)（`AsyncWorker` 异步任务抽象）
-- **ACLINT / CLINT 定时器**：[src/device/aclint.rs](REPO/tree/master/src/device/aclint.rs)（`mtime` / `mtimecmp` 与 `MTIP` / `MSIP` 局部中断）
-- **PLIC 中断控制器**：[src/device/plic/mod.rs](REPO/tree/master/src/device/plic/mod.rs) 与 [src/device/plic/irq_line.rs](REPO/tree/master/src/device/plic/irq_line.rs)（外部中断仲裁、Claim / Complete 握手与 IRQ 采样管线）
-- **SampleTimer 参考外设**：[src/device/sample_timer.rs](REPO/tree/master/src/device/sample_timer.rs)（带 `AsyncWorker`、通道解耦与原子内存屏障的完整毫秒定时器）
-- **VirtIO MMIO 传输层**：[src/device/virtio/virtio_mmio.rs](REPO/tree/master/src/device/virtio/virtio_mmio.rs)（VirtIO 控制寄存器、Feature 协商与 Doorbell 响铃机制）
-- **Virtqueue 队列机制**：[src/device/virtio/virtio_queue.rs](REPO/tree/master/src/device/virtio/virtio_queue.rs)（Descriptor Table、Available Ring 与 Used Ring 共享内存实现）
-- **VirtIO Block 设备实现**：[src/device/virtio/virtio_blk.rs](REPO/tree/master/src/device/virtio/virtio_blk.rs)（半虚拟化块设备参考实现）
-- **板卡总线与 IRQ 连接**：[src/board/virt.rs](REPO/tree/master/src/board/virt.rs)（板卡外设初始化与 PLIC 中断管线挂载）
+- **外设 Trait 抽象定义**：[src/device/mod.rs]($env.repo/tree/master/src/device/mod.rs)（定义 `DeviceTrait`、`MemMappedDeviceTrait` 与 `PlicDeviceHandler`）
+- **MMIO 总线与地址映射**：[src/device/mmio.rs]($env.repo/tree/master/src/device/mmio.rs)（`MemoryMapIO` 实现物理地址重定向与读写分发）
+- **外设地址布局配置**：[src/device/config.rs]($env.repo/tree/master/src/device/config.rs)（定义基地址 `BASE` 与内存大小 `SIZE`）
+- **异步 Task 框架**：[src/async_worker.rs]($env.repo/tree/master/src/async_worker.rs)（`AsyncWorker` 异步任务抽象）
+- **ACLINT / CLINT 定时器**：[src/device/aclint.rs]($env.repo/tree/master/src/device/aclint.rs)（`mtime` / `mtimecmp` 与 `MTIP` / `MSIP` 局部中断）
+- **PLIC 中断控制器**：[src/device/plic/mod.rs]($env.repo/tree/master/src/device/plic/mod.rs) 与 [src/device/plic/irq_line.rs]($env.repo/tree/master/src/device/plic/irq_line.rs)（外部中断仲裁、Claim / Complete 握手与 IRQ 采样管线）
+- **SampleTimer 参考外设**：[src/device/sample_timer.rs]($env.repo/tree/master/src/device/sample_timer.rs)（带 `AsyncWorker`、通道解耦与原子内存屏障的完整毫秒定时器）
+- **VirtIO MMIO 传输层**：[src/device/virtio/virtio_mmio.rs]($env.repo/tree/master/src/device/virtio/virtio_mmio.rs)（VirtIO 控制寄存器、Feature 协商与 Doorbell 响铃机制）
+- **Virtqueue 队列机制**：[src/device/virtio/virtio_queue.rs]($env.repo/tree/master/src/device/virtio/virtio_queue.rs)（Descriptor Table、Available Ring 与 Used Ring 共享内存实现）
+- **VirtIO Block 设备实现**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)（半虚拟化块设备参考实现）
+- **板卡总线与 IRQ 连接**：[src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs)（板卡外设初始化与 PLIC 中断管线挂载）

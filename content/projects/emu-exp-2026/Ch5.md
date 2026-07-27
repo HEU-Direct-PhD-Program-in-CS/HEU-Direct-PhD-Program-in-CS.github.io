@@ -6,8 +6,6 @@ draft: false
 showTableOfContents: true
 ---
 
-[REPO]: https://github.com/here-emulator/here
-
 ## 本章概览
 
 经过前面章节的学习，我们从指令集译码执行、裸机汇编、中断特权级切换，一路推进到了外设与 VirtIO 机制。现在，我们将迎接模拟器项目最重要的终极里程碑——**引导运行 Linux 操作系统内核并部署完整 Linux 发行版（Alpine Linux）**。
@@ -56,7 +54,7 @@ sequenceDiagram
 
 想深入了解设备树语法与 Linux 解析原理，可参考：[问 AI：深入理解 RISC-V 设备树 DTS 规范与 Linux 解析流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V设备树DTS语法,DTC编译器,chosen节点bootargs参数以及Linux内核如何解析DTB发现硬件&send_immediately=true&force_search=true)
 
-设备树实现了硬件描述与内核源码的解耦。在本项目 [dts/virt.dts](REPO/tree/master/dts/virt.dts) 中描述了模拟器的虚拟板卡布局（包含 `chosen` 节点、`memory@80000000`、`uart0`、`plic` 等）：
+设备树实现了硬件描述与内核源码的解耦。在本项目 [dts/virt.dts]($env.repo/tree/master/dts/virt.dts) 中描述了模拟器的虚拟板卡布局（包含 `chosen` 节点、`memory@80000000`、`uart0`、`plic` 等）：
 
 ```dts
 /dts-v1/;
@@ -132,7 +130,7 @@ S-mode 的 Linux 内核通过 `ecall` 指令请求 M-mode 的 OpenSBI 提供硬�
 ### 1. 获取预编译镜像并验证启动
 
 项目在 GitHub Releases 中提供了打包好的 `OpenSBI + Linux Kernel + Initramfs(BusyBox)` 镜像：
-- **镜像下载地址**：[prebuilt-kernels 发布页面](REPO/releases/tag/prebuilt-kernels)
+- **镜像下载地址**：[prebuilt-kernels 发布页面]($env.repo/releases/tag/prebuilt-kernels)
 
 下载预编译镜像并尝试在模拟器中启动（使用默认 Initramfs）：
 
@@ -314,9 +312,9 @@ cargo run --release -- ./test_resources/bin/virtio_blk_test.elf --device=virtio-
 
 ## 项目导览
 
-- **模拟器主入口与 CLI 参数**：[src/main.rs](REPO/tree/master/src/main.rs)
-- **设备树 DTS 定义文件**：[dts/virt.dts](REPO/tree/master/dts/virt.dts) 与编译后的二进制 [dts/virt.dtb](REPO/tree/master/dts/virt.dtb)
-- **Linux / OpenSBI 编译流控制**：[Makefile](REPO/tree/master/Makefile)（包含 `build-dtb`、`build-opensbi` 与 `linux` 目标）
-- **CPU 启动入口与默认 PC**：[src/isa/riscv/executor.rs](REPO/tree/master/src/isa/riscv/executor.rs) 与 [src/ram_config.rs](REPO/tree/master/src/ram_config.rs)
-- **VirtIO-Block 磁盘设备后端**：[src/device/virtio/virtio_blk.rs](REPO/tree/master/src/device/virtio/virtio_blk.rs)
-- **板卡总线与外设映射**：[src/board/virt.rs](REPO/tree/master/src/board/virt.rs)
+- **模拟器主入口与 CLI 参数**：[src/main.rs]($env.repo/tree/master/src/main.rs)
+- **设备树 DTS 定义文件**：[dts/virt.dts]($env.repo/tree/master/dts/virt.dts) 与编译后的二进制 [dts/virt.dtb]($env.repo/tree/master/dts/virt.dtb)
+- **Linux / OpenSBI 编译流控制**：[Makefile]($env.repo/tree/master/Makefile)（包含 `build-dtb`、`build-opensbi` 与 `linux` 目标）
+- **CPU 启动入口与默认 PC**：[src/isa/riscv/executor.rs]($env.repo/tree/master/src/isa/riscv/executor.rs) 与 [src/ram_config.rs]($env.repo/tree/master/src/ram_config.rs)
+- **VirtIO-Block 磁盘设备后端**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)
+- **板卡总线与外设映射**：[src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs)

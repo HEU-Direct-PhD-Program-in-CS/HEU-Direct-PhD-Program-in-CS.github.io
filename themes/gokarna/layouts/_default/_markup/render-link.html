@@ -1,0 +1,17 @@
+{{- $destination := .Destination -}}
+{{- $reference := index (split $destination "/") 0 -}}
+
+{{- if hasPrefix $reference "$env." -}}
+    {{- $paramName := strings.TrimPrefix "$env." $reference -}}
+    {{- $paramValue := index .Page.Params $paramName -}}
+
+    {{- if $paramValue -}}
+        {{- $base := strings.TrimSuffix "/" (printf "%v" $paramValue) -}}
+        {{- $path := strings.TrimPrefix $reference $destination -}}
+        {{- $destination = printf "%s%s" $base $path -}}
+    {{- else -}}
+        {{- warnf "Link %q in %s references undefined parameter %q" $destination .Page.File.Path $paramName -}}
+    {{- end -}}
+{{- end -}}
+
+<a href="{{ $destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
