@@ -8,25 +8,25 @@ showTableOfContents: true
 
 ## RISC-V 介绍
 
-TL;DR
-
-```markdown
-RISC由美国加州大学伯克利分校教授David Patterson发明。
-RISC-V（读作”risk-five“），表示第五代精简指令集，起源于2010年伯克利大学并行计算实验室(Par Lab) 的1位教授和2个研究生的一个项目（该项目也由David Patterson指导），希望选择一款指令集用于科研和教学，该项目在x86、ARM等指令集架构中徘徊，最终决定自己设计一个全新的指令集，RISC-V由此诞生。RISC-V的最初目标是实用、开源、可在学术上使用，并且在任何硬件或软件设计中部署时无需版税。
-2015年，为了更好的推动RISC-V在技术和商业上的发展，3位创始人做了如下安排：
- - 成立RISC-V基金会，维护指令集架构的完整性和非碎片化
- - 成立SiFive公司，推动RISC-V商业化
-2019年，RISC-V基金会宣布将总部迁往瑞士，改名RISC-V国际基金会。作为全球性非营利组织，已在全球70多个国家拥有2000+成员。包括华为、中兴、阿里巴巴、、乐鑫等众多国内企业。
+> TL;DR
+> 
+> RISC由美国加州大学伯克利分校教授David Patterson发明。
+> RISC-V（读作”risk-five“），表示第五代精简指令集，起源于2010年伯克利大学并行计算实验室(Par Lab) 的1位教授和2个研究生的一个项目（该项目也由David Patterson指导），希望选择一款指令集用于科研和教学，该项目在x86、ARM等指令集架构中徘徊，最终决定自己设计一个全新的指令集，RISC-V由此诞生。RISC-V的最初目标是实用、开源、可在学术上使用，并且在任何硬件或软件设计中部署时无需版税。
+> 
+> 2015年，为了更好的推动RISC-V在技术和商业上的发展，3位创始人做了如下安排：
+> - 成立RISC-V基金会，维护指令集架构的完整性和非碎片化
+> - 成立SiFive公司，推动RISC-V商业化
+>
+> 2019年，RISC-V基金会宣布将总部迁往瑞士，改名RISC-V国际基金会。作为全球性非营利组织，已在全球70多个国家拥有2000+成员。包括华为、中兴、阿里巴巴、、乐鑫等众多国内企业。
 通过十多年的发展，RISC-V这一星星之火已有燎原之势。倪光南院士表示，未来RISC-V很可能发展成为世界主流CPU之一，从而在CPU领域形成Intel (x86)、ARM、RISC-V三分天下的格局。
-```
 
 点击此处询问 [AI](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true) :-D
 
-## RISC-V Emualtor
+## RISC-V Emulator
 
 自主开发的开源教学用 RISC-V 模拟器，支持 RV64GC 指令集和 uart、virtio-blk 等众多外设，带有内置调试器和 gdb 支持。采用 Rust 语言开发，兼具性能和安全。
 
-如果您需要开启探索仓库之旅，可以参阅 [zread](https://zread.ai/WanDejun/riscv-emulator)，其中包含AI生成的项目详细解析，以及与LLM进行交互式探索代码的功能。 (AI **未必完全正确**，请保持理性看待，请勿盲从)
+如果您需要开启探索仓库之旅，可以参阅 [zread](https://zread.ai/WanDejun/riscv-emulator)，其中包含AI生成的项目详细解析，以及与LLM进行交互式探索代码的功能。(AI **未必完全正确**，请保持独立思考，请勿盲从)
 
 仓库：[riscv-emulator](https://github.com/WanDejun/riscv-emulator)
 
@@ -122,4 +122,4 @@ make
 
 ### issue
 
-如果遇到无法解决的 bug，请检查软件在终端的输出，运行目录下的 log 文件夹下的日志。我们在仓库目录中有附上 `create_issue.md` 的 skill，您可以将遇到的 bug 告知您的 agent，交由 agent 提交 issue。
+如果遇到无法解决的 bug，请检查软件在终端的输出，和运行目录下的 log 文件夹下的日志。我们在仓库目录中有附上 `create_issue.md` 的 skill，您可以将遇到的 bug 告知您的 agent，交由 agent 提交 issue。

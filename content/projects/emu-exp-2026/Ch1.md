@@ -131,7 +131,7 @@ UART 的发送和接收状态都通过寄存器体现。最简单的应用方式
 
 ## 调试程序
 
-参阅 [Ch0.2](./Ch0.2.md) `Debugger` 章节，获取 debugger 能力支持。
+参阅 [Ch0.2](./Ch0.2.md) `Debugger` 章节，来了解如何调试模拟器中运行的程序。
 
 ```bash
 # 请使用 --release 来提高运行 emulator 本身的运行速度

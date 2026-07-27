@@ -226,8 +226,9 @@ Alpine Linux 是一个面向安全、轻量级的 Linux 发行版，支持完整
 
 ### 1. 部署 Alpine Linux 为 VirtIO-Block Rootfs
 
-1. **下载 Alpine Linux Rootfs**：
-   访问 Alpine Linux 官网，下载 `RISC-V 64` 架构的 **Mini Root FS** 压缩包（`alpine-minirootfs-*-riscv64.tar.gz`）。
+1. **下载 Alpine Linux Rootfs 和预编译 kernel**：
+   - 访问 Alpine Linux 官网，下载 riscv64 架构的 **Mini Root FS** 压缩包（`alpine-minirootfs-*-riscv64.tar.gz`）。
+   - 从项目的 Release 中下载无 initramfs 版本的预编译内核
 2. **解压 Rootfs 到磁盘镜像**：
    ```bash
    # 创建一个 256MB 的磁盘镜像以容纳完整发行版
@@ -238,11 +239,11 @@ Alpine Linux 是一个面向安全、轻量级的 Linux 发行版，支持完整
    sudo mkdir -p /mnt/alpine
    sudo mount -o loop alpine_rootfs.img /mnt/alpine
    sudo tar -xvf alpine-minirootfs-*-riscv64.tar.gz -C /mnt/alpine
-
-   # 卸载镜像
-   sudo umount /mnt/alpine
    ```
-3. **将 VirtIO-Block 配置为系统根设备**：
+
+3. 修改 `/mnt/alpine/etc/tab`，取消 `ttyS0` 一行的注释
+4. 卸载镜像 `sudo umount /mnt/alpine`
+4. **将 VirtIO-Block 配置为系统根设备**：
    修改内核启动命令行参数（在 DTS 的 `chosen` 节点或启动参数中配置 `root=/dev/vda rw console=ttyS0`），开启模拟器并挂载 `alpine_rootfs.img`，即可直接引导进入全新的 Alpine Linux 系统！
 
 ---
@@ -289,6 +290,9 @@ apk add gcc make libc-dev
 
 # 安装完成后关机
 poweroff
+
+# 如果无法正常关机，请使用 sync 命令刷新磁盘
+# 然后再 ctrl + A, X 强制退出
 ```
 
 关机后，将安装好 GCC 开发环境的 `alpine_rootfs.img` 转回我们的 RISC-V 模拟器上启动：

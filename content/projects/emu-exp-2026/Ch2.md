@@ -74,12 +74,12 @@ RISC-V 定义了 6 种基本的指令格式：
 
 为了鼓励学术研究与特定领域的加速扩展，RISC-V 官方架构规范明确保留了 4 组用于自定义指令的 **Custom Opcode 空间**：
 
-| 名称 | Opcode (7-bit) | 二进制表示 | 用途 |
+| 名称 | Opcode (7-bit) | 二进制表示 |
 | --- | --- | --- | --- |
-| `custom-0` | `0x0B` | `0b0001011` | 用户/实验室自定义扩展 0 |
-| `custom-1` | `0x2B` | `0b0101011` | 用户/实验室自定义扩展 1 |
-| `custom-2` | `0x5B` | `0b1011011` | 用户/实验室自定义扩展 2 |
-| `custom-3` | `0x7B` | `0b1111011` | 用户/实验室自定义扩展 3 |
+| `custom-0` | `0x0B` | `0b0001011` |
+| `custom-1` | `0x2B` | `0b0101011` |
+| `custom-2` | `0x5B` | `0b1011011` |
+| `custom-3` | `0x7B` | `0b1111011` |
 
 任何在此空间内的指令均保证不会与未来的 RISC-V 官方标准指令冲突。在本章的实验中，我们将使用 `custom-0` 和 `custom-1` 空间来扩展你自己的指令。
 
@@ -110,7 +110,7 @@ flowchart TD
 ### 1. 从 JSON 到 Rust 代码生成
 
 模拟器避免了手工编写繁琐且易错的按位 mask 拆解代码，而是将所有指令的编码规则统一存储在 JSON 文件中：
-- [data/instr_dict.json](REPO/tree/master/data/instr_dict.json)：包含 RISC-V 标准指令集（RV32I/M/A/F/D/C/V/Zicsr 等）。
+- [data/instr_dict.json](REPO/tree/master/data/instr_dict.json)：包含 RISC-V 标准指令集，该文件实际上由 [riscv-opcodes](https://github.com/riscv/riscv-opcodes) 项目生成。
 - [data/instr_dict_custom.json](REPO/tree/master/data/instr_dict_custom.json)：包含用户自定义扩展指令。
 
 JSON 描述项示例：
@@ -255,7 +255,6 @@ flowchart LR
 步骤三：在后端执行点（如 [src/isa/riscv/executor.rs](REPO/tree/master/src/isa/riscv/executor.rs) 的 `execute` 方法或匹配分支中）添加初步的后端日志响应。作为阶段性验证，无需立即实现复杂的算术，直接打印 log 确认指令被成功触发即可：
 
 ```rust
-// 示例后端响应逻辑
 log::info!("[Custom-Instr] Executed PADD8: rd={}, rs1={}, rs2={}", rd, rs1, rs2);
 ```
 
@@ -272,7 +271,7 @@ cargo build --features custom-instr
 
 ### 1. 模拟器测试构件介绍
 
-在 [src/isa/riscv/cpu_tester.rs](REPO/tree/master/src/isa/riscv/cpu_tester.rs) 中，项目为你提供了一套极为方便的测试链式构建器：
+在 [src/isa/riscv/cpu_tester.rs](REPO/tree/master/src/isa/riscv/cpu_tester.rs) 中，项目提供了一套极为方便的测试链式构建器：
 
 - **`TestCPUBuilder`**：用于初始化一个仅含 RAM 的纯净测试 CPU。
   - `.reg(idx, val)`：初始化通用寄存器。
@@ -292,7 +291,7 @@ cargo build --features custom-instr
 #[cfg(feature = "custom-instr")]
 fn test_custom_padd8_decode_and_exec() {
     // 构造 padd8 x3, x1, x2 的机器码
-    // opcode=0x0B, funct3=0, funct7=0, rd=3, rs1=1, rs2=2
+    // funct7=0, rs1=1, rs2=2, funct3=0, rd=3, opcode=0x0B
     // 0000000_00010_00001_000_00011_0001011 = 0x0020818B
     let raw_instr: u32 = 0x0020818B;
 
@@ -305,14 +304,16 @@ fn test_custom_padd8_decode_and_exec() {
                 .pc(0x80000000)
         },
         |checker| {
-            // 验证 PC 推进了 4 字节
-            checker.pc(0x80000004)
+            checker
+                .reg(3, 0x06080A0C)  // rd
+                .pc(0x80000004) // 验证 PC 推进了 4 字节
         },
     );
 }
 ```
 
 使用以下命令运行该测试：
+
 ```bash
 cargo test --features custom-instr test_custom_padd8
 ```
@@ -330,6 +331,7 @@ cargo test --features custom-instr test_custom_padd8
 ```c
 // .insn r opcode, funct3, funct7, rd, rs1, rs2
 asm volatile (
+    // 使用实际的 opcode, funct3 和 funct7 代替中间三个 0
     ".insn r 0x0b, 0, 0, %0, %1, %2"
     : "=r"(rd_val)    // 输出操作数 %0
     : "r"(rs1_val),   // 输入操作数 %1
@@ -375,6 +377,8 @@ int main() {
     uint32_t res = padd8(a, b);
     
     printf("Custom padd8 finished!\n");
+    printf("%x", res);
+    
     return 0;
 }
 ```
