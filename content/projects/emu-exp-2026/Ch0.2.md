@@ -10,7 +10,7 @@ showTableOfContents: true
 
 ## 运行模式
 
-从可执行文件直接 `riscv-emulator <PATH>` 运行程序。使用 cargo 从源码编译运行的时候则为 `cargo run --release -- <PATH> <OTHER-ARGS>`。使用 `--help` 查看完整参数。
+从可执行文件直接 `here <PATH>` 运行程序。使用 cargo 从源码编译运行的时候则为 `cargo run --release -- <PATH> <OTHER-ARGS>`。使用 `--help` 查看完整参数。
 
 键入 `ctrl + A` 后按下 `x` 可以强制退出模拟器。
 

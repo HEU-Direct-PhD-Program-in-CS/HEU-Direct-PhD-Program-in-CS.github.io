@@ -22,13 +22,13 @@ showTableOfContents: true
 
 点击此处询问 [AI](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true) :-D
 
-## RISC-V Emulator
+## HERE
 
-自主开发的开源教学用 RISC-V 模拟器，支持 RV64GC 指令集和 uart、virtio-blk 等众多外设，带有内置调试器和 gdb 支持。采用 Rust 语言开发，兼具性能和安全。
+`HERE` (HEU Educational Rust-based Emulator) 是一款自主开发的开源教学用 RISC-V 模拟器，支持 RV64GC 指令集和 uart、virtio-blk 等众多外设，带有内置调试器(`rvdb`)和 gdb 支持。采用 Rust 语言开发，兼具性能和安全。
 
-如果您需要开启探索仓库之旅，可以参阅 [zread](https://zread.ai/WanDejun/riscv-emulator)，其中包含AI生成的项目详细解析，以及与LLM进行交互式探索代码的功能。(AI **未必完全正确**，请保持独立思考，请勿盲从)
+如果您需要开启探索仓库之旅，可以参阅 [zread](https://zread.ai/here-emulator/here)，其中包含AI生成的项目详细解析，以及与LLM进行交互式探索代码的功能。(AI **未必完全正确**，请保持独立思考，请勿盲从)
 
-仓库：[riscv-emulator](https://github.com/WanDejun/riscv-emulator)
+仓库：[HERE](https://github.com/here-emulator/here)
 
 ## 环境配置
 
@@ -83,16 +83,16 @@ riscv64-unknown-elf-gcc --version
 
 GNU 的常用工具链都有包含，如 `gdb` 和 `objdump`。
 
-### RISC-V Emulator
+### `HERE`
 
-项目地址：[RISC-V Emulator](https://github.com/WanDejun/riscv-emulator)
+项目地址：[HERE](https://zread.ai/here-emulator/here)
 
 如果你对该项目的使用需要额外的帮助，请参考项目的 readme；如果你遇到了问题，请检索或发表 issue
 
 拉取项目源码和 submodule：
 
 ```bash
-git clone https://github.com/WanDejun/riscv-emulator.git
+git clone https://github.com/here-emulator/here.git
 
 git submodule init
 git submodule update

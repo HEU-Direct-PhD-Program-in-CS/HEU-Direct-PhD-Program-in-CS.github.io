@@ -6,7 +6,7 @@ draft: false
 showTableOfContents: true
 ---
 
-[REPO]: https://github.com/WanDejun/riscv-emulator
+[REPO]: https://github.com/here-emulator/here
 
 ## 本章概览
 
@@ -132,7 +132,7 @@ S-mode 的 Linux 内核通过 `ecall` 指令请求 M-mode 的 OpenSBI 提供硬�
 ### 1. 获取预编译镜像并验证启动
 
 项目在 GitHub Releases 中提供了打包好的 `OpenSBI + Linux Kernel + Initramfs(BusyBox)` 镜像：
-- **镜像下载地址**：[prebuilt-kernels 发布页面](https://github.com/WanDejun/riscv-emulator/releases/tag/prebuilt-kernels)
+- **镜像下载地址**：[prebuilt-kernels 发布页面](REPO/releases/tag/prebuilt-kernels)
 
 下载预编译镜像并尝试在模拟器中启动（使用默认 Initramfs）：
 
