@@ -4,6 +4,7 @@ type: page
 weight: 20
 draft: false
 showTableOfContents: true
+mermaid: true
 ---
 
 ## 本章概览
@@ -19,7 +20,7 @@ showTableOfContents: true
 
 ---
 
-## RISC-V 指令格式与编码体系
+## 一. RISC-V 指令格式与编码体系
 
 ### RISC-V 指令格式的设计理念
 
@@ -73,7 +74,7 @@ RISC-V 定义了 6 种基本的指令格式：
 为了鼓励学术研究与特定领域的加速扩展，RISC-V 官方架构规范明确保留了 4 组用于自定义指令的 **Custom Opcode 空间**：
 
 | 名称 | Opcode (7-bit) | 二进制表示 |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | `custom-0` | `0x0B` | `0b0001011` |
 | `custom-1` | `0x2B` | `0b0101011` |
 | `custom-2` | `0x5B` | `0b1011011` |
@@ -83,7 +84,7 @@ RISC-V 定义了 6 种基本的指令格式：
 
 ---
 
-## 模拟器前端译码架构
+## 二. 模拟器前端译码架构
 
 本模拟器采用了“**数据驱动的代码生成 + 双级高效译码器 + 取指译码缓存（iCache）**”的前端架构。整体数据流与控制流如下所示：
 
@@ -112,15 +113,23 @@ flowchart TD
 - [data/instr_dict_custom.json]($env.repo/tree/master/data/instr_dict_custom.json)：包含用户自定义扩展指令。
 
 JSON 描述项示例：
+
 ```json
 "add": {
-    "encoding": "0000000----------000-----0110011",
-    "variable_fields": ["rd", "rs1", "rs2"],
-    "extension": ["rv_i"],
-    "match": "0x33",
-    "mask": "0xfe00707f"
-}
+  "encoding": "0000000----------000-----0110011",
+  "variable_fields": [
+    "rd",
+    "rs1",
+    "rs2"
+  ],
+  "extension": [
+   "rv_i"
+  ],
+  "match": "0x33",
+  "mask": "0xfe00707f"
+},
 ```
+
 其中：
 - `encoding` 描述 32 位的具体比特分布（`-` 表示变量位）。
 - `match` 为固定位的期望匹配值，`mask` 掩码用于过滤掉变量位（计算公式：`raw_instr & mask == match`）。
@@ -152,6 +161,7 @@ flowchart TD
    对于无法放入 `funct_decoder` 的稀疏或特殊掩码指令，采用掩码匹配：线性遍历 `(raw_instr & mask) == key` 找到对应指令描述。
 3. **`decode_info` 提取操作数**：
    一旦匹配成功，`Decoder` 会根据指令的 `InstrFormat` 从原始 32 位机器码 `raw_instr` 中提取出 `rd`、`rs1`、`rs2` 以及符号扩展后的 `imm`，打包封装为 `RVInstrInfo` 枚举与 `DecodeInstr` 结构体：
+
    ```rust
    pub struct DecodeInstr {
        pub instr: RiscvInstr,
@@ -200,7 +210,7 @@ fn step_impl(&mut self) {
 
 ---
 
-## 实践：设计与实现自定义指令扩展
+## 实践 1：设计与实现自定义指令扩展
 
 自定义扩展指令的完整开发流程如下图所示：
 
@@ -211,6 +221,8 @@ flowchart LR
     C --> D["4. 编写 CPU 单元测试 (cpu_test)"]
     D --> E["5. C 语言 asm volatile 封装与调用"]
 ```
+
+您可以先自行查看一条指令(如 addi )是如何从被读入, 到译码完成的.
 
 ### 1. 构思自定义扩展指令（以 Packed-SIMD 为例）
 
@@ -232,18 +244,18 @@ flowchart LR
 
 ```json
 {
-    "padd8": {
-        "encoding": "0000000----------000-----0001011",
-        "variable_fields": [
-            "rd",
-            "rs1",
-            "rs2"
-        ],
-        "extension": [
-            "rv_custom0"
-        ],
-        "match": "0x0b",
-        "mask": "0xfe00707f"
+"padd8": {
+    "encoding": "0000000----------000-----0001011",
+    "variable_fields": [
+        "rd",
+        "rs1",
+        "rs2"
+    ],
+    "extension": [
+        "rv_custom0"
+    ],
+    "match": "0x0b",
+    "mask": "0xfe00707f"
     }
 }
 ```
@@ -263,7 +275,7 @@ cargo build --features custom-instr
 
 ---
 
-## 实践：编写 CPU 单元测试
+## 实践 2：编写 CPU 单元测试
 
 在把自定义指令接入裸机程序之前，最佳实践是先在 Rust 侧编写**单元测试**，验证指令能否被正确译码和执行。
 
@@ -297,14 +309,14 @@ fn test_custom_padd8_decode_and_exec() {
         raw_instr,
         |builder| {
             builder
-                .reg(1, 0x01020304) // rs1
-                .reg(2, 0x05060708) // rs2
+                .reg(1, 0x01020304)   // rs1
+                .reg(2, 0x05060708)   // rs2
                 .pc(0x80000000)
         },
         |checker| {
             checker
-                .reg(3, 0x06080A0C)  // rd
-                .pc(0x80000004) // 验证 PC 推进了 4 字节
+                .reg(3, 0x06080A0C)   // rd
+                .pc(0x80000004)       // 验证 PC 推进了 4 字节
         },
     );
 }
@@ -318,13 +330,13 @@ cargo test --features custom-instr test_custom_padd8
 
 ---
 
-## 实践：C 语言内嵌汇编与函数封装
+## 实践 3：C 语言内嵌汇编与函数封装
 
 成功在模拟器端支持自定义指令后，下一步是在裸机 C 语言客户端程序中使用它。
 
 ### 1. GCC 内嵌汇编语法 (`asm volatile`)与 `.insn`
 
-直接编写汇编时，传统 GNU 汇编器（`riscv64-unknown-elf-gcc`）可能尚未认识你的自定义指令名字（如 `padd8`）。RISC-V 汇编器提供了一个强大的伪指令 **`.insn`**，允许开发者直接用通用格式拼装任何机器指令：
+直接编写汇编时，传统 GNU 汇编器（`riscv64-unknown-elf-gcc`）可能尚未认识你的自定义指令名字（如 `padd8`）。RISC-V 汇编器提供了一个强大的伪指令 **`.insn`**(see [riscv-asm-manual](https://github.com/riscv-non-isa/riscv-asm-manual)，允许开发者直接用通用格式拼装任何机器指令：
 
 ```c
 // .insn r opcode, funct3, funct7, rd, rs1, rs2
@@ -342,6 +354,7 @@ asm volatile (
 为了提供良好的编程抽象，你应该将底层 `asm volatile` 封装为干净的内联 C 函数（Header 库），供上层应用程序调用：
 
 在 `test_resources/include/custom_ops.h` 中：
+
 ```c
 #ifndef CUSTOM_OPS_H
 #define CUSTOM_OPS_H
@@ -394,12 +407,17 @@ int main() {
 
 ---
 
-## 综合任务：设计并实现一条属于你的自定义指令
+## 综合实验任务：设计并实现 **一组** 属于你的自定义指令
 
 请构思一条符合你自己需求的扩展指令（例如：打包点积计算、求绝对值、自定义日志打印指令等），并完成以下步骤：
 
-1. **确定指令语义与编码**：设计操作数类型（R 型/I 型等），在 `custom-0` 或 `custom-1` 空间选择合适的 match/mask。
-2. **修改 JSON 元数据**：在 [data/instr_dict_custom.json]($env.repo/tree/master/data/instr_dict_custom.json) 中添加配置。
+1. **确定指令语义与编码**：设计操作数类型（R 型/I 型等），在 `custom-0/1` 空间选择合理的指令编码或在当前 `HERE` 还未支持的标准扩展指令集(如 `B(Zba, Zbb, Zbs)`, `P` 扩展)中选择。
+2. **修改 JSON 元数据**：
+  - 若添加自定义扩展指令: 在 [data/instr_dict_custom.json]($env.repo/tree/master/data/instr_dict_custom.json) 中添加配置
+  - 若选择实现当前 `HERE` 为实现的扩展指令集: 在 `build.rs` 中启用 [data/instr_dict.json]($env.repo/tree/master/data/instr_dict.json) 中对应的扩展
 3. **模拟器后端响应**：在模拟器执行端响应该指令，使用 `log::info!` 报告指令被成功触发和执行。
 4. **编写 Rust 单元测试**：使用 `TestCPUBuilder` 和 `run_test_exec_decode` 编写单元测试，使用 `cargo test --features custom-instr` 确保测试通过。
 5. **C 语言封装与裸机测试**：编写包含 `.insn` 内嵌汇编的 C 语言函数，在裸机 C 程序中调用它，使用 `cargo run --features custom-instr -- ./test_resources/bin/main.elf` 运行程序并验证 log 打印输出。
+
+> 选择 `custom` 指令空间, 需要自己编排与设计指令编码, 选择已有的标准扩展, 指令数量会多一些, 您可以自行取舍.
+

@@ -1,329 +1,104 @@
 ---
-title: "Chapter 0x04 - 外设与中断系统"
+title: "Chapter 0x04 - 中断、异常与特权级"
 type: page
 weight: 40
 draft: false
 showTableOfContents: true
+mermaid: true
 ---
 
 ## 本章概览
 
-在现代计算机系统架构中，CPU 绝非孤立运转的算术引擎，它需要时刻与丰富的外围设备（Peripherals）交互：通过串口（UART）输出调试日志、通过定时器（Timer）触发任务调度、通过网卡与磁盘进行高速 I/O。
+本章关注正常指令流被打断后发生了什么。异常、中断、系统调用和特权级切换最终都会进入 trap 流程，但它们从哪里来、保存什么信息、处理后回到哪里并不完全相同。
 
-模拟器不仅要模拟 CPU 指令的执行，还需要构建一套高效、规范且支持并发的外设与中断抽象层。本章将带你深入 RISC-V 的中断体系拓扑（PLIC & ACLINT/CLINT），剖析模拟器的外设 Trait 基础设施与异步任务框架（`AsyncWorker`），解析基于 VirtIO 规范的半虚拟化（Paravirtualization）机制，并最终引导你开发一个具有实际功能的系统级外设。
+实验会同时观察客户程序和模拟器：客户程序负责设置入口、保存通用寄存器和编写 handler；模拟器负责判断 trap 是否发生、更新相关 CSR、切换特权级并改变 PC。把两侧的动作按时间顺序对起来，是理解本章最直接的方法。
 
-通过本章学习与实验，你将完成以下内容：
-1. 理解 RISC-V 外部中断（PLIC）与局部中断（ACLINT/CLINT）的硬件拓扑及工作机制。
-2. 掌握模拟器外设架构：`DeviceTrait`、`MemMappedDeviceTrait`、`PlicIRQSource` 以及结合原子变量与内存屏障的 `AsyncWorker` 异步解耦框架。
-3. 理解 VirtIO 规范：Virtqueue 共享环（Available/Used Ring）、Feature 协商机制、Doorbell 门铃机制以及半虚拟化 vs 全虚拟化的陷入陷出（Trap & Emulate）原理。
-4. **综合实验任务**：独立开发一个可直接被 Linux Kernel 内核驱动识别与使用的真实外设（如 VirtIO-Net、VirtIO-FS、GPIO、Watchdog 等）。
+## 特权级与 Trap 机制
 
----
+### 特权级概述
 
-## 一、 RISC-V 中断体系与 PLIC 工作机制
-
-### 1. 中断拓扑与体系结构
-
-在 RISC-V 系统架构中，中断按来源与作用域划分为两大核心子系统：
-
-```mermaid
-flowchart TD
-    subgraph ExternalDevices["外部外设 (External Peripherals)"]
-        UART["UART 串口"]
-        TimerDev["SampleTimer / 硬件定时器"]
-        VirtIO["VirtIO 磁盘/网卡"]
-    end
+为了保护硬件资源不被错误编写的或恶意的程序破坏，现代体系结构会设计不同数量的特权等级。RISC-V 定义了三种特权级（若不开启 H 扩展），从高到低：
 
-    subgraph CoreLocal["核局部设备 (Core-Local)"]
-        ACLINT["ACLINT / CLINT<br/>(mtime / mtimecmp / IPI)"]
-    end
-
-    subgraph InterruptControllers["中断控制器层"]
-        PLIC["PLIC 平台级中断控制器<br/>(Platform-Level Interrupt Controller)"]
-    end
-
-    subgraph CPUCore["RISC-V CPU Core"]
-        MEIP["mip.MEIP / sip.SEIP<br/>(外部中断管线)"]
-        MTIP["mip.MTIP / sip.STIP<br/>(定时器中断管线)"]
-        MSIP["mip.MSIP / sip.SSIP<br/>(软件/核间中断 IPI)"]
-    end
-
-    UART -->|IRQ Line| PLIC
-    TimerDev -->|IRQ Line| PLIC
-    VirtIO -->|IRQ Line| PLIC
-
-    PLIC -->|MEIP Signal| MEIP
-    ACLINT -->|MTIP Signal| MTIP
-    ACLINT -->|MSIP Signal| MSIP
-```
-
-1. **核局部中断控制器（ACLINT / CLINT）**：
-   - 负责生成处理器核本地的**定时器中断（Timer Interrupt, `MTIP`）**和**核间软件中断（Software Interrupt / IPI, `MSIP`）**。
-   - 硬件寄存器 `mtime`（全局高精度计数器）和 `mtimecmp`（比较寄存器）直接映射在 MMIO 空间中。当 `mtime >= mtimecmp` 时，硬件自动拉高当前 Core 的 `MTIP` 管线。
-2. **平台级中断控制器（PLIC）**：
-   - 负责收集与仲裁系统中成百上千个外部设备（如 UART、网卡、VirtIO 设备）发出的**外部中断（External Interrupt, `MEIP`/`SEIP`）**。
-   - PLIC 负责完成优先权仲裁，并将最高优先级的中断信号汇总输出给 CPU Core。
-
-想深入探讨 RISC-V 体系结构基础，可参考：[问 AI：什么是 RISC-V，为什么要学习 RISC-V？](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true)
-
----
-
-### 2. PLIC 的核心工作机制
-
-PLIC（Platform-Level Interrupt Controller）作为一个独立的硬件仲裁单元，内部维护了以下关键寄存器与状态状态机：
-
-- **Priority（中断优先级寄存器）**：为每个外部中断源（IRQ ID）配置优先级（通常 0 表示禁用该中断，数值越大优先级越高）。
-- **Pending（中断挂起位图）**：设备拉高 IRQ 线后，PLIC 将对应的 Pending 位置 1，表示该中断正在等待处理。
-- **Enable（中断使能位图）**：按 CPU Hart 与特权级（M-mode / S-mode）控制是否允许响应特定 IRQ ID。
-- **Threshold（中断优先级阈值）**：只有优先级**严格大于** Threshold 的 Pending 中断才会被允许递交给 CPU。
-- **Claim / Complete（中断响应与完成寄存器）**：CPU 读写该寄存器以完成与 PLIC 的握手交互。
-
-PLIC 的中断服务完整生命周期如下图所示：
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Dev as 外设 (Device)
-    participant PLIC as PLIC 仲裁器
-    participant CPU as RISC-V Core (Guest OS)
-
-    Dev->>PLIC: 1. 拉高 IRQ 信号线 (Assert IRQ)
-    Note over PLIC: 2. 置位 Pending 位图<br/>检查 Priority > Threshold<br/>且 Enable 开启
-    PLIC->>CPU: 3. 拉高 CPU 的 MEIP / SEIP 中断管线
-    Note over CPU: 4. CPU 响应中断，进入 Trap Handler
-    CPU->>PLIC: 5. 读 Claim 寄存器 (Read Claim Reg)
-    PLIC-->>CPU: 6. 返回最高优先级的 IRQ ID (如 ID 63)
-    Note over PLIC: 7. 自动清零对应 Pending 位
-    CPU->>Dev: 8. 执行外设 ISR，服务外设逻辑
-    CPU->>PLIC: 9. 写 Completion 寄存器 (Write Complete Reg = 63)
-    Note over PLIC: 10. PLIC 允许该 IRQ ID 再次触发
-```
-
-欲了解更多 PLIC 的寄存器偏移与硬件规范细节，可查阅：[问 AI：深入理解 RISC-V PLIC 中断控制器规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V的PLIC中断控制器规范,包括Priority,Pending,Enable,Threshold,Claim和Complete机制&send_immediately=true&force_search=true)
-
----
-
-## 二、 模拟器外设架构与 SamplerTimer 代码导读
-
-在模拟器中，为了让外设既能优雅地挂载到地址总线（MMIO），又不会因为耗时 I/O 阻塞 CPU 指令推进主线程，模拟器设计了一套高度解耦的**设备 Trait 基础设施**与**异步任务 Worker 框架**。
-
-### 1. 基础基础设施与 Trait 体系
-
-在 [src/device/mod.rs]($env.repo/tree/master/src/device/mod.rs) 中，模拟器定义了核心的外设接口抽象：
-
-1. **`DeviceTrait`（通用外设接口）**：
-   ```rust
-   pub trait DeviceTrait {
-       fn read(&mut self, addr: WordType, len: u32) -> Result<u64, MemError>;
-       fn write(&mut self, addr: WordType, len: u32, data: u64) -> Result<(), MemError>;
-       fn sync(&mut self);
-       /// 返回需要注册到后台线程执行的异步 Worker
-       fn get_async_worker(&mut self) -> Option<Box<dyn AsyncWorker>>;
-   }
-   ```
-2. **`MemMappedDeviceTrait`（内存映射外设接口）**：
-   扩展自 `DeviceTrait`，提供静态方法 `base()` 和 `size()`，用于模拟器启动时在 `MemoryMapIO` 中快速注册地址区间。
-3. **`PlicIRQSource` & `PlicDeviceHandler`（中断管线接入）**：
-   外设通过实现 `PlicDeviceHandler` 的 `irq_level(&self) -> bool` 方法提供当前中断电平状态。PLIC 采样定时器或电平探测器会轮询该接口获取最新电平。
-
----
-
-### 2. SamplerTimer 异步架构源码解析
-
-[src/device/sample_timer.rs]($env.repo/tree/master/src/device/sample_timer.rs) 是模拟器提供的一个完整的毫秒级测试定时器外设。它清晰地演示了**主线程 MMIO 响应**与**后台 `AsyncWorker` 异步计时**的协作关系：
-
-```mermaid
-flowchart TD
-    subgraph MainThread["模拟器主线程 (CPU Step Thread)"]
-        CPUWrite["CPU 执行 sw/sb 指令"] --> MMIO["SampleTimerDevice::write_impl()"]
-        MMIO -->|1. 发送命令| ChannelSender["crossbeam::channel::Sender"]
-        MMIO -->|2. 重置 IRQ| AtomicReset["irq_pending.store(false, Release)"]
-    end
-
-    subgraph AsyncWorkerThread["后台 AsyncWorker 线程"]
-        Worker["SampleTimerWorker::async_task()"]
-        ChannelReceiver["crossbeam::channel::Receiver"] -->|接收配置| Worker
-        Worker -->|3. 检查时间到达| AtomicSet["irq_pending.store(true, Release)"]
-    end
-
-    subgraph PLICSampling["PLIC 采样线程/阶段"]
-        PlicHandler["PlicSampleTimerHandler::irq_level()"]
-        AtomicAcquire["irq_pending.load(Acquire)"] --> PlicHandler
-        PlicHandler -->|返回电平| PLICCore["PLIC 硬件触发"]
-    end
-
-    AtomicReset -.-> irq_pending["Arc<AtomicBool> (irq_pending)"]
-    AtomicSet -.-> irq_pending
-    irq_pending -.-> AtomicAcquire
-```
-
-#### 核心源码解析
-
-1. **命令解耦（Channel & AsyncWorker）**：
-   当 CPU 通过 MMIO 写入 `SampleTimerDevice` 的时间配置寄存器时，主线程只做轻量级数据更新，并通过 `crossbeam::channel` 异步发送 `WorkerCommand::Data` 给 `SampleTimerWorker`：
-   ```rust
-   // sample_timer.rs
-   0x08 => {
-       self.layout.data_register0 = data_u32;
-       self.sender.try_send(WorkerCommand::Data {
-           interval_ms: self.get_data64(),
-           configured_at: Instant::now(),
-       }).unwrap();
-   }
-   ```
-2. **异步后台轮询（`AsyncWorker::async_task`）**：
-   `SampleTimerWorker` 在独立的线程循环中执行 `async_task()`，检查时间差。当到达定时时间后，将原子变量 `irq_pending` 置为 `true`：
-   ```rust
-   if !self.irq_pending.load(Ordering::Acquire)
-       && cur.duration_since(self.pre_time) >= self.step_time
-   {
-       self.irq_pending.store(true, Ordering::Release);
-       made_progress = true;
-   }
-   ```
-
----
-
-### 3. 内存屏障与 Guest OS 内存可见性（Memory Barrier & Visibility）
-
-在编写具有 DMA（Direct Memory Access）能力或带异步 Backend 的外设（例如磁盘读取、网卡接收包、`AsyncWorker` 直接写入模拟器物理 RAM 缓冲区）时，存在一个**极其关键的技术隐患**：
-
-> **内存乱序与可见性陷阱**：
-> 后台 `AsyncWorker` 线程将从磁盘/网络读取到的数据写入物理内存（RAM ArrayBuffer）后，如果**没有施加正确的内存屏障**就直接拉高 PLIC 中断，主线程的 CPU Core（Guest OS）可能会在接收到中断并试图读取数据时，由于 CPU/编译器/宿主机的指令重排与 Cache 暂存，**读取到写之前的旧数据/脏数据（Stale Read）**。
-
-#### 解决方案：使用 `Ordering::Release` 与 `Ordering::Acquire` 屏障
-
-在 Rust 中，通过 `std::sync::atomic` 的内存顺序保证可见性：
-- **发送端（`AsyncWorker` 写入 RAM 后）**：在拉高中断状态 `irq_pending.store(true, Ordering::Release)` 时使用 **`Release` 语义**。它确保在此之前所有的内存写入（包括对物理 RAM 缓冲区的 DMA 填充）均已完成刷新，且对其他线程可见。
-- **接收端（PLIC / CPU 读取中断前）**：使用 `irq_pending.load(Ordering::Acquire)` **`Acquire` 语义**。它与 Release 形成同步屏障（Synchronizes-with Relationship），保证 Guest OS 看到中断成立时，一定能看到 Release 之前写入物理内存的完整最新数据！
-
----
-
-## 三、 VirtIO 规范与半虚拟化机制
-
-在真实物理世界中，模拟一套复杂的网卡或显卡硬件（如 Intel e1000 或 NVMe 规范）需要模拟成百上千个复杂的硬件控制寄存器，产生极高的陷入/陷出开销。为此，现代虚拟化技术广泛采用了 **VirtIO 半虚拟化（Paravirtualization）标准**。
-
-想了解 VirtIO 规范的演进与底层细节，可参考：[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=true&force_search=true)
-
-### 1. 半虚拟化 (Paravirtualization) vs 全虚拟化 (Full Virtualization)
-
-- **全虚拟化 (Full Virtualization / Trap & Emulate)**：
-  Guest OS 无需修改，使用原生的物理设备驱动。Guest 每读写一次外设寄存器，都会触发一次硬件内存异常，导致 CPU **陷入（Trap-out）** 到模拟器/Hypervisor，模拟器修改完状态后再 **陷回（Trap-in）** Guest。由于陷入陷出涉及昂贵的上下文切换，性能极差。
-- **半虚拟化 (Paravirtualization / VirtIO)**：
-  Guest OS 明知自己运行在虚拟机中，装载专用的 VirtIO 驱动。Guest 与 Host 约定一块**共享物理内存（Virtqueue 环形缓冲区）**。Guest 批量准备好成百上千个数据包后，只需触发一次 **门铃（Doorbell）** 寄存器通知 Host，极大减少了陷入陷出次数，接近原生物理硬件性能！
-
----
-
-### 2. VirtIO 核心机制：Virtqueue 与 Ring 结构
-
-VirtIO 的核心数据传输结构称为 **Virtqueue**（包含 Split Virtqueue 和 Packed Virtqueue 两种格式）。Split Virtqueue 由三部分共享内存数组组成：
-
-```mermaid
-flowchart LR
-    subgraph GuestMem["Guest OS 共享内存 (Virtqueue)"]
-        subgraph DT["1. Descriptor Table (描述符表)"]
-            Desc0["Buf 0: PADDR, LEN, FLAGS, NEXT"]
-            Desc1["Buf 1: PADDR, LEN, FLAGS, NEXT"]
-        end
-
-        subgraph AvailRing["2. Available Ring (可用环 - Guest 写 / Host 读)"]
-            AvailIdx["idx: 最新索引"]
-            AvailArr["ring: [Head_Idx0, Head_Idx1, ...]"]
-        end
-
-        subgraph UsedRing["3. Used Ring (已用环 - Host 写 / Guest 读)"]
-            UsedIdx["idx: 最新索引"]
-            UsedArr["ring: [Elem0 {id, len}, Elem1, ...]"]
-        end
-    end
-
-    subgraph HostDev["Host Emulator 模拟器"]
-        HostReadDesc["根据 PADDR 直接操作 RAM 数据"]
-        HostReadAvail["读取 Available Ring<br/>提取待处理描述符链"]
-        HostWriteUsed["写入完成节点到 Used Ring<br/>并触发 VirtIO 中断"]
-    end
-
-    DT --> HostReadDesc
-    AvailRing -->|Guest 提交请求| HostReadAvail
-    HostWriteUsed -->|Host 完成通知| UsedRing
-```
-
-1. **Descriptor Table（描述符表）**：记录每一块数据缓冲区的物理地址 `paddr`、长度 `len`、读写标志 `flags` 以及链式下一项指针 `next`。
-2. **Available Ring（可用环）**：由 **Guest 写入，Host 读取**。Guest 将填好数据的描述符链头索引写入 Available Ring，通知 Host“有新请求待处理”。
-3. **Used Ring（已用环）**：由 **Host 写入，Guest 读取**。Host 完成 I/O 操作（如从磁盘读出数据填充到描述符缓冲区）后，将描述符索引与写入长度填入 Used Ring，通知 Guest“请求已完成”。
-
----
-
-### 3. Feature 协商与事务全生命周期
-
-VirtIO 设备的初始化与事务处理遵循严格的状态机协商机制：
-
-```mermaid
-timeline
-    title VirtIO 设备初始化与事务交互全流程
-    section 1. 发现与协商 (Setup & Negotiation)
-        读取 Magic (0x74726976) & Device ID : Guest 确认设备存在 (如 2 代表 Block 设备)
-        读取 Host Features : Host 宣告支持的功能特性
-        写入 Guest Features : Guest 驱动宣告接受的功能特性
-        设置 Status = DRIVER_OK : 完成协商，设备进入活跃状态
-    section 2. 事务发起 (Transaction Dispatch)
-        Guest 填充 Descriptor & Available Ring : 将数据缓冲区挂入环形队列
-        敲击 Doorbell (Queue Notify Reg) : Write MMIO 告知 Host 有新任务
-    section 3. 事务完成 (Transaction Complete)
-        Host / AsyncWorker 处理数据 : 完成磁盘读写 / 网络收发
-        Host 填充 Used Ring : 写入已处理完的元素节点
-        Host 触发 VirtIO Interrupt : 更新 Interrupt Status 并拉高 PLIC 中断
-        Guest 应答 Interrupt Ack : 清除 Interrupt Status 并收回 Buffer
-```
-
----
-
-## 四、 综合实验任务：开发一个实际功能的系统外设
-
-在本实验中，你将独立设计并实现一个**具备实际应用价值的系统级外设**，并将其挂载到模拟器的 MMIO 地址空间，使其能够被 Linux 操作系统内核直接识别并正常工作！
-
-### 1. 推荐选题方向（均支持 Linux 内核驱动识别）
-
-你可以根据个人兴趣从以下项目中选择一个进行实现：
-
-| 选题名称                  | 规范与类型                 | 核心挑战与特色                                                                                     | 验证方式                             |
-| ------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| **VirtIO-Console**        | VirtIO (Device ID 3)       | 实现半虚拟化控制台，支持控制台输入输出                                                             | Linux 开机输出 `/dev/hvc0`           |
-| **VirtIO-Net**            | VirtIO (Device ID 1)       | 结合 TAP/TUN 宿主网卡，实现网络收发包                                                              | Linux 内核中 `ping` 联通网络         |
-| **VirtIO-FS / VirtIO-9P** | VirtIO (Device ID 26 / 9P) | 实现文件系统共享，将宿主目录挂载入虚拟机                                                           | Linux 中 `mount -t 9p` 读写宿主文件  |
-| **VirtIO-RNG**            | VirtIO (Device ID 4)       | 硬件随机数生成器，响应熵池读取                                                                     | Linux 中 `cat /dev/hwrng` 获取随机数 |
-| **GPIO 控制器**           | 自定义 MMIO 设备           | 实现数字输入输出管脚；可通过模拟器终端 `Ctrl+A` 命令模式输入 `1`/`0` 模拟引脚电平变化，并 log 输出 | 裸机/Linux 驱动中读写 GPIO 寄存器    |
-| **I2C Adapter**           | 自定义 MMIO / I2C 总线     | 实现 I2C 总线控制器，并在总线上挂载虚拟 LED 点阵或传感器                                           | 读写 I2C 寄存器控制子设备            |
-| **Watchdog Timer**        | 自定义 MMIO 定时器         | 实现看门狗倒计时，超时未“喂狗”触发系统复位或中断                                                   | 编写测试程序验证看门狗复位           |
-| **RGB 颜色输出设备**      | 自定义 MMIO 显示设备       | 接收 RGB888 像素数据，并在终端中显示 ANSI 彩色块输出                                               | 在终端中打印彩色图像/图案            |
-
-> **提示**：强烈推荐优先尝试 **VirtIO 系列设备** 或 **GPIO / Watchdog** 设备。VirtIO 设备可以无缝使用 Linux Kernel 内置的标准驱动，无需自己为 Linux 编写内核模块！
-
----
-
-### 2. 实验要求与实现指导
-
-1. **设备映射与注册**：
-   在 [src/device/config.rs]($env.repo/tree/master/src/device/config.rs) 中配置新外设的 MMIO 基地址 `BASE` 与 `SIZE`，并实现 `MemMappedDeviceTrait`。
-2. **使用 `AsyncWorker` 异步解耦**：
-   外设中涉及耗时 I/O（如文件读写、网络收发、定时器等待）的操作，**必须**重写 `get_async_worker()` 方法，将耗时任务放入 `AsyncWorker` 线程中执行，严禁阻塞模拟器主 CPU 线程。
-3. **保证内存屏障与可见性**：
-   若外设直接向模拟器物理 RAM 写入数据（如 DMA 或 Virtqueue 写入），必须在触发 PLIC 中断前使用 `Ordering::Release` 原子屏障，确保内存数据对 Guest OS 完全可见。
-4. **中断管线接入**：
-   实现 `PlicIRQSource`，在 [src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs) 或设备构建逻辑中将外设的 IRQ 线连接至 PLIC。
-
----
+- **M-mode（Machine）**：最高特权模式，拥有访问所有系统功能和物理资源的权限。
+- **S-mode（Supervisor）**：中间特权模式，用于运行操作系统内核。
+- **U-mode（User）**：最低特权模式，用于运行用户程序。
+
+### 异常处理
+
+特权等级一个重要的特性是拦截和处理异常（trap）。异常发生时，会从低特权等级变为高特权等级，运行高特权等级指定的异常处理程序，来决定如何处理异常。这允许操作系统或者嵌入式运行环境提供众多的功能，例如多任务、对硬件的抽象。
+
+RISC-V 将 trap 分为两类：
+
+| 类型              | 触发方式                 | 例子                                                      |
+| ----------------- | ------------------------ | --------------------------------------------------------- |
+| 异常（Exception） | 指令执行触发，**同步**   | 非法指令、断点、地址未对齐、缺页、ecall                   |
+| 中断（Interrupt） | 外部或时钟事件，**异步** | 定时器中断（`MTI`）、外部中断（`MEI`）、软件中断（`MSI`） |
+
+在执行 `ecall` 指令时，会引发环境调用异常，专门用来让低特权等级向高特权等级进行请求，例如操作系统的系统调用。
+
+接下来以在 M mode 处理异常为例，讲解一个简化的异常处理流程，省略掉不重要的 CSR 字段。如果你想了解更详细的流程应该参考手册或模拟器的代码（src/isa/riscv/trap/trap_controller.rs）。
+
+异常处理流程需要用到许多关键的 CSR（控制寄存器）：
+
+- mip（Machine Interrupt Pending），记录当前的中断请求
+- mie（Machine Interrupt Enable），处理器是否相应某种中断
+- mcause（Machine Exception Cause），指示发生了何种异常
+- mtvec（Machine Trap Vector），存放发生异常时处理器应该跳转的地址
+- mtval（Machine Trap Value），存放当前异常相关的额外信息，如访存异常保存故障地址
+- mepc（Machine Exception PC），发生异常的指令地址
+- mscratch（Machine Scratch），给异常处理程序准备的临时寄存器
+
+如果当前指令遇到异常，或者在运行指令之前检测到中断，则会进入异常处理流程：
+
+1. 保存异常相关信息：
+   - `mtval` <- 异常相关地址或非法指令编码
+   - `mcause` <- trap 原因
+2. 保存上下文，保存 trap 前的状态，用于从 trap 中返回：
+   - `mstatus.MPP` <- 当前特权级
+   - `mepc` <- 当前 PC
+   - `mstatus.MPIE` <- `mstatus.MIE`，
+   - 清除 `mstatus.MIE`（为了避免立刻再次相应中断）
+3. 切换 PC：根据 `mtvec` 的 base 和 mode（Direct 或 Vectored）计算 handler 地址。在 direct 模式下就是直接跳转到 base 的地址。
+
+这之后交由软件来处理异常。
+
+### 从 Trap 返回
+
+当软件处理完异常后，需要从异常返回原本的位置，这在 M mode 通过 `mret` 指令实现：
+
+- `mstatus.MIE` <- `mstatus.MPIE`
+- `mstatus.MPIE` <- 1
+- 恢复 PC <- `mepc`
+- 当前特权模式 <- `mstatus.MPP`
+
+这基本上就是发生异常时保存上下文的逆操作。
 
 ## 项目导览
 
-- **外设 Trait 抽象定义**：[src/device/mod.rs]($env.repo/tree/master/src/device/mod.rs)（定义 `DeviceTrait`、`MemMappedDeviceTrait` 与 `PlicDeviceHandler`）
-- **MMIO 总线与地址映射**：[src/device/mmio.rs]($env.repo/tree/master/src/device/mmio.rs)（`MemoryMapIO` 实现物理地址重定向与读写分发）
-- **外设地址布局配置**：[src/device/config.rs]($env.repo/tree/master/src/device/config.rs)（定义基地址 `BASE` 与内存大小 `SIZE`）
-- **异步 Task 框架**：[src/async_worker.rs]($env.repo/tree/master/src/async_worker.rs)（`AsyncWorker` 异步任务抽象）
-- **ACLINT / CLINT 定时器**：[src/device/aclint.rs]($env.repo/tree/master/src/device/aclint.rs)（`mtime` / `mtimecmp` 与 `MTIP` / `MSIP` 局部中断）
-- **PLIC 中断控制器**：[src/device/plic/mod.rs]($env.repo/tree/master/src/device/plic/mod.rs) 与 [src/device/plic/irq_line.rs]($env.repo/tree/master/src/device/plic/irq_line.rs)（外部中断仲裁、Claim / Complete 握手与 IRQ 采样管线）
-- **SampleTimer 参考外设**：[src/device/sample_timer.rs]($env.repo/tree/master/src/device/sample_timer.rs)（带 `AsyncWorker`、通道解耦与原子内存屏障的完整毫秒定时器）
-- **VirtIO MMIO 传输层**：[src/device/virtio/virtio_mmio.rs]($env.repo/tree/master/src/device/virtio/virtio_mmio.rs)（VirtIO 控制寄存器、Feature 协商与 Doorbell 响铃机制）
-- **Virtqueue 队列机制**：[src/device/virtio/virtio_queue.rs]($env.repo/tree/master/src/device/virtio/virtio_queue.rs)（Descriptor Table、Available Ring 与 Used Ring 共享内存实现）
-- **VirtIO Block 设备实现**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)（半虚拟化块设备参考实现）
-- **板卡总线与 IRQ 连接**：[src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs)（板卡外设初始化与 PLIC 中断管线挂载）
+模拟器侧：
+
+- `src/isa/riscv/trap/trap_controller.rs`：`TrapController`，核心的 trap 调度逻辑。
+- `src/isa/riscv/trap/mod.rs`：`Interrupt` 和 `Exception` 枚举定义，以及各自的 `Into<WordType>` 实现（决定 mcause 值）。
+- `src/isa/riscv/executor.rs`：中断检查和执行异常进入 trap 的位置。
+
+用户程序侧：
+
+- `test_resources/include/trap.h`：`TrapContext` 结构体定义和 CSR 地址宏。
+- `test_resources/lib/trap.S`：`__traps_entry` / `__traps_return` 汇编，保存/恢复通用寄存器并调用 `trap_handler`。
+- `test_resources/lib/trap_handler.c`：默认的 trap handler，以及 `trap_init()` 设置 `mtvec`、`mie`、`mstatus` 的流程。
+- `test_resources/src/trap_test.c`、`ecall_test.c`、`clint.c`：已有的简单 demo 程序。
+- `test_resources/src/clint.c` 演示了在 M-mode 下使用定时器中断的基本流程。
+
+## 综合实验任务：M-mode monitor
+
+实现一个小型 M-mode monitor，由它启动多个 U-mode 测试程序。
+
+- monitor 能够从 M-mode 进入 U-mode 运行任务，并在 trap 后可靠返回 M-mode 的 trap handler
+- 设计几个通过 `ecall` 进入的简单服务，例如字符输出、`sleep`、启动新任务和退出，让 U-mode 程序通过统一接口请求 monitor 服务
+- 在 U-mode 程序中安排一项环境调用以外的异常，例如非法指令或非法访存，并检查 mcause、mepc 和 mtval 是否符合预期
+- 为各类 trap 选择合适的恢复方式：返回原位置、跳过触发指令、或者结束 U-mode 程序
+- 接收并处理 CLINT 定时器中断，在所有 U-mode 程序中公平地分配时间片, 即简单的多道批处理系统
+
+### 扩展任务
+
+实现更好的类似 RTOS 的抢占式调度：给 U-mode 程序设定优先级，总是运行当前活跃的最高优先级的程序，在多个同优先任务中公平分配时间（注意 `yield` 和 `sleep` 的实现, 尽可能减少 `CPU` 的忙等)

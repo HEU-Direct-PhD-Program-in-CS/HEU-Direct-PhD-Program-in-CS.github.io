@@ -41,3 +41,24 @@ showTableOfContents: true
 使用 `-G` (`--gdb`) 参数来启用 gdb server (默认 TCP 端口 `1234`)。之后您可以在另一个终端会话使用 `riscv-unknown-elf-gdb` 的 remote 模式（`target remote :1234`），或使用 VSCode 的远程调试来链接到模拟器，来调试模拟器中运行的 riscv 程序了。
 
 - rvdb 的 gdb 服务暂时不支持查看向量寄存器，如需调试 V 扩展指令，您可以为模拟器添加支持，或优先使用 `rvdb`
+
+### 3. `HERE` Memory Layout
+
+`HERE` 采用 MMIO 的方式映射外设, 映射表如下图所示, 完整的 `MMIO` 信息, 可以查阅项目仓库的 `dts/virt.dts`.
+
+|       Device       | Address Base |    Address Length     | PLIC Interrupt ID |
+| :----------------: | :----------: | :-------------------: | :---------------: |
+|  `power-manager`   | 0x0010_0000  |        0x1000         |         -         |
+|   `test-device`*   | 0x0010_1000  |         0x10          |       0x3f        |
+|      `clint`       | 0x0200_0000  |        0x10000        |         -         |
+|       `plic`       | 0x0c00_0000  |      0x0400_0000      |         -         |
+|       `uart`       | 0x1000_0000  |         0x08          |       0x0a        |
+| `virtio-mmio[0]`** | 0x1000_1000  |        0x1000         |       0x01        |
+|       `ram`        | 0x8000_0000  | 0x2000_0000 (512 MiB) |         -         |
+
+
+\* `test-device` is mapped when the `test-device` Cargo feature is enabled; it is part of the default feature set.
+
+\** Additional VirtIO MMIO transports use consecutive 0x1000-byte regions and interrupt IDs. Keep assigned IDs distinct from the UART interrupt ID 0x0a.
+
+现在我们暂时仅关注 ram 的 mmio 信息即可, 其余 `Device` 在后续章节会介绍.

@@ -1,177 +1,321 @@
 ---
-title: "Chapter 0x06 - SIMD 与向量/矩阵计算扩展"
+title: "Chapter 0x06 - Linux 内核启动流程与系统整合"
 type: page
 weight: 60
 draft: false
 showTableOfContents: true
+mermaid: true
 ---
 
 ## 本章概览
 
-随着端侧 AI（Edge AI）、本地大模型（Local LLM）推理、计算机视觉与音视频处理技术的爆发式发展，传统的标量处理架构（Scalar Processing）在面对海量高吞吐量的数据计算时显得力不从心。**SIMD（Single Instruction Multiple Data，单指令多数据）** 及其演进出的**矢量计算（Vector Processing）** 与 **矩阵计算（Matrix Engine）** 架构，成为了现代芯片算力提升的关键所在。
+经过前面章节的学习，我们从指令集译码执行、裸机汇编、中断特权级切换，一路推进到了外设与 VirtIO 机制。现在，我们将迎接模拟器项目最重要的终极里程碑——**引导运行 Linux 操作系统内核并部署完整 Linux 发行版（Alpine Linux）**。
 
-RISC-V 体系结构通过 **V 扩展（Vector Extension）**、处于草案阶段的 **P 扩展（Packed SIMD）** 以及 **AME 扩展（Advanced Matrix Extension）** 构建起了完整的并行计算版图。
+在全系统模拟（Full System Emulation）下，Linux 内核的引导绝非简单地把二进制加载到内存执行，它涉及到**固件（OpenSBI）**、**设备树（Device Tree / DTS）**、**特权级交接（M-mode 到 S-mode）**、**内存映射（Sv39 页表）** 以及 **根文件系统（Rootfs / Initramfs）** 的全方位协调。
 
 通过本章学习与实验，你将完成以下内容：
-1. 理解 SIMD 与 RISC-V V 扩展（VLA 可变向量长度）的核心原理及其在端侧 AI 算力加速中的关键作用。
-2. 了解 RISC-V Packed-SIMD (P) 扩展与 AME 矩阵扩展的设计初衷与应用场景（相关手册仓库见 [Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)）。
-3. 掌握模拟器当前对 RVV 1.0 整型向量指令集的支持情况。
-4. **实验任务**：编写简单的 RISC-V 向量 C/汇编程序（如向量点积 Dot Product、整型 GEMM 矩阵乘法算子），并在模拟器中运行验证。
+1. 深入理解 RISC-V Linux 系统的启动链条（OpenSBI -> Linux Kernel -> Initramfs / Rootfs）。
+2. 掌握设备树（DTS / DTB）的语法规范、硬件描述节点以及 Kernel 解析发现物理外设的原理。
+3. 理解 RISC-V SBI（Supervisor Binary Interface）规范与 M-mode / S-mode 的服务调用交互。
+4. **验证性实验小任务一**：使用预编译 Linux 镜像启动模拟器，通过 `dd` 与 `mkfs.ext4` 制作 VirtIO-Block 磁盘镜像，并将自己的 RISC-V 用户态程序注入 Linux 运行。
+5. **进阶实验小任务二**：将模拟器配置为以 VirtIO-Block 作为 Rootfs 挂载 Alpine Linux 根文件系统，使用包管理器（`apk`）在线/借用 QEMU 安装编译开发环境（如 GCC）。
 
 ---
 
-## 一、 SIMD 概念与 RISC-V V 扩展标准
+## 一、 Linux 内核启动流程全貌
 
-### 1. 什么是 SIMD？为何端侧 AI 极其依赖它？
+在全系统模拟下，Linux 内核的引导涉及固件、特权级交接、设备树解析以及根文件系统挂载。
 
-在传统标量（Scalar）计算中，一条 `add` 指令只能完成一对 32 位整数的加法；而在 SIMD/向量计算中，一条向量加法指令 `vadd.vv` 可以同时对寄存器中由数十乃至数百个元素构成的数组进行并行运算。
+### 1. 引导启动链路与特权级交接
 
-想深入探讨 SIMD 与端侧 AI 算力加速的关联，可参考：[问 AI：深入理解 SIMD 指令集与 RISC-V 向量扩展在端侧 AI 中的应用](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释什么是SIMD单指令多数据原理,RISC-V%20Vector扩展的设计优势以及SIMD在端侧AI大模型推理中的重要作用&send_immediately=true&force_search=true)
-
-```text
-标量计算 (Scalar Add):
-  a0 ────► [   10   ]
-                +      ──► c0 ──► [   30   ]
-  b0 ────► [   20   ]
-
-SIMD / 向量计算 (Vector Add - vadd.vv):
-  v1 ────► [ 10 | 20 | 30 | 40 ]
-                +   +    +    +    ──► v3 ──► [ 15 | 25 | 35 | 45 ]
-  v2 ────► [  5 |  5 |  5 |  5 ]
-```
-
-在端侧 AI 深度学习推理（如 MobileNet 图像分类、Whisper 语音识别、Llama 边缘大模型）中，绝大部分计算开销都集中在 **矩阵乘法（GEMM）**、**卷积（Convolution）** 与 **张量点积（Dot Product）** 上。SIMD 架构能够在不增加晶体管取指/译码开销的前提下，将计算吞吐量提升数倍至数百倍，极大降低能耗。
-
----
-
-### 2. RISC-V V 扩展（Vector Extension）的设计精髓
-
-与 x86 AVX（固定 128/256/512 位）或 ARM Neon（固定 128 位）不同，RISC-V V 扩展采用了全新的 **VLA（Vector Length Agnostic，矢量长度无关）** 设计模式。
-
-#### 核心优势与 CSR 寄存器
-
-1. **写一次代码，到处运行（VLA 机制）**：
-   开发者编写向量代码时无需绑定具体的物理硬件寄存器长度（`VLEN`）。无论是在 128 位嵌入式 MCU 还是 4096 位超算 Vector Engine 上，同样的二进制代码均可自动发挥最佳性能。
-2. **核心控制 CSR 寄存器**：
-   - **`vtype`（向量类型寄存器）**：
-     - `SEW` (Selected Element Width)：选择当前向量元素位宽（如 8-bit, 16-bit, 32-bit, 64-bit）。
-     - `LMUL` (Length Multiplier)：向量寄存器分组倍率（可将多个向量寄存器组合成 `LMUL=2, 4, 8` 的组，从而获得更大的向量容量）。
-     - `ta` / `ma`：尾部/掩码无感知（Tail/Mask Agnostic）控制。
-   - **`vl`（当前向量元素长度）**：表示当前指令实际处理的元素个数，由 `vsetvli` 指令根据硬件容量动态配置。
-
-指令配置示例：
-```assembly
-# 动态配置处理 SEW=32 (32-bit 整数), LMUL=1 的向量
-vsetvli t0, a0, e32, m1, ta, ma
-```
-
----
-
-### 3. 本模拟器对 V 扩展的支持状态说明
-
-在本项目模拟器中（源码位于 [src/isa/riscv/vector/]($env.repo/tree/master/src/isa/riscv/vector/)）：
-
-> [!IMPORTANT]
-> **模拟器向量扩展实现状态**：
-> 1. 模拟器支持 RISC-V V 扩展 1.0 标准的核心**整型向量指令集**（包含 `vadd.vv/vx/vi`, `vsub`, `vmul`, `vslide1up`, `vslide1down`, `vsetvli` 等）。
-> 2. **限制声明**：模拟器目前**尚未提供对浮点向量指令（Floating-Point Vector Instructions）的支持**。在进行向量编程和实验时，请使用整型数据（INT8 / INT16 / INT32）类型。
-
----
-
-## 二、 衍生扩展：AME 矩阵扩展与 P 扩展
-
-除了通用 1D 向量扩展（V 扩展）外，RISC-V 社区还在火热推进行业专用的并行扩展提案（手册规范已收录于 [Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)）：
+想深入了解 RISC-V Linux 内核启动的底层细节，可参考：[问 AI：深入理解 RISC-V Linux 内核引导启动流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V架构下Linux内核的启动流程,从OpenSBI初始化,mret切换到S-mode,head.S内核入口,页表建立到挂载Rootfs启动PID1的完整步骤&send_immediately=true&force_search=true)
 
 ```mermaid
-flowchart TD
-    ISA["RISC-V 并行计算架构扩展版图"] --> VExt["V 扩展 (Vector Extension)<br/>1D 通用矢量计算"]
-    ISA --> PExt["P 扩展 (Packed SIMD)<br/>基于 GPR 寄存器打包"]
-    ISA --> AMEExt["AME 扩展 (Matrix Extension)<br/>2D 张量/矩阵乘加引擎"]
+sequenceDiagram
+    autonumber
+    participant Emu as RISC-V 模拟器 (Host)
+    participant SBI as OpenSBI 固件 (M-Mode)
+    participant Kernel as Linux Kernel (S-Mode)
+    participant User as 用户态进程 (U-Mode)
 
-    VExt --> VApp["通用 HPC / 科学计算 / 音视频编解码"]
-    PExt --> PApp["超低功耗 MCU / DSP / 8-16bit 语音图像"]
-    AMEExt --> AMEApp["端侧 AI / 深度学习 GEMM / 大模型推理"]
+    Emu->>SBI: 1. 复位跳转至 0x80000000<br/>a0=HartID(0), a1=DTB物理地址
+    Note over SBI: 2. 硬件/CSR 初始化<br/>注册 Ecall 处理程序<br/>准备 S-mode 运行环境
+    SBI->>Kernel: 3. mret 切换特权级至 S-mode<br/>PC 跳转至 Kernel Image 入口
+    Note over Kernel: 4. 开启 Sv39 虚拟内存页表<br/>解析 a1 寄存器传入的 DTB 设备树<br/>初始化内存、PLIC、UART 驱动
+    Note over Kernel: 5. 挂载 Rootfs 根文件系统<br/>解压 Initramfs / 挂载 VirtIO-Block
+    Kernel->>User: 6. 切换至 U-mode 执行第一个进程<br/>(/sbin/init 或 BusyBox /bin/sh)
+    User-->>Kernel: 7. 通过 ecall 请求系统调用 (Syscall)
 ```
 
-### 1. P 扩展 (Packed SIMD Extension)
-
-- **设计初衷**：在不需要引入额外大面积向量寄存器堆（Vector Registers）的前提下，直接复用标准的 32 位或 64 位通用整型寄存器（GPR）。
-- **工作机制**：将一个 64 位寄存器“打包”看作 8 个 8 位整数或 4 个 16 位整数，通过单条指令完成 8-way 并行加法或乘加。
-- **适用场景**：超低功耗 IoT 芯片、DSP 信号处理、基础像素/语音算子。
-- **规范仓库**：[RISC-V P 扩展手册](https://github.com/riscv/riscv-p-spec)
+模拟器复位后，CPU 初始 PC 指向 `0x80000000`。模拟器将 DTB 设备树加载到内存（如 `0x9F000000`），并设置 `a0 = 0`（HartID）和 `a1 = 0x9F000000`（DTB 地址）。OpenSBI 在 M-mode 下完成初始化后，通过 `mret` 指令交接给 S-mode 的 Linux 内核。
 
 ---
 
-### 2. AME 扩展 (Advanced Matrix Extension / 矩阵扩展)
+### 2. 设备树 (Device Tree / DTS & DTB)
 
-- **设计初衷**：为了应对 Transformer / 卷积神经网络中密集的二维矩阵乘法（GEMM：$C = A \times B + C$），1D 矢量扩展需要频繁进行规约与转置。AME 扩展直接在硬件层引入了 **2D 矩阵寄存器（Tile Registers）**。
-- **工作机制**：单条矩阵指令可在一组 Tile 寄存器间完成二维收缩乘加，极大提高了数据复用率与 MAC（Multiplier-Accumulator）算力密度。
-- **适用场景**：AI 加速卡、端侧 NPU、大语言模型矩阵乘法硬件加速。
-- **规范仓库**：[RISC-V AME 矩阵扩展手册](https://github.com/riscv/riscv-matrix-extension)
+想深入了解设备树语法与 Linux 解析原理，可参考：[问 AI：深入理解 RISC-V 设备树 DTS 规范与 Linux 解析流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V设备树DTS语法,DTC编译器,chosen节点bootargs参数以及Linux内核如何解析DTB发现硬件&send_immediately=true&force_search=true)
+
+设备树实现了硬件描述与内核源码的解耦。在本项目 [dts/virt.dts]($env.repo/tree/master/dts/virt.dts) 中描述了模拟器的虚拟板卡布局（包含 `chosen` 节点、`memory@80000000`、`uart0`、`plic` 等）：
+
+```dts
+/dts-v1/;
+/ {
+    #address-cells = <0x2>;
+    #size-cells = <0x2>;
+    compatible = "virt-board";
+
+    chosen {
+        stdout-path = "/soc/uart0@10000000";
+        bootargs = "console=ttyS0 earlycon=sbi initcall_debug"; // 传递给内核的命令行参数
+    };
+
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x0 0x80000000 0x0 0x20000000>; // 512MB RAM
+    };
+
+    soc {
+        #address-cells = <0x2>;
+        #size-cells = <0x2>;
+        compatible = "simple-bus";
+        ranges;
+
+        uart0: uart0@10000000 {
+            interrupts = <0xa>;
+            interrupt-parent = <&plic>;
+            reg = <0x0 0x10000000 0x0 0x8>;
+            compatible = "ns16550a";
+        };
+
+        plic: plic@c000000 {
+            phandle = <0x11>;
+            reg = <0x0 0xc000000 0x0 0x4000000>;
+            interrupt-controller;
+            compatible = "riscv,plic0";
+        };
+    };
+};
+```
+
+使用 `dtc` 可将 `.dts` 编译为二进制 `.dtb` 文件：
+```bash
+dtc -I dts -O dtb -o dts/virt.dtb dts/virt.dts
+```
 
 ---
 
-## 三、 实验任务：编写与运行 SIMD 算子代码
+### 3. OpenSBI 与 SBI 接口规范
 
-本实验要求你利用模拟器支持的整型向量指令，编写简单的矢量化计算算子，并在模拟器/单元测试中验证其正确性。
+想深入了解 OpenSBI 固件与 SBI 规范，可参考：[问 AI：深入理解 RISC-V OpenSBI 固件与 SBI 规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释RISC-V%20SBI规范,OpenSBI固件的作用,M-mode与S-mode交接机制以及Ecall触发SBI服务的原理&send_immediately=true&force_search=true)
 
-### 1. 实验小任务一：向量点积（Vector Dot Product）
+S-mode 的 Linux 内核通过 `ecall` 指令请求 M-mode 的 OpenSBI 提供硬件服务（`a7` 为 EID 扩展号，`a6` 为 FID 函数号，`a0`~`a5` 传递参数）：
+- **Console Extension (EID: `0x01` / `0x4442434E`)**：控制台字符打印。
+- **Timer Extension (EID: `0x54494D45`)**：设置 `mtimecmp` 比较寄存器。
+- **System Reset Extension (EID: `0x53525354`)**：请求系统关机/重启。
 
-向量点积公式为：
-$$\text{DotProduct}(A, B) = \sum_{i=0}^{N-1} A[i] \times B[i]$$
+---
 
-在 C / 内嵌汇编中，使用向量指令实现整型向量点积算法：
+### 4. Rootfs 挂载与加载机制
+
+| 挂载方式                | 部署位置       | 存储介质           | 特点与适用场景                                                                 |
+| ----------------------- | -------------- | ------------------ | ------------------------------------------------------------------------------ |
+| **Initramfs**           | 物理内存 (RAM) | cpio/gzip 归档镜像 | 直接载入内存，加载极快，修改不保存；适合验证内核与基础工具                     |
+| **VirtIO-Block Rootfs** | 磁盘镜像文件   | Ext4 文件系统      | 挂载在 VirtIO 块设备（`/dev/vda`）上，支持持久化读写与部署 Alpine Linux 发行版 |
+
+---
+
+## 二、 实验小任务一：Initramfs 验证与用户态程序注入
+
+在这个实验中，你将使用项目提供的预编译镜像启动模拟器，制作一个带有 Ext4 文件系统的 VirtIO-Block 磁盘镜像，并将你在实验一中编写的程序编译为用户态 ELF，放入磁盘中在 Linux 内核上运行！
+
+### 1. 获取预编译镜像并验证启动
+
+项目在 GitHub Releases 中提供了打包好的 `OpenSBI + Linux Kernel + Initramfs(BusyBox)` 镜像：
+- **镜像下载地址**：[prebuilt-kernels 发布页面]($env.repo/releases/tag/prebuilt-kernels)
+
+下载预编译镜像并尝试在模拟器中启动（使用默认 Initramfs）：
+
+```bash
+# 使用 release 模式运行模拟器，体验流畅的 Linux 启动过程
+cargo run --release -- ./test_resources/bin/virtio_blk_test.elf
+```
+
+观察终端输出，等待 OpenSBI 引导完成后，Linux 内核会成功打印日志并自动进入 Busybox Shell！
+
+---
+
+### 2. 制作 VirtIO-Block 磁盘镜像
+
+在宿主机 Linux/WSL 环境下，使用 `dd` 与 `mkfs.ext4` 工具制作一个固定大小的空磁盘镜像：
+
+```bash
+# 1. 使用 dd 创建一个 40MB 的全零文件作为块设备镜像
+dd if=/dev/zero of=block_image bs=4096 count=10240
+
+# 2. 将镜像文件格式化为 Ext4 文件系统
+mkfs.ext4 block_image
+
+# 3. 在宿主机上创建临时挂载点并挂载该镜像
+sudo mkdir -p /mnt/disk
+sudo mount -o loop block_image /mnt/disk
+```
+
+---
+
+### 3. 编写并交叉编译用户态 C 程序
+
+将 Chapter 1 中的逻辑改写为一个标准 C 语言用户态程序 `user_app.c`：
 
 ```c
-#include <stdint.h>
-#include <stddef.h>
+// user_app.c
+#include <stdio.h>
 
-// 使用 RISC-V 向量指令计算 32 位整型向量点积
-int32_t vector_dot_product_int32(const int32_t *a, const int32_t *b, size_t n) {
-    int32_t sum = 0;
-    size_t vl;
-    
-    for (; n > 0; n -= vl, a += vl, b += vl) {
-        // 1. 动态配置向量长度 (SEW=32, LMUL=1)
-        asm volatile ("vsetvli %0, %1, e32, m1, ta, ma" : "=r"(vl) : "r"(n));
-        
-        // 2. 将数组 a 和 b 加载入向量寄存器 v1, v2 (伪代码/内嵌汇编)
-        // 3. 执行向量乘法与规约累加
-    }
-    
-    return sum;
+int main() {
+    printf("=========================================\n");
+    printf(" Hello RISC-V Linux User Space!         \n");
+    printf(" Running inside RISC-V Emulator + Linux! \n");
+    printf("=========================================\n");
+    return 0;
 }
 ```
 
----
-
-### 2. 实验小任务二：整型矩阵乘法算子 (INT32 GEMM)
-
-实现一个基于向量指令加速的 $2 \times 2$ 或 $4 \times 4$ 整型矩阵乘法 $C = A \times B$：
-
-$$C_{i,j} = \sum_{k} A_{i,k} \times B_{k,j}$$
-
-在计算 $C$ 的每一行时，将矩阵 $B$ 的对应行加载入向量寄存器，使用向量标量乘加指令（`vwmacc` 或 `vmul` + `vadd`）批量更新结果矩阵的行向量，体会向量并行计算相比嵌套循环标量代码的效率提升。
-
----
-
-### 3. 在模拟器与单元测试中验证
-
-项目在 [src/isa/riscv/vector/arithmetic/integer_test.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/integer_test.rs) 中提供了大量整型向量算术测试用例（如 `test_vector_op_vadd_vv`）。
-
-你可以通过以下命令在模拟器上运行向量单元测试：
+使用交叉编译器 `riscv64-unknown-elf-gcc`（或 `riscv64-linux-gnu-gcc`）将其**静态编译（`-static`）**为 RISC-V 64 位用户态 ELF 可执行文件，并放入挂载的磁盘镜像中：
 
 ```bash
-cargo test vector_op
+# 静态编译 C 程序
+riscv64-unknown-elf-gcc -static user_app.c -o user_app
+
+# 拷贝二进制文件进入磁盘挂载目录
+sudo cp user_app /mnt/disk/
+
+# 确认文件写入后，卸载磁盘镜像（极其重要！必须 umount 后才能传给模拟器）
+sudo umount /mnt/disk
 ```
+
+---
+
+### 4. 模拟器挂载磁盘并运行用户程序
+
+在启动模拟器时，通过 `--device=virtio-block:block_image` 参数将镜像挂载为 VirtIO-Block 块设备：
+
+```bash
+cargo run --release -- ./test_resources/bin/virtio_blk_test.elf --device=virtio-block:block_image
+```
+
+Linux 内核启动后，VirtIO 驱动会自动识别该设备为 `/dev/vda`。在 BusyBox Shell 终端中挂载磁盘并执行你注入的程序：
+
+```bash
+# 在模拟器 Linux 终端中执行：
+# 1. 创建挂载点并挂载 VirtIO 磁盘
+mount /dev/vda /mnt
+
+# 2. 运行你写入的用户态 ELF 程序！
+/mnt/user_app
+```
+
+如果你能成功看到 `Hello RISC-V Linux User Space!` 的输出，恭喜你成功完成了模拟器从底层物理设备到高层 Linux 用户态程序的完整穿透！
+
+---
+
+## 三、 实践：Alpine Linux Rootfs 部署与系统扩展
+
+在完成了基础验证后，我们来挑战更具成就感的目标：**在模拟器上部署一个真正的通用 Linux 发行版（Alpine Linux）**。
+
+Alpine Linux 是一个面向安全、轻量级的 Linux 发行版，支持完整的 `apk` 包管理器与丰富的软件生态。
+
+### 1. 部署 Alpine Linux 为 VirtIO-Block Rootfs
+
+1. **下载 Alpine Linux Rootfs 和预编译 kernel**：
+   - 访问 Alpine Linux 官网，下载 riscv64 架构的 **Mini Root FS** 压缩包（`alpine-minirootfs-*-riscv64.tar.gz`）。
+   - 从项目的 Release 中下载无 initramfs 版本的预编译内核
+2. **解压 Rootfs 到磁盘镜像**：
+   ```bash
+   # 创建一个 256MB 的磁盘镜像以容纳完整发行版
+   dd if=/dev/zero of=alpine_rootfs.img bs=1M count=256
+   mkfs.ext4 alpine_rootfs.img
+
+   # 挂载镜像并解压 Alpine Rootfs
+   sudo mkdir -p /mnt/alpine
+   sudo mount -o loop alpine_rootfs.img /mnt/alpine
+   sudo tar -xvf alpine-minirootfs-*-riscv64.tar.gz -C /mnt/alpine
+   ```
+
+3. 修改 `/mnt/alpine/etc/tab`，取消 `ttyS0` 一行的注释
+4. 卸载镜像 `sudo umount /mnt/alpine`
+4. **将 VirtIO-Block 配置为系统根设备**：
+   修改内核启动命令行参数（在 DTS 的 `chosen` 节点或启动参数中配置 `root=/dev/vda rw console=ttyS0`），开启模拟器并挂载 `alpine_rootfs.img`，即可直接引导进入全新的 Alpine Linux 系统！
+
+---
+
+### 2. 使用包管理器 (`apk`) 扩展系统
+
+进入 Alpine Linux 后，我们希望安装 GCC 编译器等开发工具。根据你在 Chapter 5 中的外设实现情况，有两种扩展途径：
+
+```mermaid
+flowchart TD
+    Start["准备部署 Alpine Linux"] --> CheckNet{"Chapter 5 是否实现了 VirtIO-Net 网卡？"}
+
+    CheckNet -- "是 (支持网络)" --> DirectApk["途径 A：模拟器直接连网<br/>在模拟器 Linux 内运行:<br/>apk update && apk add gcc make"]
+    CheckNet -- "否 (仅有 VirtIO-Block)" --> QemuBridge["途径 B：借用 QEMU 宿主联网更新"]
+
+    QemuBridge --> Step1["1. 将 alpine_rootfs.img 挂载至 qemu-system-riscv64"]
+    Step1 --> Step2["2. 在 QEMU 中借用 VirtIO-Net 连网<br/>运行 apk update && apk add gcc make"]
+    Step2 --> Step3["3. QEMU 关机并保存镜像"]
+    Step3 --> Step4["4. 将更新后的镜像转回我们的模拟器启动！"]
+
+    DirectApk --> Final["成功在模拟器上运行原生 GCC 编译程序！"]
+    Step4 --> Final
+```
+
+#### 途径 B 操作指引（借用 QEMU 安装软件包）：
+
+在宿主机上使用 QEMU 挂载该磁盘镜像，并借用 QEMU 的网络支持在线安装软件：
+
+```bash
+# 使用 QEMU 启动镜像并开启网络支持
+qemu-system-riscv64 -M virt -m 2G -nographic \
+  -kernel ./path/to/Image \
+  -drive file=alpine_rootfs.img,format=raw,id=hd0 \
+  -device virtio-blk-device,drive=hd0 \
+  -netdev user,id=net0 -device virtio-net-device,netdev=net0 \
+  -append "root=/dev/vda rw console=ttyS0"
+```
+
+进入 QEMU 中的 Alpine 终端后，使用包管理器安装你需要的软件包：
+```bash
+# 在 QEMU 的 Alpine 内执行：
+apk update
+apk add gcc make libc-dev
+
+# 安装完成后关机
+poweroff
+
+# 如果无法正常关机，请使用 sync 命令刷新磁盘
+# 然后再 ctrl + A, X 强制退出
+```
+
+关机后，将安装好 GCC 开发环境的 `alpine_rootfs.img` 转回我们的 RISC-V 模拟器上启动：
+```bash
+cargo run --release -- ./test_resources/bin/virtio_blk_test.elf --device=virtio-block:alpine_rootfs.img
+```
+
+现在，你可以在你亲手编写的 RISC-V 模拟器上运行的 Alpine Linux 系统中，**直接在虚拟机内使用 `gcc` 编译并运行新的 C 语言程序**！
+
+---
+
+### 3. 探索更多精简 Linux 发行版
+
+完成了 Alpine Linux 的部署后，你还可以尝试探索其他流行的 Linux 发行版生态：
+- **Buildroot**：使用 Buildroot 工具链从零按需定制极简 Linux 系统镜像。
+- **Debian RISC-V**：体验涵盖上万软件包的完整 Debian RISC-V 操作系统环境。
 
 ---
 
 ## 项目导览
 
-- **向量寄存器与类型定义**：[src/isa/riscv/vector/types.rs]($env.repo/tree/master/src/isa/riscv/vector/types.rs)（定义 `Vlmul`, `Vsew`, `Vector` 结构体）
-- **向量模块核心调度**：[src/isa/riscv/vector/mod.rs]($env.repo/tree/master/src/isa/riscv/vector/mod.rs)
-- **整型向量指令实现**：[src/isa/riscv/vector/arithmetic/integer_impl.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/integer_impl.rs)
-- **定点向量指令实现**：[src/isa/riscv/vector/arithmetic/fix_point_impl.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/fix_point_impl.rs)
-- **向量单元测试套件**：[src/isa/riscv/vector/arithmetic/integer_test.rs]($env.repo/tree/master/src/isa/riscv/vector/arithmetic/integer_test.rs)
-- **附录拓展资料库**：[Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)
+- **模拟器主入口与 CLI 参数**：[src/main.rs]($env.repo/tree/master/src/main.rs)
+- **设备树 DTS 定义文件**：[dts/virt.dts]($env.repo/tree/master/dts/virt.dts) 与编译后的二进制 [dts/virt.dtb]($env.repo/tree/master/dts/virt.dtb)
+- **Linux / OpenSBI 编译流控制**：[Makefile]($env.repo/tree/master/Makefile)（包含 `build-dtb`、`build-opensbi` 与 `linux` 目标）
+- **CPU 启动入口与默认 PC**：[src/isa/riscv/executor.rs]($env.repo/tree/master/src/isa/riscv/executor.rs) 与 [src/ram_config.rs]($env.repo/tree/master/src/ram_config.rs)
+- **VirtIO-Block 磁盘设备后端**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)
+- **板卡总线与外设映射**：[src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs)

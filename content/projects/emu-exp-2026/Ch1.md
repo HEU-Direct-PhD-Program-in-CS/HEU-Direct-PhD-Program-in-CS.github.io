@@ -4,6 +4,7 @@ type: page
 weight: 10
 draft: false
 showTableOfContents: true
+mermaid: true
 ---
 
 ## 本章概览
@@ -37,16 +38,35 @@ GNU ASM 汇编文件通常由 label、指令和 assembler directive（伪指令�
 
 ```asm
 .section .text.ENTRY
-.globl _start
+.globl main
 
-_start:
-1:
-    la a0, msg             # 设置第一个参数为 msg 的地址
-    call print             # 函数调用
-    j 1b                   # 跳回 (back) 最近的 label 1
+main:
+    # 分配栈空间并保存 ra、s0
+    addi sp, sp, -16
+    sd   ra, 8(sp)
+    sd   s0, 0(sp)
+
+    li   s0, 0              # 用 s0 作计数器，printf 保证不会修改 s0
+
+loop0:
+    la   a0, msg            # 传入字符串地址
+    call printf
+
+    addi s0, s0, 1
+    li   t1, 10
+    bne  s0, t1, loop0
+
+    li   a0, 0              # main 函数返回值 0
+
+    # 恢复寄存器并返回
+    ld   s0, 0(sp)
+    ld   ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
 .section .rodata
 msg:
-    .asciz "Hello, world!"
+    .asciz "Hello, world!\n"
 ```
 
 `_start:` 和 `msg:` 是标号（label），代表当前位置的地址。`la`、`call` 和 `j` 是 RISC-V 汇编指令或伪指令（pseudo instruction）。以 `.` 开头的行通常是汇编器伪指令（directive），由汇编器处理，本身并不是 CPU 的指令。
@@ -118,7 +138,7 @@ riscv64-unknown-elf-objdump -d -M no-aliases bin/main.elf
 
 UART 的发送和接收状态都通过寄存器体现。最简单的应用方式：输出字符时，程序轮询发送状态并写入数据寄存器；输入字符时，交互程序可以轮询接收状态。模拟器的终端桥接会把宿主按键送入 UART，并把 UART 输出写回终端。
 
-如果你需要在裸机程序中使用定时器中断或操作系统类功能，请参考 Chapter 0x03 中的异常处理和特权级内容。
+如果你需要在裸机程序中使用定时器中断或操作系统类功能，请参考 Chapter 0x04 中的异常处理和特权级内容。
 
 
 ## 项目导览

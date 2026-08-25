@@ -1,320 +1,331 @@
 ---
-title: "Chapter 0x05 - Linux 内核启动流程与系统整合"
+title: "Chapter 0x05 - 外设与中断系统"
 type: page
 weight: 50
 draft: false
 showTableOfContents: true
+mermaid: true
 ---
 
 ## 本章概览
 
-经过前面章节的学习，我们从指令集译码执行、裸机汇编、中断特权级切换，一路推进到了外设与 VirtIO 机制。现在，我们将迎接模拟器项目最重要的终极里程碑——**引导运行 Linux 操作系统内核并部署完整 Linux 发行版（Alpine Linux）**。
+在现代计算机系统架构中，CPU 绝非孤立运转的算术引擎，它需要时刻与丰富的外围设备（Peripherals）交互：通过串口（UART）输出调试日志、通过定时器（Timer）触发任务调度、通过网卡与磁盘进行高速 I/O。
 
-在全系统模拟（Full System Emulation）下，Linux 内核的引导绝非简单地把二进制加载到内存执行，它涉及到**固件（OpenSBI）**、**设备树（Device Tree / DTS）**、**特权级交接（M-mode 到 S-mode）**、**内存映射（Sv39 页表）** 以及 **根文件系统（Rootfs / Initramfs）** 的全方位协调。
+模拟器不仅要模拟 CPU 指令的执行，还需要构建一套高效、规范且支持并发的外设与中断抽象层。本章将带你深入 RISC-V 的中断体系拓扑（PLIC & ACLINT/CLINT），剖析模拟器的外设 Trait 基础设施与异步任务框架（`AsyncWorker`），解析基于 VirtIO 规范的半虚拟化（Paravirtualization）机制，并最终引导你开发一个具有实际功能的系统级外设。
 
 通过本章学习与实验，你将完成以下内容：
-1. 深入理解 RISC-V Linux 系统的启动链条（OpenSBI -> Linux Kernel -> Initramfs / Rootfs）。
-2. 掌握设备树（DTS / DTB）的语法规范、硬件描述节点以及 Kernel 解析发现物理外设的原理。
-3. 理解 RISC-V SBI（Supervisor Binary Interface）规范与 M-mode / S-mode 的服务调用交互。
-4. **验证性实验小任务一**：使用预编译 Linux 镜像启动模拟器，通过 `dd` 与 `mkfs.ext4` 制作 VirtIO-Block 磁盘镜像，并将自己的 RISC-V 用户态程序注入 Linux 运行。
-5. **进阶实验小任务二**：将模拟器配置为以 VirtIO-Block 作为 Rootfs 挂载 Alpine Linux 根文件系统，使用包管理器（`apk`）在线/借用 QEMU 安装编译开发环境（如 GCC）。
+1. 理解 RISC-V 外部中断（PLIC）与局部中断（ACLINT/CLINT）的硬件拓扑及工作机制。
+2. 掌握模拟器外设架构：`DeviceTrait`、`MemMappedDeviceTrait`、`PlicIRQSource` 以及结合原子变量与内存屏障的 `AsyncWorker` 异步解耦框架。
+3. 理解 VirtIO 规范：Virtqueue 共享环（Available/Used Ring）、Feature 协商机制、Doorbell 门铃机制以及半虚拟化 vs 全虚拟化的陷入陷出（Trap & Emulate）原理。
+4. **综合实验任务**：独立开发一个可直接被 Linux Kernel 内核驱动识别与使用的真实外设（如 VirtIO-Net、VirtIO-FS、GPIO、Watchdog 等）。
 
 ---
 
-## 一、 Linux 内核启动流程全貌
+## 一、 RISC-V 中断体系与 PLIC 工作机制
 
-在全系统模拟下，Linux 内核的引导涉及固件、特权级交接、设备树解析以及根文件系统挂载。
+### 1. 中断拓扑与体系结构
 
-### 1. 引导启动链路与特权级交接
+在 RISC-V 系统架构中，中断按来源与作用域划分为两大核心子系统：
 
-想深入了解 RISC-V Linux 内核启动的底层细节，可参考：[问 AI：深入理解 RISC-V Linux 内核引导启动流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V架构下Linux内核的启动流程,从OpenSBI初始化,mret切换到S-mode,head.S内核入口,页表建立到挂载Rootfs启动PID1的完整步骤&send_immediately=true&force_search=true)
+```mermaid
+flowchart TD
+    subgraph ExternalDevices["外部外设 (External Peripherals)"]
+        UART["UART 串口"]
+        TimerDev["SampleTimer / 硬件定时器"]
+        VirtIO["VirtIO 磁盘/网卡"]
+    end
+
+    subgraph CoreLocal["核局部设备 (Core-Local)"]
+        ACLINT["ACLINT / CLINT<br/>(mtime / mtimecmp / IPI)"]
+    end
+
+    subgraph InterruptControllers["中断控制器层"]
+        PLIC["PLIC 平台级中断控制器<br/>(Platform-Level Interrupt Controller)"]
+    end
+
+    subgraph CPUCore["RISC-V CPU Core"]
+        MEIP["mip.MEIP / sip.SEIP<br/>(外部中断管线)"]
+        MTIP["mip.MTIP / sip.STIP<br/>(定时器中断管线)"]
+        MSIP["mip.MSIP / sip.SSIP<br/>(软件/核间中断 IPI)"]
+    end
+
+    UART -->|IRQ Line| PLIC
+    TimerDev -->|IRQ Line| PLIC
+    VirtIO -->|IRQ Line| PLIC
+
+    PLIC -->|MEIP Signal| MEIP
+    ACLINT -->|MTIP Signal| MTIP
+    ACLINT -->|MSIP Signal| MSIP
+```
+
+1. **核局部中断控制器（ACLINT / CLINT）**：
+   - 负责生成处理器核本地的**定时器中断（Timer Interrupt, `MTIP`）**和**核间软件中断（Software Interrupt / IPI, `MSIP`）**。
+   - 硬件寄存器 `mtime`（全局高精度计数器）和 `mtimecmp`（比较寄存器）直接映射在 MMIO 空间中。当 `mtime >= mtimecmp` 时，硬件自动拉高当前 Core 的 `MTIP` 管线。
+2. **平台级中断控制器（PLIC）**：
+   - 负责收集与仲裁系统中成百上千个外部设备（如 UART、网卡、VirtIO 设备）发出的**外部中断（External Interrupt, `MEIP`/`SEIP`）**。
+   - PLIC 负责完成优先权仲裁，并将最高优先级的中断信号汇总输出给 CPU Core。
+
+想深入探讨 RISC-V 体系结构基础，可参考：[问 AI：什么是 RISC-V，为什么要学习 RISC-V？](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true)
+
+---
+
+### 2. PLIC 的核心工作机制
+
+PLIC（Platform-Level Interrupt Controller）作为一个独立的硬件仲裁单元，内部维护了以下关键寄存器与状态状态机：
+
+- **Priority（中断优先级寄存器）**：为每个外部中断源（IRQ ID）配置优先级（通常 0 表示禁用该中断，数值越大优先级越高）。
+- **Pending（中断挂起位图）**：设备拉高 IRQ 线后，PLIC 将对应的 Pending 位置 1，表示该中断正在等待处理。
+- **Enable（中断使能位图）**：按 CPU Hart 与特权级（M-mode / S-mode）控制是否允许响应特定 IRQ ID。
+- **Threshold（中断优先级阈值）**：只有优先级**严格大于** Threshold 的 Pending 中断才会被允许递交给 CPU。
+- **Claim / Complete（中断响应与完成寄存器）**：CPU 读写该寄存器以完成与 PLIC 的握手交互。
+
+PLIC 的中断服务完整生命周期如下图所示：
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Emu as RISC-V 模拟器 (Host)
-    participant SBI as OpenSBI 固件 (M-Mode)
-    participant Kernel as Linux Kernel (S-Mode)
-    participant User as 用户态进程 (U-Mode)
+    participant Dev as 外设 (Device)
+    participant PLIC as PLIC 仲裁器
+    participant CPU as RISC-V Core (Guest OS)
 
-    Emu->>SBI: 1. 复位跳转至 0x80000000<br/>a0=HartID(0), a1=DTB物理地址
-    Note over SBI: 2. 硬件/CSR 初始化<br/>注册 Ecall 处理程序<br/>准备 S-mode 运行环境
-    SBI->>Kernel: 3. mret 切换特权级至 S-mode<br/>PC 跳转至 Kernel Image 入口
-    Note over Kernel: 4. 开启 Sv39 虚拟内存页表<br/>解析 a1 寄存器传入的 DTB 设备树<br/>初始化内存、PLIC、UART 驱动
-    Note over Kernel: 5. 挂载 Rootfs 根文件系统<br/>解压 Initramfs / 挂载 VirtIO-Block
-    Kernel->>User: 6. 切换至 U-mode 执行第一个进程<br/>(/sbin/init 或 BusyBox /bin/sh)
-    User-->>Kernel: 7. 通过 ecall 请求系统调用 (Syscall)
+    Dev->>PLIC: 1. 拉高 IRQ 信号线 (Assert IRQ)
+    Note over PLIC: 2. 置位 Pending 位图<br/>检查 Priority > Threshold<br/>且 Enable 开启
+    PLIC->>CPU: 3. 拉高 CPU 的 MEIP / SEIP 中断管线
+    Note over CPU: 4. CPU 响应中断，进入 Trap Handler
+    CPU->>PLIC: 5. 读 Claim 寄存器 (Read Claim Reg)
+    PLIC-->>CPU: 6. 返回最高优先级的 IRQ ID (如 ID 63)
+    Note over PLIC: 7. 自动清零对应 Pending 位
+    CPU->>Dev: 8. 执行外设 ISR，服务外设逻辑
+    CPU->>PLIC: 9. 写 Completion 寄存器 (Write Complete Reg = 63)
+    Note over PLIC: 10. PLIC 允许该 IRQ ID 再次触发
 ```
 
-模拟器复位后，CPU 初始 PC 指向 `0x80000000`。模拟器将 DTB 设备树加载到内存（如 `0x9F000000`），并设置 `a0 = 0`（HartID）和 `a1 = 0x9F000000`（DTB 地址）。OpenSBI 在 M-mode 下完成初始化后，通过 `mret` 指令交接给 S-mode 的 Linux 内核。
+欲了解更多 PLIC 的寄存器偏移与硬件规范细节，可查阅：[问 AI：深入理解 RISC-V PLIC 中断控制器规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V的PLIC中断控制器规范,包括Priority,Pending,Enable,Threshold,Claim和Complete机制&send_immediately=true&force_search=true)
 
 ---
 
-### 2. 设备树 (Device Tree / DTS & DTB)
+## 二、 模拟器外设架构与 SamplerTimer 代码导读
 
-想深入了解设备树语法与 Linux 解析原理，可参考：[问 AI：深入理解 RISC-V 设备树 DTS 规范与 Linux 解析流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V设备树DTS语法,DTC编译器,chosen节点bootargs参数以及Linux内核如何解析DTB发现硬件&send_immediately=true&force_search=true)
+在模拟器中，为了让外设既能优雅地挂载到地址总线（MMIO），又不会因为耗时 I/O 阻塞 CPU 指令推进主线程，模拟器设计了一套高度解耦的**设备 Trait 基础设施**与**异步任务 Worker 框架**。
 
-设备树实现了硬件描述与内核源码的解耦。在本项目 [dts/virt.dts]($env.repo/tree/master/dts/virt.dts) 中描述了模拟器的虚拟板卡布局（包含 `chosen` 节点、`memory@80000000`、`uart0`、`plic` 等）：
+### 1. 基础基础设施与 Trait 体系
 
-```dts
-/dts-v1/;
-/ {
-    #address-cells = <0x2>;
-    #size-cells = <0x2>;
-    compatible = "virt-board";
+在 [src/device/mod.rs]($env.repo/tree/master/src/device/mod.rs) 中，模拟器定义了核心的外设接口抽象：
 
-    chosen {
-        stdout-path = "/soc/uart0@10000000";
-        bootargs = "console=ttyS0 earlycon=sbi initcall_debug"; // 传递给内核的命令行参数
-    };
-
-    memory@80000000 {
-        device_type = "memory";
-        reg = <0x0 0x80000000 0x0 0x20000000>; // 512MB RAM
-    };
-
-    soc {
-        #address-cells = <0x2>;
-        #size-cells = <0x2>;
-        compatible = "simple-bus";
-        ranges;
-
-        uart0: uart0@10000000 {
-            interrupts = <0xa>;
-            interrupt-parent = <&plic>;
-            reg = <0x0 0x10000000 0x0 0x8>;
-            compatible = "ns16550a";
-        };
-
-        plic: plic@c000000 {
-            phandle = <0x11>;
-            reg = <0x0 0xc000000 0x0 0x4000000>;
-            interrupt-controller;
-            compatible = "riscv,plic0";
-        };
-    };
-};
-```
-
-使用 `dtc` 可将 `.dts` 编译为二进制 `.dtb` 文件：
-```bash
-dtc -I dts -O dtb -o dts/virt.dtb dts/virt.dts
-```
-
----
-
-### 3. OpenSBI 与 SBI 接口规范
-
-想深入了解 OpenSBI 固件与 SBI 规范，可参考：[问 AI：深入理解 RISC-V OpenSBI 固件与 SBI 规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释RISC-V%20SBI规范,OpenSBI固件的作用,M-mode与S-mode交接机制以及Ecall触发SBI服务的原理&send_immediately=true&force_search=true)
-
-S-mode 的 Linux 内核通过 `ecall` 指令请求 M-mode 的 OpenSBI 提供硬件服务（`a7` 为 EID 扩展号，`a6` 为 FID 函数号，`a0`~`a5` 传递参数）：
-- **Console Extension (EID: `0x01` / `0x4442434E`)**：控制台字符打印。
-- **Timer Extension (EID: `0x54494D45`)**：设置 `mtimecmp` 比较寄存器。
-- **System Reset Extension (EID: `0x53525354`)**：请求系统关机/重启。
-
----
-
-### 4. Rootfs 挂载与加载机制
-
-| 挂载方式                | 部署位置       | 存储介质           | 特点与适用场景                                                                 |
-| ----------------------- | -------------- | ------------------ | ------------------------------------------------------------------------------ |
-| **Initramfs**           | 物理内存 (RAM) | cpio/gzip 归档镜像 | 直接载入内存，加载极快，修改不保存；适合验证内核与基础工具                     |
-| **VirtIO-Block Rootfs** | 磁盘镜像文件   | Ext4 文件系统      | 挂载在 VirtIO 块设备（`/dev/vda`）上，支持持久化读写与部署 Alpine Linux 发行版 |
-
----
-
-## 二、 实验小任务一：Initramfs 验证与用户态程序注入
-
-在这个实验中，你将使用项目提供的预编译镜像启动模拟器，制作一个带有 Ext4 文件系统的 VirtIO-Block 磁盘镜像，并将你在实验一中编写的程序编译为用户态 ELF，放入磁盘中在 Linux 内核上运行！
-
-### 1. 获取预编译镜像并验证启动
-
-项目在 GitHub Releases 中提供了打包好的 `OpenSBI + Linux Kernel + Initramfs(BusyBox)` 镜像：
-- **镜像下载地址**：[prebuilt-kernels 发布页面]($env.repo/releases/tag/prebuilt-kernels)
-
-下载预编译镜像并尝试在模拟器中启动（使用默认 Initramfs）：
-
-```bash
-# 使用 release 模式运行模拟器，体验流畅的 Linux 启动过程
-cargo run --release -- ./test_resources/bin/virtio_blk_test.elf
-```
-
-观察终端输出，等待 OpenSBI 引导完成后，Linux 内核会成功打印日志并自动进入 Busybox Shell！
-
----
-
-### 2. 制作 VirtIO-Block 磁盘镜像
-
-在宿主机 Linux/WSL 环境下，使用 `dd` 与 `mkfs.ext4` 工具制作一个固定大小的空磁盘镜像：
-
-```bash
-# 1. 使用 dd 创建一个 40MB 的全零文件作为块设备镜像
-dd if=/dev/zero of=block_image bs=4096 count=10240
-
-# 2. 将镜像文件格式化为 Ext4 文件系统
-mkfs.ext4 block_image
-
-# 3. 在宿主机上创建临时挂载点并挂载该镜像
-sudo mkdir -p /mnt/disk
-sudo mount -o loop block_image /mnt/disk
-```
-
----
-
-### 3. 编写并交叉编译用户态 C 程序
-
-将 Chapter 1 中的逻辑改写为一个标准 C 语言用户态程序 `user_app.c`：
-
-```c
-// user_app.c
-#include <stdio.h>
-
-int main() {
-    printf("=========================================\n");
-    printf(" Hello RISC-V Linux User Space!         \n");
-    printf(" Running inside RISC-V Emulator + Linux! \n");
-    printf("=========================================\n");
-    return 0;
-}
-```
-
-使用交叉编译器 `riscv64-unknown-elf-gcc`（或 `riscv64-linux-gnu-gcc`）将其**静态编译（`-static`）**为 RISC-V 64 位用户态 ELF 可执行文件，并放入挂载的磁盘镜像中：
-
-```bash
-# 静态编译 C 程序
-riscv64-unknown-elf-gcc -static user_app.c -o user_app
-
-# 拷贝二进制文件进入磁盘挂载目录
-sudo cp user_app /mnt/disk/
-
-# 确认文件写入后，卸载磁盘镜像（极其重要！必须 umount 后才能传给模拟器）
-sudo umount /mnt/disk
-```
-
----
-
-### 4. 模拟器挂载磁盘并运行用户程序
-
-在启动模拟器时，通过 `--device=virtio-block:block_image` 参数将镜像挂载为 VirtIO-Block 块设备：
-
-```bash
-cargo run --release -- ./test_resources/bin/virtio_blk_test.elf --device=virtio-block:block_image
-```
-
-Linux 内核启动后，VirtIO 驱动会自动识别该设备为 `/dev/vda`。在 BusyBox Shell 终端中挂载磁盘并执行你注入的程序：
-
-```bash
-# 在模拟器 Linux 终端中执行：
-# 1. 创建挂载点并挂载 VirtIO 磁盘
-mount /dev/vda /mnt
-
-# 2. 运行你写入的用户态 ELF 程序！
-/mnt/user_app
-```
-
-如果你能成功看到 `Hello RISC-V Linux User Space!` 的输出，恭喜你成功完成了模拟器从底层物理设备到高层 Linux 用户态程序的完整穿透！
-
----
-
-## 三、 实验小任务二：Alpine Linux Rootfs 部署与系统扩展
-
-在完成了基础验证后，我们来挑战更具成就感的目标：**在模拟器上部署一个真正的通用 Linux 发行版（Alpine Linux）**。
-
-Alpine Linux 是一个面向安全、轻量级的 Linux 发行版，支持完整的 `apk` 包管理器与丰富的软件生态。
-
-### 1. 部署 Alpine Linux 为 VirtIO-Block Rootfs
-
-1. **下载 Alpine Linux Rootfs 和预编译 kernel**：
-   - 访问 Alpine Linux 官网，下载 riscv64 架构的 **Mini Root FS** 压缩包（`alpine-minirootfs-*-riscv64.tar.gz`）。
-   - 从项目的 Release 中下载无 initramfs 版本的预编译内核
-2. **解压 Rootfs 到磁盘镜像**：
-   ```bash
-   # 创建一个 256MB 的磁盘镜像以容纳完整发行版
-   dd if=/dev/zero of=alpine_rootfs.img bs=1M count=256
-   mkfs.ext4 alpine_rootfs.img
-
-   # 挂载镜像并解压 Alpine Rootfs
-   sudo mkdir -p /mnt/alpine
-   sudo mount -o loop alpine_rootfs.img /mnt/alpine
-   sudo tar -xvf alpine-minirootfs-*-riscv64.tar.gz -C /mnt/alpine
+1. **`DeviceTrait`（通用外设接口）**：
+   ```rust
+   pub trait DeviceTrait {
+       fn read(&mut self, addr: WordType, len: u32) -> Result<u64, MemError>;
+       fn write(&mut self, addr: WordType, len: u32, data: u64) -> Result<(), MemError>;
+       fn sync(&mut self);
+       /// 返回需要注册到后台线程执行的异步 Worker
+       fn get_async_worker(&mut self) -> Option<Box<dyn AsyncWorker>>;
+   }
    ```
-
-3. 修改 `/mnt/alpine/etc/tab`，取消 `ttyS0` 一行的注释
-4. 卸载镜像 `sudo umount /mnt/alpine`
-4. **将 VirtIO-Block 配置为系统根设备**：
-   修改内核启动命令行参数（在 DTS 的 `chosen` 节点或启动参数中配置 `root=/dev/vda rw console=ttyS0`），开启模拟器并挂载 `alpine_rootfs.img`，即可直接引导进入全新的 Alpine Linux 系统！
+2. **`MemMappedDeviceTrait`（内存映射外设接口）**：
+   扩展自 `DeviceTrait`，提供静态方法 `base()` 和 `size()`，用于模拟器启动时在 `MemoryMapIO` 中快速注册地址区间。
+3. **`PlicIRQSource` & `PlicDeviceHandler`（中断管线接入）**：
+   外设通过实现 `PlicDeviceHandler` 的 `irq_level(&self) -> bool` 方法提供当前中断电平状态。PLIC 采样定时器或电平探测器会轮询该接口获取最新电平。
 
 ---
 
-### 2. 使用包管理器 (`apk`) 扩展系统
+### 2. SamplerTimer 异步架构源码解析
 
-进入 Alpine Linux 后，我们希望安装 GCC 编译器等开发工具。根据你在 Chapter 4 中的外设实现情况，有两种扩展途径：
+[src/device/sample_timer.rs]($env.repo/tree/master/src/device/sample_timer.rs) 是模拟器提供的一个完整的毫秒级测试定时器外设。它清晰地演示了**主线程 MMIO 响应**与**后台 `AsyncWorker` 异步计时**的协作关系：
 
 ```mermaid
 flowchart TD
-    Start["准备部署 Alpine Linux"] --> CheckNet{"Chapter 4 是否实现了 VirtIO-Net 网卡？"}
+    subgraph MainThread["模拟器主线程 (CPU Step Thread)"]
+        CPUWrite["CPU 执行 sw/sb 指令"] --> MMIO["SampleTimerDevice::write_impl()"]
+        MMIO -->|1. 发送命令| ChannelSender["crossbeam::channel::Sender"]
+        MMIO -->|2. 重置 IRQ| AtomicReset["irq_pending.store(false, Release)"]
+    end
 
-    CheckNet -- "是 (支持网络)" --> DirectApk["途径 A：模拟器直接连网<br/>在模拟器 Linux 内运行:<br/>apk update && apk add gcc make"]
-    CheckNet -- "否 (仅有 VirtIO-Block)" --> QemuBridge["途径 B：借用 QEMU 宿主联网更新"]
+    subgraph AsyncWorkerThread["后台 AsyncWorker 线程"]
+        Worker["SampleTimerWorker::async_task()"]
+        ChannelReceiver["crossbeam::channel::Receiver"] -->|接收配置| Worker
+        Worker -->|3. 检查时间到达| AtomicSet["irq_pending.store(true, Release)"]
+    end
 
-    QemuBridge --> Step1["1. 将 alpine_rootfs.img 挂载至 qemu-system-riscv64"]
-    Step1 --> Step2["2. 在 QEMU 中借用 VirtIO-Net 连网<br/>运行 apk update && apk add gcc make"]
-    Step2 --> Step3["3. QEMU 关机并保存镜像"]
-    Step3 --> Step4["4. 将更新后的镜像转回我们的模拟器启动！"]
+    subgraph PLICSampling["PLIC 采样线程/阶段"]
+        PlicHandler["PlicSampleTimerHandler::irq_level()"]
+        AtomicAcquire["irq_pending.load(Acquire)"] --> PlicHandler
+        PlicHandler -->|返回电平| PLICCore["PLIC 硬件触发"]
+    end
 
-    DirectApk --> Final["成功在模拟器上运行原生 GCC 编译程序！"]
-    Step4 --> Final
+    AtomicReset -.-> irq_pending["Arc<AtomicBool> (irq_pending)"]
+    AtomicSet -.-> irq_pending
+    irq_pending -.-> AtomicAcquire
 ```
 
-#### 途径 B 操作指引（借用 QEMU 安装软件包）：
+#### 核心源码解析
 
-在宿主机上使用 QEMU 挂载该磁盘镜像，并借用 QEMU 的网络支持在线安装软件：
-
-```bash
-# 使用 QEMU 启动镜像并开启网络支持
-qemu-system-riscv64 -M virt -m 2G -nographic \
-  -kernel ./path/to/Image \
-  -drive file=alpine_rootfs.img,format=raw,id=hd0 \
-  -device virtio-blk-device,drive=hd0 \
-  -netdev user,id=net0 -device virtio-net-device,netdev=net0 \
-  -append "root=/dev/vda rw console=ttyS0"
-```
-
-进入 QEMU 中的 Alpine 终端后，使用包管理器安装你需要的软件包：
-```bash
-# 在 QEMU 的 Alpine 内执行：
-apk update
-apk add gcc make libc-dev
-
-# 安装完成后关机
-poweroff
-
-# 如果无法正常关机，请使用 sync 命令刷新磁盘
-# 然后再 ctrl + A, X 强制退出
-```
-
-关机后，将安装好 GCC 开发环境的 `alpine_rootfs.img` 转回我们的 RISC-V 模拟器上启动：
-```bash
-cargo run --release -- ./test_resources/bin/virtio_blk_test.elf --device=virtio-block:alpine_rootfs.img
-```
-
-现在，你可以在你亲手编写的 RISC-V 模拟器上运行的 Alpine Linux 系统中，**直接在虚拟机内使用 `gcc` 编译并运行新的 C 语言程序**！
+1. **命令解耦（Channel & AsyncWorker）**：
+   当 CPU 通过 MMIO 写入 `SampleTimerDevice` 的时间配置寄存器时，主线程只做轻量级数据更新，并通过 `crossbeam::channel` 异步发送 `WorkerCommand::Data` 给 `SampleTimerWorker`：
+   ```rust
+   // sample_timer.rs
+   0x08 => {
+       self.layout.data_register0 = data_u32;
+       self.sender.try_send(WorkerCommand::Data {
+           interval_ms: self.get_data64(),
+           configured_at: Instant::now(),
+       }).unwrap();
+   }
+   ```
+2. **异步后台轮询（`AsyncWorker::async_task`）**：
+   `SampleTimerWorker` 在独立的线程循环中执行 `async_task()`，检查时间差。当到达定时时间后，将原子变量 `irq_pending` 置为 `true`：
+   ```rust
+   if !self.irq_pending.load(Ordering::Acquire)
+       && cur.duration_since(self.pre_time) >= self.step_time
+   {
+       self.irq_pending.store(true, Ordering::Release);
+       made_progress = true;
+   }
+   ```
 
 ---
 
-### 3. 探索更多精简 Linux 发行版
+### 3. 内存屏障与 Guest OS 内存可见性（Memory Barrier & Visibility）
 
-完成了 Alpine Linux 的部署后，你还可以尝试探索其他流行的 Linux 发行版生态：
-- **Buildroot**：使用 Buildroot 工具链从零按需定制极简 Linux 系统镜像。
-- **Debian RISC-V**：体验涵盖上万软件包的完整 Debian RISC-V 操作系统环境。
+在编写具有 DMA（Direct Memory Access）能力或带异步 Backend 的外设（例如磁盘读取、网卡接收包、`AsyncWorker` 直接写入模拟器物理 RAM 缓冲区）时，存在一个**极其关键的技术隐患**：
+
+> **内存乱序与可见性陷阱**：
+> 后台 `AsyncWorker` 线程将从磁盘/网络读取到的数据写入物理内存（RAM ArrayBuffer）后，如果**没有施加正确的内存屏障**就直接拉高 PLIC 中断，主线程的 CPU Core（Guest OS）可能会在接收到中断并试图读取数据时，由于 CPU/编译器/宿主机的指令重排与 Cache 暂存，**读取到写之前的旧数据/脏数据（Stale Read）**。
+
+#### 解决方案：使用 `Ordering::Release` 与 `Ordering::Acquire` 屏障
+
+在 Rust 中，通过 `std::sync::atomic` 的内存顺序保证可见性：
+- **发送端（`AsyncWorker` 写入 RAM 后）**：在拉高中断状态 `irq_pending.store(true, Ordering::Release)` 时使用 **`Release` 语义**。它确保在此之前所有的内存写入（包括对物理 RAM 缓冲区的 DMA 填充）均已完成刷新，且对其他线程可见。
+- **接收端（PLIC / CPU 读取中断前）**：使用 `irq_pending.load(Ordering::Acquire)` **`Acquire` 语义**。它与 Release 形成同步屏障（Synchronizes-with Relationship），保证 Guest OS 看到中断成立时，一定能看到 Release 之前写入物理内存的完整最新数据！
 
 ---
 
-## 项目导览
+## 三、 VirtIO 规范与半虚拟化机制
 
-- **模拟器主入口与 CLI 参数**：[src/main.rs]($env.repo/tree/master/src/main.rs)
-- **设备树 DTS 定义文件**：[dts/virt.dts]($env.repo/tree/master/dts/virt.dts) 与编译后的二进制 [dts/virt.dtb]($env.repo/tree/master/dts/virt.dtb)
-- **Linux / OpenSBI 编译流控制**：[Makefile]($env.repo/tree/master/Makefile)（包含 `build-dtb`、`build-opensbi` 与 `linux` 目标）
-- **CPU 启动入口与默认 PC**：[src/isa/riscv/executor.rs]($env.repo/tree/master/src/isa/riscv/executor.rs) 与 [src/ram_config.rs]($env.repo/tree/master/src/ram_config.rs)
-- **VirtIO-Block 磁盘设备后端**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)
-- **板卡总线与外设映射**：[src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs)
+在真实物理世界中，模拟一套复杂的网卡或显卡硬件（如 Intel e1000 或 NVMe 规范）需要模拟成百上千个复杂的硬件控制寄存器，产生极高的陷入/陷出开销。为此，现代虚拟化技术广泛采用了 **VirtIO 半虚拟化（Paravirtualization）标准**。
+
+想了解 VirtIO 规范的演进与底层细节，可参考：[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=true&force_search=true)
+
+### 1. 半虚拟化 (Paravirtualization) vs 全虚拟化 (Full Virtualization)
+
+- **全虚拟化 (Full Virtualization / Trap & Emulate)**：
+  Guest OS 无需修改，使用原生的物理设备驱动。Guest 每读写一次外设寄存器，都会触发一次硬件内存异常，导致 CPU **陷入（Trap-out）** 到模拟器/Hypervisor，模拟器修改完状态后再 **陷回（Trap-in）** Guest。由于陷入陷出涉及昂贵的上下文切换，性能极差。
+- **半虚拟化 (Paravirtualization / VirtIO)**：
+  Guest OS 明知自己运行在虚拟机中，装载专用的 VirtIO 驱动。Guest 与 Host 约定一块**共享物理内存（Virtqueue 环形缓冲区）**。Guest 批量准备好成百上千个数据包后，只需触发一次 **门铃（Doorbell）** 寄存器通知 Host，极大减少了陷入陷出次数，接近原生物理硬件性能！
+
+---
+
+### 2. VirtIO 核心机制：Virtqueue 与 Ring 结构
+
+VirtIO 的核心数据传输结构称为 **Virtqueue**（包含 Split Virtqueue 和 Packed Virtqueue 两种格式）。Split Virtqueue 由三部分共享内存数组组成：
+
+```mermaid
+flowchart LR
+    subgraph GuestMem["Guest OS 共享内存 (Virtqueue)"]
+        subgraph DT["1. Descriptor Table (描述符表)"]
+            Desc0["Buf 0: PADDR, LEN, FLAGS, NEXT"]
+            Desc1["Buf 1: PADDR, LEN, FLAGS, NEXT"]
+        end
+
+        subgraph AvailRing["2. Available Ring (可用环 - Guest 写 / Host 读)"]
+            AvailIdx["idx: 最新索引"]
+            AvailArr["ring: [Head_Idx0, Head_Idx1, ...]"]
+        end
+
+        subgraph UsedRing["3. Used Ring (已用环 - Host 写 / Guest 读)"]
+            UsedIdx["idx: 最新索引"]
+            UsedArr["ring: [Elem0 {id, len}, Elem1, ...]"]
+        end
+    end
+
+    subgraph HostDev["Host Emulator 模拟器"]
+        HostReadDesc["根据 PADDR 直接操作 RAM 数据"]
+        HostReadAvail["读取 Available Ring<br/>提取待处理描述符链"]
+        HostWriteUsed["写入完成节点到 Used Ring<br/>并触发 VirtIO 中断"]
+    end
+
+    DT --> HostReadDesc
+    AvailRing -->|Guest 提交请求| HostReadAvail
+    HostWriteUsed -->|Host 完成通知| UsedRing
+```
+
+1. **Descriptor Table（描述符表）**：记录每一块数据缓冲区的物理地址 `paddr`、长度 `len`、读写标志 `flags` 以及链式下一项指针 `next`。
+2. **Available Ring（可用环）**：由 **Guest 写入，Host 读取**。Guest 将填好数据的描述符链头索引写入 Available Ring，通知 Host“有新请求待处理”。
+3. **Used Ring（已用环）**：由 **Host 写入，Guest 读取**。Host 完成 I/O 操作（如从磁盘读出数据填充到描述符缓冲区）后，将描述符索引与写入长度填入 Used Ring，通知 Guest“请求已完成”。
+
+---
+
+### 3. Feature 协商与事务全生命周期
+
+VirtIO 设备的初始化与事务处理遵循严格的状态机协商机制：
+
+```mermaid
+timeline
+    title VirtIO 设备初始化与事务交互全流程
+    section 1. 发现与协商 (Setup & Negotiation)
+        读取 Magic (0x74726976) & Device ID : Guest 确认设备存在 (如 2 代表 Block 设备)
+        读取 Host Features : Host 宣告支持的功能特性
+        写入 Guest Features : Guest 驱动宣告接受的功能特性
+        设置 Status = DRIVER_OK : 完成协商，设备进入活跃状态
+    section 2. 事务发起 (Transaction Dispatch)
+        Guest 填充 Descriptor & Available Ring : 将数据缓冲区挂入环形队列
+        敲击 Doorbell (Queue Notify Reg) : Write MMIO 告知 Host 有新任务
+    section 3. 事务完成 (Transaction Complete)
+        Host / AsyncWorker 处理数据 : 完成磁盘读写 / 网络收发
+        Host 填充 Used Ring : 写入已处理完的元素节点
+        Host 触发 VirtIO Interrupt : 更新 Interrupt Status 并拉高 PLIC 中断
+        Guest 应答 Interrupt Ack : 清除 Interrupt Status 并收回 Buffer
+```
+
+---
+
+## 四、 项目导览
+
+- **外设 Trait 抽象定义**：[src/device/mod.rs]($env.repo/tree/master/src/device/mod.rs)（定义 `DeviceTrait`、`MemMappedDeviceTrait` 与 `PlicDeviceHandler`）
+- **MMIO 总线与地址映射**：[src/device/mmio.rs]($env.repo/tree/master/src/device/mmio.rs)（`MemoryMapIO` 实现物理地址重定向与读写分发）
+- **外设地址布局配置**：[src/device/config.rs]($env.repo/tree/master/src/device/config.rs)（定义基地址 `BASE` 与内存大小 `SIZE`）
+- **异步 Task 框架**：[src/async_worker.rs]($env.repo/tree/master/src/async_worker.rs)（`AsyncWorker` 异步任务抽象）
+- **ACLINT / CLINT 定时器**：[src/device/aclint.rs]($env.repo/tree/master/src/device/aclint.rs)（`mtime` / `mtimecmp` 与 `MTIP` / `MSIP` 局部中断）
+- **PLIC 中断控制器**：[src/device/plic/mod.rs]($env.repo/tree/master/src/device/plic/mod.rs) 与 [src/device/plic/irq_line.rs]($env.repo/tree/master/src/device/plic/irq_line.rs)（外部中断仲裁、Claim / Complete 握手与 IRQ 采样管线）
+- **SampleTimer 参考外设**：[src/device/sample_timer.rs]($env.repo/tree/master/src/device/sample_timer.rs)（带 `AsyncWorker`、通道解耦与原子内存屏障的完整毫秒定时器）
+- **VirtIO MMIO 传输层**：[src/device/virtio/virtio_mmio.rs]($env.repo/tree/master/src/device/virtio/virtio_mmio.rs)（VirtIO 控制寄存器、Feature 协商与 Doorbell 响铃机制）
+- **Virtqueue 队列机制**：[src/device/virtio/virtio_queue.rs]($env.repo/tree/master/src/device/virtio/virtio_queue.rs)（Descriptor Table、Available Ring 与 Used Ring 共享内存实现）
+- **VirtIO Block 设备实现**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)（半虚拟化块设备参考实现）
+- **板卡总线与 IRQ 连接**：[src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs)（板卡外设初始化与 PLIC 中断管线挂载）
+
+---
+
+## 五、 综合实验任务：开发一个实际功能的系统外设
+
+在本实验中，你将独立设计并实现一个**具备实际应用价值的系统级外设**，并将其挂载到模拟器的 MMIO 地址空间，使其能够被 Linux 操作系统内核直接识别并正常工作！
+
+### 1. 推荐选题方向（均支持 Linux 内核驱动识别）
+
+你可以根据个人兴趣从以下项目中选择一个进行实现：
+
+| 选题名称                  | 规范与类型                 | 核心挑战与特色                                                                                     | 验证方式                             |
+| ------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| **VirtIO-Console**        | VirtIO (Device ID 3)       | 实现半虚拟化控制台，支持控制台输入输出                                                             | Linux 开机输出 `/dev/hvc0`           |
+| **VirtIO-Net**            | VirtIO (Device ID 1)       | 结合 TAP/TUN 宿主网卡，实现网络收发包                                                              | Linux 内核中 `ping` 联通网络         |
+| **VirtIO-FS / VirtIO-9P** | VirtIO (Device ID 26 / 9P) | 实现文件系统共享，将宿主目录挂载入虚拟机                                                           | Linux 中 `mount -t 9p` 读写宿主文件  |
+| **VirtIO-RNG**            | VirtIO (Device ID 4)       | 硬件随机数生成器，响应熵池读取                                                                     | Linux 中 `cat /dev/hwrng` 获取随机数 |
+| **GPIO 控制器**           | 自定义 MMIO 设备           | 实现数字输入输出管脚；可通过模拟器终端 `Ctrl+A` 命令模式输入 `1`/`0` 模拟引脚电平变化，并 log 输出 | 裸机/Linux 驱动中读写 GPIO 寄存器    |
+| **I2C Adapter**           | 自定义 MMIO / I2C 总线     | 实现 I2C 总线控制器，并在总线上挂载虚拟 LED 点阵或传感器                                           | 读写 I2C 寄存器控制子设备            |
+| **Watchdog Timer**        | 自定义 MMIO 定时器         | 实现看门狗倒计时，超时未“喂狗”触发系统复位或中断                                                   | 编写测试程序验证看门狗复位           |
+| **RGB 颜色输出设备**      | 自定义 MMIO 显示设备       | 接收 RGB888 像素数据，并在终端中显示 ANSI 彩色块输出                                               | 在终端中打印彩色图像/图案            |
+
+> **提示**：强烈推荐优先尝试 **VirtIO 系列设备** 或 **GPIO / Watchdog** 设备。VirtIO 设备可以无缝使用 Linux Kernel 内置的标准驱动，无需自己为 Linux 编写内核模块！
+
+---
+
+### 2. 实验要求与实现指导
+
+1. **设备映射与注册**：
+   在 [src/device/config.rs]($env.repo/tree/master/src/device/config.rs) 中配置新外设的 MMIO 基地址 `BASE` 与 `SIZE`，并实现 `MemMappedDeviceTrait`。
+2. **使用 `AsyncWorker` 异步解耦**：
+   外设中涉及耗时 I/O（如文件读写、网络收发、定时器等待）的操作，**必须**重写 `get_async_worker()` 方法，将耗时任务放入 `AsyncWorker` 线程中执行，严禁阻塞模拟器主 CPU 线程。
+3. **保证内存屏障与可见性**：
+   若外设直接向模拟器物理 RAM 写入数据（如 DMA 或 Virtqueue 写入），必须在触发 PLIC 中断前使用 `Ordering::Release` 原子屏障，确保内存数据对 Guest OS 完全可见。
+4. **中断管线接入**：
+   实现 `PlicIRQSource`，在 [src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs) 或设备构建逻辑中将外设的 IRQ 线连接至 PLIC。
+
