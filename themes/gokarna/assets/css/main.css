@@ -6,6 +6,7 @@
   --light-secondary-color: #dddddd;
   --light-tertiary-color: #272822;
   --light-text-color: black;
+  --code-font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "Noto Sans Mono", "DejaVu Sans Mono", ui-monospace, monospace;
 }
 
 @font-face {
@@ -310,6 +311,7 @@ pre {
   background-color: var(--light-tertiary-color);
   box-sizing: border-box;
   color: white;
+  font-family: var(--code-font-family);
 }
 
 pre {
@@ -331,6 +333,7 @@ code {
 }
 
 pre code {
+  font-family: inherit;
   font-size: 0.9em;
 }
 

@@ -2,12 +2,12 @@
     {{ if eq .Type "post" }}
         {{- partial "post.html" . -}}
         {{- partial "toc.html" . -}}
-        <!-- mermaid -->  
-        {{- partial "mermaid.html" . -}}
     {{ end }}
 
     {{ if or (eq .Type "page") (eq .Section "projects") }}
         {{- partial "page.html" . -}}
         {{- partial "toc.html" . -}}
     {{ end }}
+
+    {{- partial "mermaid.html" . -}}
 {{ end }}

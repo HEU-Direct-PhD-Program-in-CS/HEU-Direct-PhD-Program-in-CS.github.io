@@ -65,13 +65,13 @@ blockquote {
 }
 
 .markdown-alert-note {
-  --markdown-alert-color: #54aeff;
-  --markdown-alert-background-color: #033d8b;
+  --markdown-alert-color: #086ddd;
+  --markdown-alert-background-color: #253346;
 }
 
 .markdown-alert-tip {
   --markdown-alert-color: #4ac26b;
-  --markdown-alert-background-color: #0f5323;
+  --markdown-alert-background-color: #073314;
 }
 
 .markdown-alert-important {
