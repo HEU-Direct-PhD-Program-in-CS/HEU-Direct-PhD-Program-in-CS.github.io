@@ -1,9 +1,382 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{--accent-color:#FF4D4D;--font-size:1.1rem}</style><title>Chapter 0x03 - 中断、异常与特权级</title><meta name=description content="本章概览 本章关注正常指令流被打断后发生了什么。异常、中断、系统调用和特权级切换最终都会进入 trap 流程，但它们从哪里来、保存什么信息、处理后回到哪里并不完全相同。
-实验会同时观察客户程序和模拟器：客户程序负责设置入口、保存通用寄存器和编写 handler；模拟器负责判断 trap 是否发生、更新相关 CSR、切换 …"><meta name=keywords content='blog,gokarna,hugo'><meta property="og:url" content="https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/"><meta property="og:type" content="website"><meta property="og:title" content="Chapter 0x03 - 中断、异常与特权级"><meta property="og:description" content="本章概览 本章关注正常指令流被打断后发生了什么。异常、中断、系统调用和特权级切换最终都会进入 trap 流程，但它们从哪里来、保存什么信息、处理后回到哪里并不完全相同。
-实验会同时观察客户程序和模拟器：客户程序负责设置入口、保存通用寄存器和编写 handler；模拟器负责判断 trap 是否发生、更新相关 CSR、切换 …"><meta property="og:image" content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><meta property="og:image:secure_url" content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Chapter 0x03 - 中断、异常与特权级"><meta name=twitter:description content="本章概览 本章关注正常指令流被打断后发生了什么。异常、中断、系统调用和特权级切换最终都会进入 trap 流程，但它们从哪里来、保存什么信息、处理后回到哪里并不完全相同。
-实验会同时观察客户程序和模拟器：客户程序负责设置入口、保存通用寄存器和编写 handler；模拟器负责判断 trap 是否发生、更新相关 CSR、切换 …"><meta property="twitter:domain" content="https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/"><meta property="twitter:url" content="https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/"><meta name=twitter:image content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><link rel=canonical href=https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/><link rel=stylesheet type=text/css href=/css/normalize.min.css media=print><link rel=stylesheet type=text/css href=/css/main.min.css><link id=dark-theme rel=stylesheet href=/css/dark.min.css><script src=/js/bundle.min.7136b4abac7b277aba8bc933917f4602d39a5c44f5590be687244bc86ef4f162.js integrity="sha256-cTa0q6x7J3q6i8kzkX9GAtOaXET1WQvmhyRLyG708WI="></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css integrity=sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js integrity=sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js integrity=sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],throwOnError:!1})})</script></head><body><script>setThemeByUserPref()</script><header class=header><nav class=header-nav><div class=avatar><a href=https://heu-direct-phd-program-in-cs.github.io/><img src=/images/avatar.webp alt=avatar></a></div><div class=nav-title><a class=nav-brand href=https://heu-direct-phd-program-in-cs.github.io/>HEU本博班's Blog</a></div><div class=nav-links><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/ aria-label><span data-feather=home></span> Home</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/posts/ aria-label><span data-feather=book></span> Posts</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/projects/ aria-label><span data-feather=code></span> Projects</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/tags/ aria-label><span data-feather=tag></span> Tags</a></div><div class=nav-link><a href=https://github.com/HEU-Direct-PhD-Program-in-CS aria-label=github><span data-feather=github></span></a></div><div class=nav-link><a href=https://example.com aria-label=buymeacoffee><span data-feather=coffee></span></a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/index.xml aria-label=rss><span data-feather=rss></span></a></div><span class=nav-icons-divider></span><div class="nav-link dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{--accent-color:#FF4D4D;--font-size:1.1rem}</style><title>Chapter 0x03 - 后端执行架构与自定义计算单元</title><meta name=description content="本章概览 在 Chapter 0x02 中，我们完成了模拟器前端从指令编码规则、JSON 元数据、build.rs 代码生成到 Decoder 译码与操作数提取（RVInstrInfo）的完整链路，并通过日志打印（log::info!）验证了自定义指令的成功匹配与触发。
+然而，处理器不仅要“认出”指令，更重要的是“执行 …"><meta name=keywords content='blog,gokarna,hugo'><meta property="og:url" content="https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/"><meta property="og:type" content="website"><meta property="og:title" content="Chapter 0x03 - 后端执行架构与自定义计算单元"><meta property="og:description" content="本章概览 在 Chapter 0x02 中，我们完成了模拟器前端从指令编码规则、JSON 元数据、build.rs 代码生成到 Decoder 译码与操作数提取（RVInstrInfo）的完整链路，并通过日志打印（log::info!）验证了自定义指令的成功匹配与触发。
+然而，处理器不仅要“认出”指令，更重要的是“执行 …"><meta property="og:image" content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><meta property="og:image:secure_url" content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Chapter 0x03 - 后端执行架构与自定义计算单元"><meta name=twitter:description content="本章概览 在 Chapter 0x02 中，我们完成了模拟器前端从指令编码规则、JSON 元数据、build.rs 代码生成到 Decoder 译码与操作数提取（RVInstrInfo）的完整链路，并通过日志打印（log::info!）验证了自定义指令的成功匹配与触发。
+然而，处理器不仅要“认出”指令，更重要的是“执行 …"><meta property="twitter:domain" content="https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/"><meta property="twitter:url" content="https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/"><meta name=twitter:image content="https://heu-direct-phd-program-in-cs.github.io/images/avatar.webp"><link rel=canonical href=https://heu-direct-phd-program-in-cs.github.io/projects/emu-exp-2026/ch3/><link rel=stylesheet type=text/css href=/css/normalize.min.css media=print><link rel=stylesheet type=text/css href=/css/main.min.css><link id=dark-theme rel=stylesheet href=/css/dark.min.css><script src=/js/bundle.min.7136b4abac7b277aba8bc933917f4602d39a5c44f5590be687244bc86ef4f162.js integrity="sha256-cTa0q6x7J3q6i8kzkX9GAtOaXET1WQvmhyRLyG708WI="></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css integrity=sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js integrity=sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js integrity=sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],throwOnError:!1})})</script></head><body><script>setThemeByUserPref()</script><header class=header><nav class=header-nav><div class=avatar><a href=https://heu-direct-phd-program-in-cs.github.io/><img src=/images/avatar.webp alt=avatar></a></div><div class=nav-title><a class=nav-brand href=https://heu-direct-phd-program-in-cs.github.io/>HEU本博班's Blog</a></div><div class=nav-links><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/ aria-label><span data-feather=home></span> Home</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/posts/ aria-label><span data-feather=book></span> Posts</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/projects/ aria-label><span data-feather=code></span> Projects</a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/tags/ aria-label><span data-feather=tag></span> Tags</a></div><div class=nav-link><a href=https://github.com/HEU-Direct-PhD-Program-in-CS aria-label=github><span data-feather=github></span></a></div><div class=nav-link><a href=https://example.com aria-label=buymeacoffee><span data-feather=coffee></span></a></div><div class=nav-link><a href=https://heu-direct-phd-program-in-cs.github.io/index.xml aria-label=rss><span data-feather=rss></span></a></div><span class=nav-icons-divider></span><div class="nav-link dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
 <a aria-hidden=true role=switch><span class=theme-toggle-icon data-feather=moon></span></a></div><div class=nav-link id=hamburger-menu-toggle><span class="sr-only hamburger-menu-toggle-screen-reader-target">menu</span>
 <a aria-checked=false aria-labelledby=hamburger-menu-toggle id=hamburger-menu-toggle-target role=switch><span data-feather=menu></span></a></div><ul class="nav-hamburger-list visibility-hidden"><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/><span data-feather=home></span> Home</a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/posts/><span data-feather=book></span> Posts</a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/projects/><span data-feather=code></span> Projects</a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/tags/><span data-feather=tag></span> Tags</a></li><li class=nav-item><a href=https://github.com/HEU-Direct-PhD-Program-in-CS><span data-feather=github></span></a></li><li class=nav-item><a href=https://example.com><span data-feather=coffee></span></a></li><li class=nav-item><a href=https://heu-direct-phd-program-in-cs.github.io/index.xml><span data-feather=rss></span></a></li><li class="nav-item dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
-<a role=switch><span class=theme-toggle-icon data-feather=moon></span></a></li></ul></div></nav></header><main id=content><div class="post container"><div class=post-header-section><h1>Chapter 0x03 - 中断、异常与特权级</h1></div><div class=post-content><h2 id=本章概览>本章概览</h2><p>本章关注正常指令流被打断后发生了什么。异常、中断、系统调用和特权级切换最终都会进入 trap 流程，但它们从哪里来、保存什么信息、处理后回到哪里并不完全相同。</p><p>实验会同时观察客户程序和模拟器：客户程序负责设置入口、保存通用寄存器和编写 handler；模拟器负责判断 trap 是否发生、更新相关 CSR、切换特权级并改变 PC。把两侧的动作按时间顺序对起来，是理解本章最直接的方法。</p><h2 id=特权级与-trap-机制>特权级与 Trap 机制</h2><h3 id=特权级概述>特权级概述</h3><p>为了保护硬件资源不被错误编写的或恶意的程序破坏，现代体系结构会设计不同数量的特权等级。RISC-V 定义了三种特权级（若不开启 H 扩展），从高到低：</p><ul><li><strong>M-mode（Machine）</strong>：最高特权模式，拥有访问所有系统功能和物理资源的权限。</li><li><strong>S-mode（Supervisor）</strong>：中间特权模式，用于运行操作系统内核。</li><li><strong>U-mode（User）</strong>：最低特权模式，用于运行用户程序。</li></ul><h3 id=异常处理>异常处理</h3><p>特权等级一个重要的特性是拦截和处理异常（trap）。异常发生时，会从低特权等级变为高特权等级，运行高特权等级指定的异常处理程序，来决定如何处理异常。这允许操作系统或者嵌入式运行环境提供众多的功能，例如多任务、对硬件的抽象。</p><p>RISC-V 将 trap 分为两类：</p><table><thead><tr><th>类型</th><th>触发方式</th><th>例子</th></tr></thead><tbody><tr><td>异常（Exception）</td><td>指令执行触发，<strong>同步</strong></td><td>非法指令、断点、地址未对齐、缺页、ecall</td></tr><tr><td>中断（Interrupt）</td><td>外部或时钟事件，<strong>异步</strong></td><td>定时器中断（<code>MTI</code>）、外部中断（<code>MEI</code>）、软件中断（<code>MSI</code>）</td></tr></tbody></table><p>在执行 <code>ecall</code> 指令时，会引发环境调用异常，专门用来让低特权等级向高特权等级进行请求，例如操作系统的系统调用。</p><p>接下来以在 M mode 处理异常为例，讲解一个简化的异常处理流程，省略掉不重要的 CSR 字段。如果你想了解更详细的流程应该参考手册或模拟器的代码（src/isa/riscv/trap/trap_controller.rs）。</p><p>异常处理流程需要用到许多关键的 CSR（控制寄存器）：</p><ul><li>mip（Machine Interrupt Pending），记录当前的中断请求</li><li>mie（Machine Interrupt Enable），处理器是否相应某种中断</li><li>mcause（Machine Exception Cause），指示发生了何种异常</li><li>mtvec（Machine Trap Vector），存放发生异常时处理器应该跳转的地址</li><li>mtval（Machine Trap Value），存放当前异常相关的额外信息，如访存异常保存故障地址</li><li>mepc（Machine Exception PC），发生异常的指令地址</li><li>mscratch（Machine Scratch），给异常处理程序准备的临时寄存器</li></ul><p>如果当前指令遇到异常，或者在运行指令之前检测到中断，则会进入异常处理流程：</p><ol><li>保存异常相关信息：<ul><li><code>mtval</code> &lt;- 异常相关地址或非法指令编码</li><li><code>mcause</code> &lt;- trap 原因</li></ul></li><li>保存上下文，保存 trap 前的状态，用于从 trap 中返回：<ul><li><code>mstatus.MPP</code> &lt;- 当前特权级</li><li><code>mepc</code> &lt;- 当前 PC</li><li><code>mstatus.MPIE</code> &lt;- <code>mstatus.MIE</code>，</li><li>清除 <code>mstatus.MIE</code>（为了避免立刻再次相应中断）</li></ul></li><li>切换 PC：根据 <code>mtvec</code> 的 base 和 mode（Direct 或 Vectored）计算 handler 地址。在 direct 模式下就是直接跳转到 base 的地址。</li></ol><p>这之后交由软件来处理异常。</p><h3 id=从-trap-返回>从 Trap 返回</h3><p>当软件处理完异常后，需要从异常返回原本的位置，这在 M mode 通过 <code>mret</code> 指令实现：</p><ul><li><code>mstatus.MIE</code> &lt;- <code>mstatus.MPIE</code></li><li><code>mstatus.MPIE</code> &lt;- 1</li><li>恢复 PC &lt;- <code>mepc</code></li><li>当前特权模式 &lt;- <code>mstatus.MPP</code></li></ul><p>这基本上就是发生异常时保存上下文的逆操作。</p><h2 id=项目导览>项目导览</h2><p>模拟器侧：</p><ul><li><code>src/isa/riscv/trap/trap_controller.rs</code>：<code>TrapController</code>，核心的 trap 调度逻辑。</li><li><code>src/isa/riscv/trap/mod.rs</code>：<code>Interrupt</code> 和 <code>Exception</code> 枚举定义，以及各自的 <code>Into&lt;WordType></code> 实现（决定 mcause 值）。</li><li><code>src/isa/riscv/executor.rs</code>：中断检查和执行异常进入 trap 的位置。</li></ul><p>用户程序侧：</p><ul><li><code>test_resources/include/trap.h</code>：<code>TrapContext</code> 结构体定义和 CSR 地址宏。</li><li><code>test_resources/lib/trap.S</code>：<code>__traps_entry</code> / <code>__traps_return</code> 汇编，保存/恢复通用寄存器并调用 <code>trap_handler</code>。</li><li><code>test_resources/lib/trap_handler.c</code>：默认的 trap handler，以及 <code>trap_init()</code> 设置 <code>mtvec</code>、<code>mie</code>、<code>mstatus</code> 的流程。</li><li><code>test_resources/src/trap_test.c</code>、<code>ecall_test.c</code>、<code>clint.c</code>：已有的简单 demo 程序。</li><li><code>test_resources/src/clint.c</code> 演示了在 M-mode 下使用定时器中断的基本流程。</li></ul><h2 id=综合任务m-mode-monitor>综合任务：M-mode monitor</h2><p>实现一个小型 M-mode monitor，由它启动多个 U-mode 测试程序。</p><ul><li>monitor 能够从 M-mode 进入 U-mode 运行任务，并在 trap 后可靠返回 M-mode 的 trap handler</li><li>设计几个通过 <code>ecall</code> 进入的简单服务，例如字符输出、<code>sleep</code>、启动新任务和退出，让 U-mode 程序通过统一接口请求 monitor 服务</li><li>在 U-mode 程序中安排一项环境调用以外的异常，例如非法指令或非法访存，并检查 mcause、mepc 和 mtval 是否符合预期</li><li>为各类 trap 选择合适的恢复方式：返回原位置、跳过触发指令、或者结束 U-mode 程序</li><li>接收并处理 CLINT 定时器中断，在所有 U-mode 程序中公平地分配时间片</li></ul><h3 id=扩展任务>扩展任务</h3><p>实现更好的类似 RTOS 的抢占式调度：给 U-mode 程序设定优先级，总是运行当前活跃的最高优先级的程序，在多个同优先任务中公平分配时间（注意在应用程序通过 <code>ecall</code> 请求 <code>sleep</code> 的时候不应该被调度）</p></div><svg id="btt-button" class="arrow-logo" height="1em" viewBox="0 0 384 512" onclick="scrollToTop()" title="Go to top"><path d="M177 159.7l136 136c9.4 9.4 9.4 24.6.0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9.0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9.0L7 329.7c-9.4-9.4-9.4-24.6.0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/></svg>
-<script>let backToTopButton=document.getElementById("btt-button");window.onscroll=function(){scrollFunction()};function scrollFunction(){document.body.scrollTop>20||document.documentElement.scrollTop>20?backToTopButton.style.display="block":backToTopButton.style.display="none"}function scrollToTop(){window.scrollTo(0,0)}</script></div><aside class=post-toc><nav id=toc><nav id=TableOfContents><ul><li><ul><li><a href=#本章概览>本章概览</a></li><li><a href=#特权级与-trap-机制>特权级与 Trap 机制</a><ul><li><a href=#特权级概述>特权级概述</a></li><li><a href=#异常处理>异常处理</a></li><li><a href=#从-trap-返回>从 Trap 返回</a></li></ul></li><li><a href=#项目导览>项目导览</a></li><li><a href=#综合任务m-mode-monitor>综合任务：M-mode monitor</a><ul><li><a href=#扩展任务>扩展任务</a></li></ul></li></ul></li></ul></nav></nav></aside></main><footer class=footer><span>&copy; 2026 The Marauders</span>
+<a role=switch><span class=theme-toggle-icon data-feather=moon></span></a></li></ul></div></nav></header><main id=content><div class="post container"><div class=post-header-section><h1>Chapter 0x03 - 后端执行架构与自定义计算单元</h1></div><div class=post-content><h2 id=本章概览>本章概览</h2><p>在 Chapter 0x02 中，我们完成了模拟器前端从指令编码规则、JSON 元数据、<code>build.rs</code> 代码生成到 <code>Decoder</code> 译码与操作数提取（<code>RVInstrInfo</code>）的完整链路，并通过日志打印（<code>log::info!</code>）验证了自定义指令的成功匹配与触发。</p><p>然而，处理器不仅要“认出”指令，更重要的是“执行”指令。指令在译码完成后，必须送入后端的各个功能单元（算术逻辑单元 ALU、浮点单元 FPU、向量引擎 Vector、访存单元 Load/Store 以及 CSR 控制器）进行真正的算术计算、逻辑判断与 CPU 体系结构状态的变更（修改通用寄存器、更新 PC、写入内存或改变特权级状态）。</p><p>通过本章学习与实验，你将完成以下内容：</p><ol><li>深入理解模拟器的<strong>后端执行引擎与指令分发架构</strong>：<code>RVCPU::execute()</code>、执行分发表 <code>get_exec_func()</code>、执行包装器 <code>normal_exec</code> 以及指令退休计数（<code>Minstret</code>）推进机制。</li><li>掌握模拟器优雅的<strong>模块化计算抽象</strong>：<code>ExecTrait</code> 与 <code>ExecUnaryTrait</code>，理解纯算术逻辑与 CPU 硬件状态机变更（寄存器读写、<code>x0</code> 恒零硬连线、异常传播）的解耦设计。</li><li>掌握不同类型计算单元的设计理念与实现模式：标量 ALU 算术、Packed-SIMD 向量通道计算（进位隔离、溢出环绕与饱和截断）、位操作与访存执行核心。</li><li><strong>实践 1</strong>：为 Chapter 0x02 中定义的自定义扩展指令（以 Packed-SIMD <code>padd8</code> 为例）实现完整的后端计算逻辑（<code>ExecTrait</code>）并在 <code>exec_mapping.rs</code> 中接入执行分发。</li><li><strong>实践 2</strong>：使用 <code>TestCPUBuilder</code>、<code>CPUChecker</code> 与 <code>run_test_exec_decode</code> 编写覆盖边界值（全 0、全 1、通道溢出截断、<code>x0</code> 目标寄存器硬件约束）的严密 Rust 单元测试。</li><li><strong>实践 3</strong>：在裸机 C 语言程序中编写测试套件与 Software Golden Model 软件参考模型，对比验证硬件模拟指令的计算正确性。</li><li><strong>综合实验任务</strong>：为你在 Chapter 0x02 中构思并完成前端译码的自定义指令集，设计并实现完整的<strong>后端执行单元</strong>，通过全部 Rust 单元测试并在裸机环境下验证其功能。</li></ol><hr><h2 id=一-模拟器后端执行架构>一. 模拟器后端执行架构</h2><p>模拟器的后端执行系统遵循“<strong>分发路由 -> 计算求值 -> 状态写回 -> 流水推进/异常处理</strong>”的标准处理器执行生命周期。</p><h3 id=1-指令分发与执行主回路>1. 指令分发与执行主回路</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/executor.rs>src/isa/riscv/executor.rs</a>
+中，<code>RVCPU::step_impl()</code> 在完成前端取指与译码后，调用 <code>self.execute(instr, info)</code>：</p><pre tabindex=0><code class=language-mermaid data-lang=mermaid>flowchart TD
+    DecodeOut[&#34;DecodeInstr { instr, info, .. }&#34;] --&gt; Execute[&#34;RVCPU::execute(instr, info)&#34;]
+    Execute --&gt; Dispatch[&#34;get_exec_func(instr)&#34;]
+    Dispatch --&gt; Router{&#34;指令类别路由&lt;br/&gt;(exec_mapping.rs)&#34;}
+
+    Router -- &#34;标量算术 (ADD/SUB/PADD8)&#34; --&gt; Arith[&#34;exec_arith::&lt;ExecTrait&gt;()&#34;]
+    Router -- &#34;访存指令 (LB/LW/SW)&#34; --&gt; Mem[&#34;exec_load / exec_store&#34;]
+    Router -- &#34;分支跳转 (BEQ/BNE/JAL)&#34; --&gt; Branch[&#34;exec_branch / JAL Handler&#34;]
+    Router -- &#34;CSR 控制 (CSRRW/CSRRS)&#34; --&gt; Csr[&#34;exec_csrw / exec_csr_bit&#34;]
+    Router -- &#34;特殊/自定义控制&#34; --&gt; Custom[&#34;自定义闭包函数&#34;]
+
+    Arith --&gt; Calc[&#34;ExecTrait::exec(val1, val2) 计算&#34;]
+    Calc --&gt; StateUpdate[&#34;更新 reg_file / pc / minstret&#34;]
+    StateUpdate --&gt; ForceZero[&#34;强制硬连线: reg_file[0] = 0&#34;]
+    ForceZero --&gt; Ret[&#34;返回 Ok(()) 或 Err(Exception)&#34;]
+</code></pre><p><code>execute()</code> 函数的内部实现非常精炼且极具鲁棒性：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>execute</span>(
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;</span><span style=color:#66d9ef>mut</span> self,
+</span></span><span style=display:flex><span>    instr: <span style=color:#a6e22e>RiscvInstr</span>,
+</span></span><span style=display:flex><span>    info: <span style=color:#a6e22e>RVInstrInfo</span>,
+</span></span><span style=display:flex><span>) -&gt; Result<span style=color:#f92672>&lt;</span>(), Exception<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 1. 从静态函数映射表中检索当前指令对应的执行函数指针并调用
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> rst <span style=color:#f92672>=</span> get_exec_func(instr)(info, self);
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 2. 硬件硬连线约束：无论指令是否尝试写入 x0 寄存器，始终强制清零
+</span></span></span><span style=display:flex><span>    self.reg_file[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 3. 异常检查与 cold_path 处理
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#66d9ef>let</span> Err(ex) <span style=color:#f92672>=</span> rst {
+</span></span><span style=display:flex><span>        cold_path();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> ex <span style=color:#f92672>==</span> Exception::IllegalInstruction {
+</span></span><span style=display:flex><span>            log::<span style=color:#a6e22e>warn!</span>(
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#34;IllegalInstruction for instr: {:#?} at pc = {:#x}, info: {:?} &#34;</span>,
+</span></span><span style=display:flex><span>                instr,
+</span></span><span style=display:flex><span>                self.pc,
+</span></span><span style=display:flex><span>                info,
+</span></span><span style=display:flex><span>            );
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    rst
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=2-执行包装器与流水线推进-normal_exec>2. 执行包装器与流水线推进 (<code>normal_exec</code>)</h3><p>在 RISC-V 体系结构中，一条普通的非跳转指令在执行成功后，必须完成两项标准动作：</p><ol><li><strong>程序计数器推进</strong>：<code>pc = pc + 4</code>（对于 32 位指令）或 <code>pc = pc + 2</code>（对于 16 位压缩指令）。</li><li><strong>指令退休计数器递增</strong>：将 <code>minstret</code>（Machine Instructions-Retired Counter）CSR 增加 1。</li></ol><p>为了避免在几百条指令的实现中重复编写上述容易遗漏的逻辑，模拟器在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/mod.rs>src/isa/riscv/instruction/mod.rs</a>
+中提供了统一的高阶包装器 <code>normal_exec</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#75715e>#[inline(always)]</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>normal_exec</span><span style=color:#f92672>&lt;</span>F<span style=color:#f92672>&gt;</span>(cpu: <span style=color:#66d9ef>&amp;</span><span style=color:#a6e22e>mut</span> <span style=color:#66d9ef>RVCPU</span>, f: <span style=color:#a6e22e>F</span>) -&gt; Result<span style=color:#f92672>&lt;</span>(), riscv::trap::Exception<span style=color:#f92672>&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>    F: FnOnce(<span style=color:#f92672>&amp;</span><span style=color:#66d9ef>mut</span> <span style=color:#66d9ef>RVCPU</span>) -&gt; Result<span style=color:#f92672>&lt;</span>(), riscv::trap::Exception<span style=color:#f92672>&gt;</span>,
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 1. 执行具体的指令逻辑（闭包 f）
+</span></span></span><span style=display:flex><span>    f(cpu)<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 2. 成功后推进 PC 4 字节
+</span></span></span><span style=display:flex><span>    cpu.pc <span style=color:#f92672>=</span> cpu.pc.wrapping_add(<span style=color:#ae81ff>4</span>);
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 3. 递增已退休指令计数 CSR
+</span></span></span><span style=display:flex><span>    cpu.csr.get_by_type_existing::<span style=color:#f92672>&lt;</span>Minstret<span style=color:#f92672>&gt;</span>().wrapping_add(<span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    Ok(())
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><div class="markdown-alert markdown-alert-note"><p class=markdown-alert-title>Note</p><p><strong>设计考量</strong>：如果闭包 <code>f(cpu)</code> 在计算或访存过程中返回了 <code>Err(Exception)</code>（例如触发了非对齐访存或除零/非法指令），Rust 的 <code>?</code> 操作符会立即中断并返回异常，<strong>不会</strong>推进 <code>pc</code> 和 <code>minstret</code>。这样硬件的异常处理单元（<code>TrapController</code>）就可以准确捕获触发异常时的精确 PC（<code>mepc</code>）。</p></div><hr><h2 id=二-核心计算抽象exectrait-与模块化解耦>二. 核心计算抽象：<code>ExecTrait</code> 与模块化解耦</h2><p>模拟器后端采用了函数式与泛型 Trait 相结合的架构，将<strong>纯数学计算</strong>与 <strong>CPU 体系结构状态变更</strong>进行了极致解耦。</p><h3 id=1-exectrait-抽象定义>1. <code>ExecTrait</code> 抽象定义</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/exec_function.rs>src/isa/riscv/instruction/exec_function.rs</a>
+中：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#e6db74>/// ExecTrait 定义了纯粹的二元操作数计算逻辑
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>trait</span> ExecTrait<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>OUT</span>, <span style=color:#66d9ef>IN</span> <span style=color:#f92672>=</span> WordType<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec</span>(a: <span style=color:#a6e22e>IN</span>, b: <span style=color:#a6e22e>IN</span>) -&gt; <span style=color:#a6e22e>OUT</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>/// ExecUnaryTrait 定义了纯粹的一元操作数计算逻辑
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>trait</span> ExecUnaryTrait<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>OUT</span>, <span style=color:#66d9ef>IN</span> <span style=color:#f92672>=</span> WordType<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec</span>(a: <span style=color:#a6e22e>IN</span>) -&gt; <span style=color:#a6e22e>OUT</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=2-算术通用分发器-exec_arith>2. 算术通用分发器 <code>exec_arith</code></h3><p><code>exec_arith</code> 负责将提取出的指令操作数（来自寄存器堆或经过符号扩展的立即数）送入具体的 <code>ExecTrait</code>，并将结果写回目标寄存器 <code>rd</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#75715e>#[inline]</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec_arith</span><span style=color:#f92672>&lt;</span>F<span style=color:#f92672>&gt;</span>(info: <span style=color:#a6e22e>RVInstrInfo</span>, cpu: <span style=color:#66d9ef>&amp;</span><span style=color:#a6e22e>mut</span> <span style=color:#66d9ef>RVCPU</span>) -&gt; Result<span style=color:#f92672>&lt;</span>(), Exception<span style=color:#f92672>&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>    F: <span style=color:#a6e22e>ExecTrait</span><span style=color:#f92672>&lt;</span>Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;&gt;</span>,
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>super</span>::normal_exec(cpu, <span style=color:#f92672>|</span>cpu<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> (rd, rst) <span style=color:#f92672>=</span> <span style=color:#66d9ef>match</span> info {
+</span></span><span style=display:flex><span>            <span style=color:#75715e>// R 型指令：从寄存器堆读取 rs1 和 rs2 的值
+</span></span></span><span style=display:flex><span>            RVInstrInfo::R { rs1, rs2, rd } <span style=color:#f92672>=&gt;</span> {
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>let</span> (val1, val2) <span style=color:#f92672>=</span> cpu.reg_file.read(rs1, rs2);
+</span></span><span style=display:flex><span>                (rd, F::exec(val1, val2)<span style=color:#f92672>?</span>)
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>            <span style=color:#75715e>// I 型指令：从寄存器堆读取 rs1，操作数 2 直接使用译码器符号扩展后的 imm
+</span></span></span><span style=display:flex><span>            RVInstrInfo::I { rs1, rd, imm } <span style=color:#f92672>=&gt;</span> {
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>let</span> val1 <span style=color:#f92672>=</span> cpu.reg_file.read(rs1, <span style=color:#ae81ff>0</span>).<span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>                (rd, F::exec(val1, imm)<span style=color:#f92672>?</span>)
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>            _ <span style=color:#f92672>=&gt;</span> <span style=color:#66d9ef>unsafe</span> { unreachable_unchecked() },
+</span></span><span style=display:flex><span>        };
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 将计算结果写入目标寄存器 rd
+</span></span></span><span style=display:flex><span>        cpu.reg_file.write(rd, rst);
+</span></span><span style=display:flex><span>        Ok(())
+</span></span><span style=display:flex><span>    })
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>以标准加法 <code>ADD</code> / <code>ADDI</code> 为例，其算术核心实现极其简洁直观：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>ExecAdd</span><span style=color:#f92672>&lt;</span>T <span style=color:#f92672>=</span> WordType<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>    phantom: <span style=color:#a6e22e>PhantomData</span><span style=color:#f92672>&lt;</span>T<span style=color:#f92672>&gt;</span>,
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>impl</span><span style=color:#f92672>&lt;</span>T<span style=color:#f92672>&gt;</span> ExecTrait<span style=color:#f92672>&lt;</span>Result<span style=color:#f92672>&lt;</span>T, Exception<span style=color:#f92672>&gt;</span>, T<span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>for</span> ExecAdd<span style=color:#f92672>&lt;</span>T<span style=color:#f92672>&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>    T: <span style=color:#a6e22e>UnsignedInteger</span>,
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec</span>(a: <span style=color:#a6e22e>T</span>, b: <span style=color:#a6e22e>T</span>) -&gt; Result<span style=color:#f92672>&lt;</span>T, Exception<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>        Ok(a.wrapping_add(<span style=color:#f92672>&amp;</span>b))
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>在 <code>exec_mapping.rs</code> 中，只需一行即可完成多条指令的高效绑定：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span>RiscvInstr::<span style=color:#66d9ef>ADD</span> <span style=color:#f92672>|</span> RiscvInstr::<span style=color:#66d9ef>ADDI</span> <span style=color:#f92672>=&gt;</span> exec_arith::<span style=color:#f92672>&lt;</span>ExecAdd<span style=color:#f92672>&gt;</span>,
+</span></span></code></pre></div><hr><h2 id=三-计算单元设计模式与算术语义实现>三. 计算单元设计模式与算术语义实现</h2><p>在为 CPU 设计各种扩展计算单元时，常见的模式包括标量 ALU、Packed-SIMD 向量打包计算、单目位操作以及特殊副作用单元。</p><h3 id=1-packed-simd-计算单元与进位隔离-carry-isolation>1. Packed-SIMD 计算单元与进位隔离 (Carry Isolation)</h3><p>在 Chapter 0x02 中，我们构思了属于 <code>custom-0</code> 空间的 8-bit 打包加法指令 <code>padd8</code>。</p><h4 id=硬件原理与进位隔离>硬件原理与进位隔离</h4><p>在 Packed-SIMD 中，一个 32 位（或 64 位）寄存器被均等划分为多个独立的 8 位通道（Sub-words / Lanes）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-text data-lang=text><span style=display:flex><span>寄存器 rs1:  [  Byte 3  ] [  Byte 2  ] [  Byte 1  ] [  Byte 0  ]
+</span></span><span style=display:flex><span>                 +             +             +             +
+</span></span><span style=display:flex><span>寄存器 rs2:  [  Byte 3&#39; ] [  Byte 2&#39; ] [  Byte 1&#39; ] [  Byte 0&#39; ]
+</span></span><span style=display:flex><span>                 │             │             │             │
+</span></span><span style=display:flex><span>                [X] 进位阻断  [X] 进位阻断  [X] 进位阻断    ▼ (溢出截断)
+</span></span><span style=display:flex><span>                 ▼             ▼             ▼             ▼
+</span></span><span style=display:flex><span>寄存器 rd :  [ Byte 3&#34; ] [ Byte 2&#34; ] [ Byte 1&#34; ] [ Byte 0&#34; ]
+</span></span></code></pre></div><div class="markdown-alert markdown-alert-warning"><p class=markdown-alert-title>Warning</p><p><strong>关键陷阱：为什么不能直接用 <code>a + b</code>？</strong>
+如果直接将 32 位寄存器做常规加法，当 <code>Byte 0</code> 发生溢出（如 <code>0xFF + 0x01 = 0x100</code>）时，溢出的进位（Carry bit）会悄悄溢入高位的 <code>Byte 1</code>，从而彻底破坏相邻通道数据的独立性！
+在硬件 SIMD 算术逻辑单元中，各个通道之间的进位链必须被物理切断（Carry Isolation），每个通道独立按 <code>u8::wrapping_add</code> 进行 8 位环绕运算。</p></div><h4 id=rust-实现方式>Rust 实现方式</h4><p>我们可以通过字节切片转换（<code>to_le_bytes()</code>）或位移掩码（SWAR 技巧）来实现干净的通道级并行运算：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>ExecPadd8</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>impl</span> ExecTrait<span style=color:#f92672>&lt;</span>Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;&gt;</span> <span style=color:#66d9ef>for</span> ExecPadd8 {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec</span>(a: <span style=color:#a6e22e>WordType</span>, b: <span style=color:#a6e22e>WordType</span>) -&gt; Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> a_bytes <span style=color:#f92672>=</span> a.to_le_bytes();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> b_bytes <span style=color:#f92672>=</span> b.to_le_bytes();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> <span style=color:#66d9ef>mut</span> res <span style=color:#f92672>=</span> [<span style=color:#ae81ff>0</span><span style=color:#66d9ef>u8</span>; std::mem::size_of::<span style=color:#f92672>&lt;</span>WordType<span style=color:#f92672>&gt;</span>()];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 各通道独立执行 8-bit 环绕加法，进位互不干扰
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> i <span style=color:#66d9ef>in</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>..</span>std::mem::size_of::<span style=color:#f92672>&lt;</span>WordType<span style=color:#f92672>&gt;</span>() {
+</span></span><span style=display:flex><span>            res[i] <span style=color:#f92672>=</span> a_bytes[i].wrapping_add(b_bytes[i]);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        Ok(WordType::from_le_bytes(res))
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=2-饱和算术-saturating-arithmetic>2. 饱和算术 (Saturating Arithmetic)</h3><p>在音视频处理和图像渲染中，数据溢出若发生环绕（Wrap-around，如白色像素 255 + 1 变成黑色 0）会造成严重的画面闪烁。饱和加法（Saturating Add）要求当结果超过最大值时，自动钳位（Clamp）在最大值：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>ExecPadd8Sat</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>impl</span> ExecTrait<span style=color:#f92672>&lt;</span>Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;&gt;</span> <span style=color:#66d9ef>for</span> ExecPadd8Sat {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec</span>(a: <span style=color:#a6e22e>WordType</span>, b: <span style=color:#a6e22e>WordType</span>) -&gt; Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> a_bytes <span style=color:#f92672>=</span> a.to_le_bytes();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> b_bytes <span style=color:#f92672>=</span> b.to_le_bytes();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> <span style=color:#66d9ef>mut</span> res <span style=color:#f92672>=</span> [<span style=color:#ae81ff>0</span><span style=color:#66d9ef>u8</span>; std::mem::size_of::<span style=color:#f92672>&lt;</span>WordType<span style=color:#f92672>&gt;</span>()];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> i <span style=color:#66d9ef>in</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>..</span>std::mem::size_of::<span style=color:#f92672>&lt;</span>WordType<span style=color:#f92672>&gt;</span>() {
+</span></span><span style=display:flex><span>            <span style=color:#75715e>// 8 位无符号饱和加法：超过 255 则锁定为 255
+</span></span></span><span style=display:flex><span>            res[i] <span style=color:#f92672>=</span> a_bytes[i].saturating_add(b_bytes[i]);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        Ok(WordType::from_le_bytes(res))
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=3-单目与位操作计算单元-bit-manipulation-unit>3. 单目与位操作计算单元 (Bit Manipulation Unit)</h3><p>对于一元操作数指令（如按位反转 <code>brev</code>、统计置 1 的位数 <code>cpop</code>、前导零计数 <code>clz</code>），可使用 <code>ExecUnaryTrait</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>ExecCpop</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>impl</span> ExecUnaryTrait<span style=color:#f92672>&lt;</span>Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;&gt;</span> <span style=color:#66d9ef>for</span> ExecCpop {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec</span>(a: <span style=color:#a6e22e>WordType</span>) -&gt; Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>        Ok(a.count_ones() <span style=color:#66d9ef>as</span> WordType)
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h2 id=实践-1实现自定义指令后端执行逻辑与分发>实践 1：实现自定义指令后端执行逻辑与分发</h2><p>在 Chapter 0x02 中，我们在 <code>data/instr_dict_custom.json</code> 中定义了 <code>padd8</code>，并在 <code>exec_mapping.rs</code> 中只做了 <code>log::info!</code> 临时响应。现在我们来为它赋予真正的后端计算能力。</p><h3 id=1-编写计算结构体与-trait-实现>1. 编写计算结构体与 Trait 实现</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/exec_function.rs>src/isa/riscv/instruction/exec_function.rs</a>
+的末尾添加：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#75715e>#[cfg(feature = </span><span style=color:#e6db74>&#34;custom-instr&#34;</span><span style=color:#75715e>)]</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>pub</span>(<span style=color:#66d9ef>in</span> <span style=color:#66d9ef>super</span>::<span style=color:#66d9ef>super</span>) <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>ExecPadd8</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#[cfg(feature = </span><span style=color:#e6db74>&#34;custom-instr&#34;</span><span style=color:#75715e>)]</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>impl</span> ExecTrait<span style=color:#f92672>&lt;</span>Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;&gt;</span> <span style=color:#66d9ef>for</span> ExecPadd8 {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>exec</span>(a: <span style=color:#a6e22e>WordType</span>, b: <span style=color:#a6e22e>WordType</span>) -&gt; Result<span style=color:#f92672>&lt;</span>WordType, Exception<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> a_bytes <span style=color:#f92672>=</span> a.to_le_bytes();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> b_bytes <span style=color:#f92672>=</span> b.to_le_bytes();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> <span style=color:#66d9ef>mut</span> res <span style=color:#f92672>=</span> [<span style=color:#ae81ff>0</span><span style=color:#66d9ef>u8</span>; std::mem::size_of::<span style=color:#f92672>&lt;</span>WordType<span style=color:#f92672>&gt;</span>()];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> i <span style=color:#66d9ef>in</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>..</span>std::mem::size_of::<span style=color:#f92672>&lt;</span>WordType<span style=color:#f92672>&gt;</span>() {
+</span></span><span style=display:flex><span>            res[i] <span style=color:#f92672>=</span> a_bytes[i].wrapping_add(b_bytes[i]);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        Ok(WordType::from_le_bytes(res))
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=2-在-exec_mappingrs-中配置分发路由>2. 在 <code>exec_mapping.rs</code> 中配置分发路由</h3><p>打开 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/exec_mapping.rs>src/isa/riscv/instruction/exec_mapping.rs</a>
+，找到 <code>RV_Custom</code> 部分，将原有的 <code>todo!()</code> 替换为 <code>exec_arith::&lt;ExecPadd8></code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span>        <span style=color:#75715e>//---------------------------------------
+</span></span></span><span style=display:flex><span>        <span style=color:#75715e>// RV_Custom
+</span></span></span><span style=display:flex><span>        <span style=color:#75715e>//---------------------------------------
+</span></span></span><span style=display:flex><span>        <span style=color:#75715e>#[cfg(feature = </span><span style=color:#e6db74>&#34;custom-instr&#34;</span><span style=color:#75715e>)]</span>
+</span></span><span style=display:flex><span>        RiscvInstr::<span style=color:#66d9ef>PADD8</span> <span style=color:#f92672>=&gt;</span> exec_arith::<span style=color:#f92672>&lt;</span>ExecPadd8<span style=color:#f92672>&gt;</span>,
+</span></span></code></pre></div><p>编译检查：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>cargo check --features custom-instr
+</span></span></code></pre></div><hr><h2 id=实践-2编写严密的-cpu-执行单元测试>实践 2：编写严密的 CPU 执行单元测试</h2><p>单元测试是确保模拟器指令执行正确性的首要防线。</p><h3 id=1-构建全方位的测试向量>1. 构建全方位的测试向量</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/cpu_test.rs>src/isa/riscv/cpu_test.rs</a>
+中，我们利用 <code>TestCPUBuilder</code> 和 <code>CPUChecker</code> 编写针对后端执行语义的细致测试：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#75715e>#[test]</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#[cfg(feature = </span><span style=color:#e6db74>&#34;custom-instr&#34;</span><span style=color:#75715e>)]</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>test_custom_padd8_backend_execution</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 构造指令: padd8 x3, x1, x2 -&gt; 0x0020818B
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> raw_padd8: <span style=color:#66d9ef>u32</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x0020818B</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 用例 1：多通道基础无进位加法
+</span></span></span><span style=display:flex><span>    run_test_exec_decode(
+</span></span><span style=display:flex><span>        raw_padd8,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>builder<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>            builder
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0x01020304</span>)
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>0x05060708</span>)
+</span></span><span style=display:flex><span>                .pc(<span style=color:#ae81ff>0x80000000</span>)
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>checker<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>            checker
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>0x06080A0C</span>)
+</span></span><span style=display:flex><span>                .pc(<span style=color:#ae81ff>0x80000004</span>) <span style=color:#75715e>// 验证 PC 正确推进
+</span></span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>    );
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 用例 2：进位隔离与单通道独立溢出截断 (Carry Isolation Test)
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// byte0: 0x02 + 0xFE = 0x100 -&gt; 0x00 (不能产生进位影响 byte1)
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// byte1: 0xFE + 0x02 = 0x100 -&gt; 0x00
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// byte2: 0x01 + 0xFF = 0x100 -&gt; 0x00
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// byte3: 0xFF + 0x01 = 0x100 -&gt; 0x00
+</span></span></span><span style=display:flex><span>    run_test_exec_decode(
+</span></span><span style=display:flex><span>        raw_padd8,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>builder<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>            builder
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0xFF01FE02</span>)
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>0x01FF02FE</span>)
+</span></span><span style=display:flex><span>                .pc(<span style=color:#ae81ff>0x80000000</span>)
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>checker<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>            checker
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>0x00000000</span>)
+</span></span><span style=display:flex><span>                .pc(<span style=color:#ae81ff>0x80000004</span>)
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>    );
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 用例 3：硬件约束验证——写入 x0 寄存器必须被丢弃
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// 构造指令: padd8 x0, x1, x2 -&gt; 0x0020800B
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> raw_padd8_to_x0: <span style=color:#66d9ef>u32</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x0020800B</span>;
+</span></span><span style=display:flex><span>    run_test_exec_decode(
+</span></span><span style=display:flex><span>        raw_padd8_to_x0,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>builder<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>            builder
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0x11223344</span>)
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>0x55667788</span>)
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>checker<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>            checker.reg(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>) <span style=color:#75715e>// x0 必须保持恒为 0
+</span></span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>    );
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=2-连续步进流水线测试-run_test_cpu_step>2. 连续步进流水线测试 (<code>run_test_cpu_step</code>)</h3><p>除了单指令测试，还需要测试指令与标准指令交替执行时的寄存器依赖传递：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#75715e>#[test]</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#[cfg(feature = </span><span style=color:#e6db74>&#34;custom-instr&#34;</span><span style=color:#75715e>)]</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>test_custom_padd8_pipeline_step</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> program <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>        <span style=color:#ae81ff>0x00500093</span>, <span style=color:#75715e>// addi x1, x0, 5    (x1 = 5)
+</span></span></span><span style=display:flex><span>        <span style=color:#ae81ff>0x00a00113</span>, <span style=color:#75715e>// addi x2, x0, 10   (x2 = 10)
+</span></span></span><span style=display:flex><span>        <span style=color:#ae81ff>0x0020818B</span>, <span style=color:#75715e>// padd8 x3, x1, x2  (x3 = 15)
+</span></span></span><span style=display:flex><span>        <span style=color:#ae81ff>0x0031820B</span>, <span style=color:#75715e>// padd8 x4, x3, x3  (x4 = 30)
+</span></span></span><span style=display:flex><span>    ];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    run_test_cpu_step(
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&amp;</span>program,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>builder<span style=color:#f92672>|</span> builder.pc(ram_config::<span style=color:#66d9ef>BASE_ADDR</span>),
+</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>checker<span style=color:#f92672>|</span> {
+</span></span><span style=display:flex><span>            checker
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>5</span>)
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>15</span>)
+</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>30</span>)
+</span></span><span style=display:flex><span>                .pc(ram_config::<span style=color:#66d9ef>BASE_ADDR</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>16</span>)
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>    );
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>运行单元测试：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>cargo test --features custom-instr test_custom_padd8
+</span></span></code></pre></div><hr><h2 id=实践-3c-语言裸机端与-golden-model-自动化比对>实践 3：C 语言裸机端与 Golden Model 自动化比对</h2><p>在裸机 C 程序中，最佳实践是编写纯软件的参考模型（Golden Model），通过大规模测试向量自动对比硬件指令与软件模型的结果。</p><h3 id=1-编写-golden-model-与测试用例>1. 编写 Golden Model 与测试用例</h3><p>在 <code>test_resources/src/main.c</code> 中：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&#34;io.h&#34;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&#34;custom_ops.h&#34;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdint.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 纯软件 C 语言参考模型 (Golden Model)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>uint32_t</span> <span style=color:#a6e22e>golden_padd8</span>(<span style=color:#66d9ef>uint32_t</span> a, <span style=color:#66d9ef>uint32_t</span> b) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint8_t</span> a0 <span style=color:#f92672>=</span> a <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>, a1 <span style=color:#f92672>=</span> (a <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>8</span>) <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>, a2 <span style=color:#f92672>=</span> (a <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>16</span>) <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>, a3 <span style=color:#f92672>=</span> (a <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>24</span>) <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint8_t</span> b0 <span style=color:#f92672>=</span> b <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>, b1 <span style=color:#f92672>=</span> (b <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>8</span>) <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>, b2 <span style=color:#f92672>=</span> (b <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>16</span>) <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>, b3 <span style=color:#f92672>=</span> (b <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>24</span>) <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xFF</span>;
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint8_t</span> r0 <span style=color:#f92672>=</span> (<span style=color:#66d9ef>uint8_t</span>)(a0 <span style=color:#f92672>+</span> b0);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint8_t</span> r1 <span style=color:#f92672>=</span> (<span style=color:#66d9ef>uint8_t</span>)(a1 <span style=color:#f92672>+</span> b1);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint8_t</span> r2 <span style=color:#f92672>=</span> (<span style=color:#66d9ef>uint8_t</span>)(a2 <span style=color:#f92672>+</span> b2);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint8_t</span> r3 <span style=color:#f92672>=</span> (<span style=color:#66d9ef>uint8_t</span>)(a3 <span style=color:#f92672>+</span> b3);
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> ((<span style=color:#66d9ef>uint32_t</span>)r0) <span style=color:#f92672>|</span>
+</span></span><span style=display:flex><span>           (((<span style=color:#66d9ef>uint32_t</span>)r1) <span style=color:#f92672>&lt;&lt;</span> <span style=color:#ae81ff>8</span>) <span style=color:#f92672>|</span>
+</span></span><span style=display:flex><span>           (((<span style=color:#66d9ef>uint32_t</span>)r2) <span style=color:#f92672>&lt;&lt;</span> <span style=color:#ae81ff>16</span>) <span style=color:#f92672>|</span>
+</span></span><span style=display:flex><span>           (((<span style=color:#66d9ef>uint32_t</span>)r3) <span style=color:#f92672>&lt;&lt;</span> <span style=color:#ae81ff>24</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 测试数据集
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>typedef</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint32_t</span> a;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint32_t</span> b;
+</span></span><span style=display:flex><span>} TestCase;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>const</span> TestCase test_cases[] <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    {<span style=color:#ae81ff>0x01020304</span>, <span style=color:#ae81ff>0x05060708</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#ae81ff>0xFF01FE02</span>, <span style=color:#ae81ff>0x01FF02FE</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#ae81ff>0x80808080</span>, <span style=color:#ae81ff>0x80808080</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#ae81ff>0x00000000</span>, <span style=color:#ae81ff>0x00000000</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#ae81ff>0xFFFFFFFF</span>, <span style=color:#ae81ff>0xFFFFFFFF</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#ae81ff>0x12345678</span>, <span style=color:#ae81ff>0x87654321</span>},
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;=== Starting Custom Instruction Backend Verification ===</span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>&#34;);</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> total <span style=color:#f92672>=</span> <span style=color:#66d9ef>sizeof</span>(test_cases) <span style=color:#f92672>/</span> <span style=color:#66d9ef>sizeof</span>(test_cases[<span style=color:#ae81ff>0</span>]);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> passed <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> total; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>uint32_t</span> a <span style=color:#f92672>=</span> test_cases[i].a;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>uint32_t</span> b <span style=color:#f92672>=</span> test_cases[i].b;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 调用通过 .insn 内嵌汇编封装的硬件指令
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>uint32_t</span> hw_result <span style=color:#f92672>=</span> <span style=color:#a6e22e>padd8</span>(a, b);
+</span></span><span style=display:flex><span>        
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 调用软件 Golden Model
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>uint32_t</span> sw_result <span style=color:#f92672>=</span> <span style=color:#a6e22e>golden_padd8</span>(a, b);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (hw_result <span style=color:#f92672>==</span> sw_result) {
+</span></span><span style=display:flex><span>            <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[PASS] Test %d: a=0x%x, b=0x%x -&gt; res=0x%x</span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>&#34;, i, a, b, hw_result);</span>
+</span></span><span style=display:flex><span>            passed<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>        } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>            <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[FAIL] Test %d: a=0x%x, b=0x%x -&gt; HW=0x%x, SW=0x%x</span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>&#34;, i, a, b, hw_result, sw_result);</span>
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (passed <span style=color:#f92672>==</span> total) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;=== ALL %d TESTS PASSED SUCCESSFULLY! ===</span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>&#34;, total);</span>
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;=== VERIFICATION FAILED! (%d/%d passed) ===</span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>&#34;, passed, total);</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=2-编译与全系统执行验证>2. 编译与全系统执行验证</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 1. 编译裸机测试程序</span>
+</span></span><span style=display:flex><span>make -C test_resources
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 2. 启动模拟器并执行验证</span>
+</span></span><span style=display:flex><span>cargo run --features custom-instr -- ./test_resources/bin/main.elf
+</span></span></code></pre></div><hr><h2 id=项目导览>项目导览</h2><ul><li><strong>CPU 执行分发总控</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/executor.rs>src/isa/riscv/executor.rs</a>
+（<code>execute()</code>, <code>step_impl()</code>）</li><li><strong>指令执行映射表</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/exec_mapping.rs>src/isa/riscv/instruction/exec_mapping.rs</a>
+（<code>get_exec_func()</code>）</li><li><strong>算术/逻辑执行函数与 Trait 定义</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/exec_function.rs>src/isa/riscv/instruction/exec_function.rs</a>
+（<code>ExecTrait</code>, <code>ExecUnaryTrait</code>, <code>exec_arith</code>）</li><li><strong>流水推进与执行包装</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/mod.rs>src/isa/riscv/instruction/mod.rs</a>
+（<code>normal_exec</code>, <code>check_jump_alignment</code>）</li><li><strong>核心访存与状态更新</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/instruction/exec_core.rs>src/isa/riscv/instruction/exec_core.rs</a></li><li><strong>单元测试套件与 Checker</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/cpu_tester.rs>src/isa/riscv/cpu_tester.rs</a>
+与 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/cpu_test.rs>src/isa/riscv/cpu_test.rs</a></li><li><strong>裸机 C 测试资源</strong>：<a href=https://github.com/here-emulator/here/tree/master/test_resources/>test_resources/</a></li></ul><hr><h2 id=综合实验任务为-chapter-0x02-自定义指令实现完整后端执行单元>综合实验任务：为 Chapter 0x02 自定义指令实现完整后端执行单元</h2><p>在 Chapter 0x02 中，你已经构思并完成了指令的格式定义、JSON 描述注入、前端译码与 C 语言内嵌汇编 API 封装。现在，请为你构思的一组自定义指令完成真正的<strong>后端执行单元</strong>：</p><ol><li><strong>确定并实现计算语义</strong>：<ul><li>在 <code>src/isa/riscv/instruction/exec_function.rs</code>（或新建的模块）中编写具体的计算逻辑。</li><li>优先采用实现 <code>ExecTrait</code> 或 <code>ExecUnaryTrait</code> 的方式，确保纯算术计算与硬件状态解耦。</li><li>正确处理进位隔离、数据截断、符号位扩展或饱和截断。</li></ul></li><li><strong>接入模拟器执行路由</strong>：<ul><li>在 <code>src/isa/riscv/instruction/exec_mapping.rs</code> 中为你的指令绑定对应的执行函数，替换原先的 <code>log::info!</code> 或占位代码。</li></ul></li><li><strong>编写 Rust 执行单元测试</strong>：<ul><li>在 <code>src/isa/riscv/cpu_test.rs</code> 中使用 <code>TestCPUBuilder</code> 和 <code>CPUChecker</code> 编写针对后端执行结果的测试函数。</li><li>必须覆盖多种输入场景：常规输入、极端边界值（全 0、全 1、溢出点）、通道独立性测试以及 <code>rd=x0</code> 的硬连线测试。</li><li>运行 <code>cargo test --features custom-instr</code> 确保测试全部通过。</li></ul></li><li><strong>C 语言裸机综合测试与验证</strong>：<ul><li>在 <code>test_resources</code> 下编写或扩展裸机 C 测试程序，调用你封装的 C API。</li><li>构造丰富的测试数据集，使用 C 语言软件参考模型（Golden Model）进行自动化比对。</li><li>使用 <code>cargo run --features custom-instr -- ./test_resources/bin/main.elf</code> 运行，并在终端观察到所有测试 PASS 输出。</li></ul></li></ol></div><svg id="btt-button" class="arrow-logo" height="1em" viewBox="0 0 384 512" onclick="scrollToTop()" title="Go to top"><path d="M177 159.7l136 136c9.4 9.4 9.4 24.6.0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9.0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9.0L7 329.7c-9.4-9.4-9.4-24.6.0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/></svg>
+<script>let backToTopButton=document.getElementById("btt-button");window.onscroll=function(){scrollFunction()};function scrollFunction(){document.body.scrollTop>20||document.documentElement.scrollTop>20?backToTopButton.style.display="block":backToTopButton.style.display="none"}function scrollToTop(){window.scrollTo(0,0)}</script></div><aside class=post-toc><nav id=toc><nav id=TableOfContents><ul><li><ul><li><a href=#本章概览>本章概览</a></li><li><a href=#一-模拟器后端执行架构>一. 模拟器后端执行架构</a><ul><li><a href=#1-指令分发与执行主回路>1. 指令分发与执行主回路</a></li><li><a href=#2-执行包装器与流水线推进-normal_exec>2. 执行包装器与流水线推进 (<code>normal_exec</code>)</a></li></ul></li><li><a href=#二-核心计算抽象exectrait-与模块化解耦>二. 核心计算抽象：<code>ExecTrait</code> 与模块化解耦</a><ul><li><a href=#1-exectrait-抽象定义>1. <code>ExecTrait</code> 抽象定义</a></li><li><a href=#2-算术通用分发器-exec_arith>2. 算术通用分发器 <code>exec_arith</code></a></li></ul></li><li><a href=#三-计算单元设计模式与算术语义实现>三. 计算单元设计模式与算术语义实现</a><ul><li><a href=#1-packed-simd-计算单元与进位隔离-carry-isolation>1. Packed-SIMD 计算单元与进位隔离 (Carry Isolation)</a><ul><li><a href=#硬件原理与进位隔离>硬件原理与进位隔离</a></li><li><a href=#rust-实现方式>Rust 实现方式</a></li></ul></li><li><a href=#2-饱和算术-saturating-arithmetic>2. 饱和算术 (Saturating Arithmetic)</a></li><li><a href=#3-单目与位操作计算单元-bit-manipulation-unit>3. 单目与位操作计算单元 (Bit Manipulation Unit)</a></li></ul></li><li><a href=#实践-1实现自定义指令后端执行逻辑与分发>实践 1：实现自定义指令后端执行逻辑与分发</a><ul><li><a href=#1-编写计算结构体与-trait-实现>1. 编写计算结构体与 Trait 实现</a></li><li><a href=#2-在-exec_mappingrs-中配置分发路由>2. 在 <code>exec_mapping.rs</code> 中配置分发路由</a></li></ul></li><li><a href=#实践-2编写严密的-cpu-执行单元测试>实践 2：编写严密的 CPU 执行单元测试</a><ul><li><a href=#1-构建全方位的测试向量>1. 构建全方位的测试向量</a></li><li><a href=#2-连续步进流水线测试-run_test_cpu_step>2. 连续步进流水线测试 (<code>run_test_cpu_step</code>)</a></li></ul></li><li><a href=#实践-3c-语言裸机端与-golden-model-自动化比对>实践 3：C 语言裸机端与 Golden Model 自动化比对</a><ul><li><a href=#1-编写-golden-model-与测试用例>1. 编写 Golden Model 与测试用例</a></li><li><a href=#2-编译与全系统执行验证>2. 编译与全系统执行验证</a></li></ul></li><li><a href=#项目导览>项目导览</a></li><li><a href=#综合实验任务为-chapter-0x02-自定义指令实现完整后端执行单元>综合实验任务：为 Chapter 0x02 自定义指令实现完整后端执行单元</a></li></ul></li></ul></nav></nav></aside><script type=module>
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+    const renderMermaid = async () => {
+        const containers = [];
+
+        document.querySelectorAll("pre > code.language-mermaid").forEach((code) => {
+            const container = document.createElement("div");
+            container.className = "mermaid";
+            container.textContent = code.textContent;
+            code.parentElement.replaceWith(container);
+            containers.push(container);
+        });
+
+        mermaid.initialize({
+            securityLevel: "loose",
+            startOnLoad: false,
+        });
+
+        if (containers.length > 0) {
+            await mermaid.run({ nodes: containers });
+        }
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", renderMermaid, { once: true });
+    } else {
+        renderMermaid();
+    }
+</script><style>.mermaid svg{display:block;margin:auto;max-width:100%}</style></main><footer class=footer><span>&copy; 2026 The Marauders</span>
 <span>Made with &#10084;&#65039; using <a target=_blank href=https://github.com/gokarna-theme/gokarna-hugo>Gokarna</a></span></footer></body></html>
