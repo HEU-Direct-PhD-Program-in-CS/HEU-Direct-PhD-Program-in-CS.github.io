@@ -1,0 +1,12 @@
+{{- if .AlertType -}}
+{{- $titles := dict "note" "Note" "tip" "Tip" "important" "Important" "warning" "Warning" "caution" "Caution" -}}
+{{- $title := .AlertTitle | default (index $titles .AlertType) -}}
+<div class="markdown-alert markdown-alert-{{ .AlertType }}">
+  <p class="markdown-alert-title">{{ $title }}</p>
+  {{ .Text }}
+</div>
+{{- else -}}
+<blockquote>
+  {{ .Text }}
+</blockquote>
+{{- end -}}

@@ -353,6 +353,63 @@ blockquote {
   margin-left: 0;
 }
 
+/* GitHub Flavored Markdown alerts, emitted by Goldmark. */
+.markdown-alert {
+  --markdown-alert-color: #57606a;
+  --markdown-alert-background-color: #f6f8fa;
+  background-color: var(--markdown-alert-background-color);
+  border-left: 0.25rem solid var(--markdown-alert-color);
+  color: var(--light-text-color);
+  margin: 1.5rem 0;
+  padding: 1rem;
+}
+
+.markdown-alert > :first-child {
+  margin-top: 0;
+}
+
+.markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-alert-title {
+  align-items: center;
+  color: var(--markdown-alert-color);
+  display: flex;
+  font-weight: 700;
+  gap: 0.45rem;
+}
+
+.markdown-alert-title svg {
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
+.markdown-alert-note {
+  --markdown-alert-color: #0969da;
+  --markdown-alert-background-color: #ddf4ff;
+}
+
+.markdown-alert-tip {
+  --markdown-alert-color: #1a7f37;
+  --markdown-alert-background-color: #dafbe1;
+}
+
+.markdown-alert-important {
+  --markdown-alert-color: #8250df;
+  --markdown-alert-background-color: #fbefff;
+}
+
+.markdown-alert-warning {
+  --markdown-alert-color: #9a6700;
+  --markdown-alert-background-color: #fff8c5;
+}
+
+.markdown-alert-caution {
+  --markdown-alert-color: #cf222e;
+  --markdown-alert-background-color: #ffebe9;
+}
+
 hr {
   color: var(--light-secondary-color);
   margin: 50px auto;

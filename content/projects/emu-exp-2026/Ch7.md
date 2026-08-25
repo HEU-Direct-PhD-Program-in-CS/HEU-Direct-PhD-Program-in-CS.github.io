@@ -27,7 +27,8 @@ RISC-V 体系结构通过 **V 扩展（Vector Extension）**、处于草案阶�
 
 在传统标量（Scalar）计算中，一条 `add` 指令只能完成一对 32 位整数的加法；而在 SIMD/向量计算中，一条向量加法指令 `vadd.vv` 可以同时对寄存器中由数十乃至数百个元素构成的数组进行并行运算。
 
-想深入探讨 SIMD 与端侧 AI 算力加速的关联，可参考：[问 AI：深入理解 SIMD 指令集与 RISC-V 向量扩展在端侧 AI 中的应用](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释什么是SIMD单指令多数据原理,RISC-V%20Vector扩展的设计优势以及SIMD在端侧AI大模型推理中的重要作用&send_immediately=true&force_search=true)
+> [!TIP]
+> 想深入探讨 SIMD 与端侧 AI 算力加速的关联，可参考：[问 AI：深入理解 SIMD 指令集与 RISC-V 向量扩展在端侧 AI 中的应用](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释什么是SIMD单指令多数据原理,RISC-V%20Vector扩展的设计优势以及SIMD在端侧AI大模型推理中的重要作用&send_immediately=true&force_search=true)
 
 ```text
 标量计算 (Scalar Add):

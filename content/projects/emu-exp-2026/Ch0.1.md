@@ -20,7 +20,8 @@ showTableOfContents: true
 > 2019年，RISC-V基金会宣布将总部迁往瑞士，改名RISC-V国际基金会。作为全球性非营利组织，已在全球70多个国家拥有2000+成员。包括华为、中兴、阿里巴巴、、乐鑫等众多国内企业。
 通过十多年的发展，RISC-V这一星星之火已有燎原之势。倪光南院士表示，未来RISC-V很可能发展成为世界主流CPU之一，从而在CPU领域形成Intel (x86)、ARM、RISC-V三分天下的格局。
 
-点击此处询问 [AI](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true) :-D
+> [!TIP]
+> 点击此处询问 [AI](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true) :-D
 
 ## HERE
 

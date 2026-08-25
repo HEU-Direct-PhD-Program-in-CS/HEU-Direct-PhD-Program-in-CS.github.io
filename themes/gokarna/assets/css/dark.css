@@ -60,6 +60,35 @@ blockquote {
   border-left-color: var(--dark-secondary-color);
 }
 
+.markdown-alert {
+  color: var(--dark-text-color);
+}
+
+.markdown-alert-note {
+  --markdown-alert-color: #54aeff;
+  --markdown-alert-background-color: #033d8b;
+}
+
+.markdown-alert-tip {
+  --markdown-alert-color: #4ac26b;
+  --markdown-alert-background-color: #0f5323;
+}
+
+.markdown-alert-important {
+  --markdown-alert-color: #c297ff;
+  --markdown-alert-background-color: #5a32a3;
+}
+
+.markdown-alert-warning {
+  --markdown-alert-color: #e3b341;
+  --markdown-alert-background-color: #633c01;
+}
+
+.markdown-alert-caution {
+  --markdown-alert-color: #ff7b72;
+  --markdown-alert-background-color: #7d1d1d;
+}
+
 hr {
   color: var(--dark-secondary-color);
 }

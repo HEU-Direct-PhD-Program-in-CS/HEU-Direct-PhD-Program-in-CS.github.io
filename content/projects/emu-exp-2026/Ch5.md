@@ -65,7 +65,8 @@ flowchart TD
    - 负责收集与仲裁系统中成百上千个外部设备（如 UART、网卡、VirtIO 设备）发出的**外部中断（External Interrupt, `MEIP`/`SEIP`）**。
    - PLIC 负责完成优先权仲裁，并将最高优先级的中断信号汇总输出给 CPU Core。
 
-想深入探讨 RISC-V 体系结构基础，可参考：[问 AI：什么是 RISC-V，为什么要学习 RISC-V？](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true)
+> [!TIP]
+> 想深入探讨 RISC-V 体系结构基础，可参考：[问 AI：什么是 RISC-V，为什么要学习 RISC-V？](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true)
 
 ---
 
@@ -100,7 +101,8 @@ sequenceDiagram
     Note over PLIC: 10. PLIC 允许该 IRQ ID 再次触发
 ```
 
-欲了解更多 PLIC 的寄存器偏移与硬件规范细节，可查阅：[问 AI：深入理解 RISC-V PLIC 中断控制器规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V的PLIC中断控制器规范,包括Priority,Pending,Enable,Threshold,Claim和Complete机制&send_immediately=true&force_search=true)
+> [!TIP]
+> 欲了解更多 PLIC 的寄存器偏移与硬件规范细节，可查阅：[问 AI：深入理解 RISC-V PLIC 中断控制器规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V的PLIC中断控制器规范,包括Priority,Pending,Enable,Threshold,Claim和Complete机制&send_immediately=true&force_search=true)
 
 ---
 
@@ -204,7 +206,8 @@ flowchart TD
 
 在真实物理世界中，模拟一套复杂的网卡或显卡硬件（如 Intel e1000 或 NVMe 规范）需要模拟成百上千个复杂的硬件控制寄存器，产生极高的陷入/陷出开销。为此，现代虚拟化技术广泛采用了 **VirtIO 半虚拟化（Paravirtualization）标准**。
 
-想了解 VirtIO 规范的演进与底层细节，可参考：[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=true&force_search=true)
+> [!TIP]
+> 想了解 VirtIO 规范的演进与底层细节，可参考：[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=true&force_search=true)
 
 ### 1. 半虚拟化 (Paravirtualization) vs 全虚拟化 (Full Virtualization)
 
