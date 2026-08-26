@@ -7,17 +7,17 @@ showTableOfContents: true
 mermaid: true
 ---
 
-## 本章概览
+## 一. 本章概览
 
 本章关注正常指令流被打断后发生了什么。异常、中断、系统调用和特权级切换最终都会进入 trap 流程，但它们从哪里来、保存什么信息、处理后回到哪里并不完全相同。
 
 实验会同时观察客户程序和模拟器：客户程序负责设置入口、保存通用寄存器和编写 handler；模拟器负责判断 trap 是否发生、更新相关 CSR、切换特权级并改变 PC。把两侧的动作按时间顺序对起来，是理解本章最直接的方法。
 
-## 特权级与 Trap 机制
+## 二. 特权级与 Trap 机制
 
 ### 特权级概述
 
-为了保护硬件资源不被错误编写的或恶意的程序破坏，现代体系结构会设计不同数量的特权等级。RISC-V 定义了三种特权级（若不开启 H 扩展），从高到低：
+为了保护硬件资源不被错误编写的或恶意的程序破坏，现代体系结构会设计不同数量的特权等级。RISC-V 定义了三种特权级，从高到低为：
 
 - **M-mode（Machine）**：最高特权模式，拥有访问所有系统功能和物理资源的权限。
 - **S-mode（Supervisor）**：中间特权模式，用于运行操作系统内核。
@@ -38,15 +38,15 @@ RISC-V 将 trap 分为两类：
 
 接下来以在 M mode 处理异常为例，讲解一个简化的异常处理流程，省略掉不重要的 CSR 字段。如果你想了解更详细的流程应该参考手册或模拟器的代码（src/isa/riscv/trap/trap_controller.rs）。
 
-异常处理流程需要用到许多关键的 CSR（控制寄存器）：
+异常处理流程需要用到许多关键的 CSR（控制状态寄存器）：
 
-- mip（Machine Interrupt Pending），记录当前的中断请求
-- mie（Machine Interrupt Enable），处理器是否相应某种中断
-- mcause（Machine Exception Cause），指示发生了何种异常
-- mtvec（Machine Trap Vector），存放发生异常时处理器应该跳转的地址
-- mtval（Machine Trap Value），存放当前异常相关的额外信息，如访存异常保存故障地址
-- mepc（Machine Exception PC），发生异常的指令地址
-- mscratch（Machine Scratch），给异常处理程序准备的临时寄存器
+- `mip`（Machine Interrupt Pending）：记录当前挂起的中断请求
+- `mie`（Machine Interrupt Enable）：指示处理器是否响应某种中断
+- `mcause`（Machine Exception Cause）：指示发生了何种异常或中断
+- `mtvec`（Machine Trap Vector）：存放发生异常时处理器应该跳转的基地址与模式
+- `mtval`（Machine Trap Value）：存放当前异常相关的附加信息（如访存故障地址、非法指令编码等）
+- `mepc`（Machine Exception PC）：记录发生异常或中断时的指令 PC 地址
+- `mscratch`（Machine Scratch）：提供给异常处理程序用于临时保存上下文的暂存寄存器
 
 如果当前指令遇到异常，或者在运行指令之前检测到中断，则会进入异常处理流程：
 
@@ -56,9 +56,9 @@ RISC-V 将 trap 分为两类：
 2. 保存上下文，保存 trap 前的状态，用于从 trap 中返回：
    - `mstatus.MPP` <- 当前特权级
    - `mepc` <- 当前 PC
-   - `mstatus.MPIE` <- `mstatus.MIE`，
-   - 清除 `mstatus.MIE`（为了避免立刻再次相应中断）
-3. 切换 PC：根据 `mtvec` 的 base 和 mode（Direct 或 Vectored）计算 handler 地址。在 direct 模式下就是直接跳转到 base 的地址。
+   - `mstatus.MPIE` <- `mstatus.MIE`
+   - 清除 `mstatus.MIE`（为了避免立刻再次响应中断）
+3. 切换 PC：根据 `mtvec` 的 base 和 mode（Direct 或 Vectored）计算 handler 地址。在 Direct 模式下就是直接跳转到 base 的地址。
 
 这之后交由软件来处理异常。
 
@@ -73,7 +73,7 @@ RISC-V 将 trap 分为两类：
 
 这基本上就是发生异常时保存上下文的逆操作。
 
-## 项目导览
+## 三. 项目导览
 
 模拟器侧：
 
@@ -89,7 +89,7 @@ RISC-V 将 trap 分为两类：
 - `test_resources/src/trap_test.c`、`ecall_test.c`、`clint.c`：已有的简单 demo 程序。
 - `test_resources/src/clint.c` 演示了在 M-mode 下使用定时器中断的基本流程。
 
-## 综合实验任务：M-mode monitor
+## 四. 综合实验任务：M-mode monitor
 
 实现一个小型 M-mode monitor，由它启动多个 U-mode 测试程序。
 
@@ -101,4 +101,10 @@ RISC-V 将 trap 分为两类：
 
 ### 扩展任务
 
-实现更好的类似 RTOS 的抢占式调度：给 U-mode 程序设定优先级，总是运行当前活跃的最高优先级的程序，在多个同优先任务中公平分配时间（注意 `yield` 和 `sleep` 的实现, 尽可能减少 `CPU` 的忙等)
+实现更先进的类似 RTOS 的抢占式调度：给 U-mode 程序设定优先级，总是运行当前处于就绪态的最高优先级程序，在多个同优先级的任务中公平分配时间片。
+
+> [!NOTE]
+> - 注意 `yield` 和 `sleep` 的实现，尽可能减少 CPU 的空转忙等。
+> - 可以尝试支持任务的中断唤醒睡眠（类似 Linux 的 `TASK_INTERRUPTIBLE` 状态），当任务在等待 I/O 时不参与调度。
+
+在 RISC-V 体系中，一般情况下操作系统内核（OS）运行在 S-mode，而 M-mode 由 **SBI（Supervisor Binary Interface）** 固件程序控制。SBI 在操作系统之前加载完成；在 OS 启动前期外设驱动尚未就绪时，OS 可以通过 SBI 提供的系统调用输出控制台日志；在 OS 发生严重崩溃后，SBI 也能捕获底层异常并输出诊断日志，极大地方便了调试工作。如果感兴趣，可以查阅 [RISC-V SBI 规范文档](https://github.com/riscv-non-isa/riscv-sbi-doc) 获取更多信息。

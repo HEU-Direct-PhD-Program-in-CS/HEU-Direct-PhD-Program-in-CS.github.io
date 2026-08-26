@@ -2,7 +2,7 @@ baseURL = "https://heu-direct-phd-program-in-cs.github.io/"
 defaultContentLanguage = "zh_cn"
 enableEmoji = true
 enableRobotsTXT = true
-languageCode = "zh"
+locale = "zh"
 # Build draft pages so that their URLs still render. The theme layouts remove
 # them from every navigational/indexing surface.
 buildDrafts = true

@@ -7,7 +7,7 @@ showTableOfContents: true
 mermaid: true
 ---
 
-## 本章概览
+## 一. 本章概览
 
 随着端侧 AI（Edge AI）、本地大模型（Local LLM）推理、计算机视觉与音视频处理技术的爆发式发展，传统的标量处理架构（Scalar Processing）在面对海量高吞吐量的数据计算时显得力不从心。**SIMD（Single Instruction Multiple Data，单指令多数据）** 及其演进出的**矢量计算（Vector Processing）** 与 **矩阵计算（Matrix Engine）** 架构，成为了现代芯片算力提升的关键所在。
 
@@ -15,13 +15,14 @@ RISC-V 体系结构通过 **V 扩展（Vector Extension）**、处于草案阶�
 
 通过本章学习与实验，你将完成以下内容：
 1. 理解 SIMD 与 RISC-V V 扩展（VLA 可变向量长度）的核心原理及其在端侧 AI 算力加速中的关键作用。
-2. 了解 RISC-V Packed-SIMD (P) 扩展与 AME 矩阵扩展的设计初衷与应用场景（相关手册仓库见 [Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)）。
-3. 掌握模拟器当前对 RVV 1.0 整型向量指令集的支持情况。
-4. **实验任务**：编写简单的 RISC-V 向量 C/汇编程序（如向量点积 Dot Product、整型 GEMM 矩阵乘法算子），并在模拟器中运行验证。
+2. 掌握现代编译器（以 LLVM 为例）的向量化方案（Loop/SLP Vectorizer、VP 抽象）以及针对 RVV 的专属优化（`RISCVInsertVSETVLI` 状态机合并、Tail-Folding 消除尾循环、LMUL 启发式选择等）。
+3. 了解 RISC-V Packed-SIMD (P) 扩展与 AME 矩阵扩展的设计初衷与应用场景（相关手册仓库见 [Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)）。
+4. 掌握模拟器当前对 RVV 1.0 整型向量指令集的支持情况。
+5. **实验任务**：编写简单的 RISC-V 向量 C/汇编程序（如向量点积 Dot Product、整型 GEMM 矩阵乘法算子），并在模拟器中运行验证。
 
 ---
 
-## 一、 SIMD 概念与 RISC-V V 扩展标准
+## 二. SIMD 概念与 RISC-V V 扩展标准
 
 ### 1. 什么是 SIMD？为何端侧 AI 极其依赖它？
 
@@ -80,7 +81,155 @@ vsetvli t0, a0, e32, m1, ta, ma
 
 ---
 
-## 二、 衍生扩展：AME 矩阵扩展与 P 扩展
+## 三. 编译器对 RISC-V 向量扩展的支持与优化（以 LLVM 为例）
+
+RISC-V V 扩展的 VLA（可变向量长度）与动态状态机（`vtype`/`vl`）特性为硬件设计带来了极高的灵活性，但同时也对编译器（如 LLVM/Clang、GCC）的代码生成和优化提出了极高的要求。编译器不仅要识别同构计算并生成向量指令，还要智能地处理动态向量长度（`vl`）、寄存器分组（`LMUL`）以及配置状态机切换开销。
+
+参考官方文档：[LLVM RISC-V Vector Extension 文档](https://llvm.org/docs/RISCV/RISCVVectorExtension.html)
+
+---
+
+### 1. LLVM 常见的向量化方案与中间表示 (IR)
+
+LLVM 的向量化体系包含三个核心技术层次：
+
+```mermaid
+flowchart TD
+    Src["C / C++ 源码"] --> Clang["Clang 前端"]
+    Clang --> Opt["LLVM 中端优化管线 (Mid-end Optimizer)"]
+
+    subgraph Vectorizers["LLVM 自动向量化引擎"]
+        LV["Loop Vectorizer<br/>(循环自动向量化)"]
+        SLP["SLP Vectorizer<br/>(基本块同构代码向量化)"]
+        VP["Vector Predication (VP)<br/>(带显式 Mask 与 VL 的内在抽象)"]
+    end
+
+    Opt --> LV
+    Opt --> SLP
+    LV --> VP
+    SLP --> VP
+
+    VP --> Backend["LLVM RISC-V 后端 (Target-Specific)"]
+    Backend --> InsertVSETVLI["RISCVInsertVSETVLI Pass<br/>(vsetvli 状态机插桩与合并)"]
+    Backend --> RegAlloc["LMUL & 向量寄存器分配"]
+    Backend --> Asm["最终 RVV 机器汇编 (.s / .o)"]
+```
+
+#### A. Loop Vectorizer（循环向量化器）
+- **核心机制**：针对 `for` / `while` 循环进行归纳变量分析（Induction Variable）、数据依赖距离检查（Loop-carried Dependence）与内存别名分析（Alias Analysis）。
+- **Cost Model（代价模型）**：评估向量化因子（Vector Factor, VF）与循环展开因子（Unroll Factor, UF），权衡指令吞吐收益与指令发射开销。
+
+#### B. SLP Vectorizer（Superword-Level Parallelism，基本块向量化器）
+- **核心机制**：在单个基本块（Basic Block）内识别并行的标量独立操作（如三维坐标变换 `p.x += dx; p.y += dy; p.z += dz;`），自底向上聚合成向量操作，有效加速直线型计算密集代码。
+
+#### C. Scalable Vector 类型与 Vector Predication (VP) 抽象
+- **Scalable Vector Type (`<vscale x N x ty>`)**：传统 x86/ARM 使用固定宽度向量（如 `<4 x i32>`），而 LLVM 为 RVV 引入了包含运行时伸缩因子 `vscale` 的类型，以此在 IR 层完整表达 VLA 概念。
+- **VP Intrinsics（`llvm.vp.*`）**：引入统一的显式向量长度（Explicit Vector Length, EVL）控制，将循环中迭代的动态 `vl` 和 `mask` 作为首要参数传递给中端指令，让优化器能够无损保留变长向量语义。
+
+---
+
+### 2. LLVM 针对 RISC-V Vector 的专属后端优化
+
+RISC-V V 扩展的独特硬件模型促使 LLVM 实现了一系列专属于 RVV 的关键优化 Pass：
+
+#### A. `RISCVInsertVSETVLI` 编译优化 Pass（状态机冗余消除）
+
+在 RVV 汇编中，每当改变元素位宽（SEW）、向量寄存器分组（LMUL）或计算长度（AVL）时，硬件要求必须执行 `vsetvli` 指令配置 CPU 内部的 `vtype` 和 `vl` 寄存器。如果编译器在每条向量算术指令前都盲目插入 `vsetvli`，将带来巨大的流水线气泡与指令膨胀。
+
+- **全局数据流分析（Dataflow Analysis）**：`RISCVInsertVSETVLI` Pass 遍历控制流图（CFG），追踪每个基本块入口和出口处的 `vtype` 状态（SEW、LMUL、Tail/Mask 策略）。
+- **状态传播与合并（State Merging & Redundancy Elimination）**：
+  - 如果相邻指令的 `vtype` 需求相同，直接剔除后续冗余的 `vsetvli` 指令。
+  - **循环外提（Loop Hoisting）**：如果循环内部的向量配置在迭代过程中保持恒定，将 `vsetvli` 提升至循环前驱块（Preheader），使循环内部实现“纯计算零配置开销”。
+
+```mermaid
+flowchart LR
+    subgraph Before["优化前 (未优化)"]
+        A1["vsetvli (SEW=32, LMUL=1)"] --> A2["vle32.v v1, (a0)"]
+        A2 --> A3["vsetvli (SEW=32, LMUL=1)"]
+        A3 --> A4["vadd.vv v3, v1, v2"]
+    end
+
+    subgraph After["优化后 (RISCVInsertVSETVLI 优化后)"]
+        B1["vsetvli (SEW=32, LMUL=1)"] --> B2["vle32.v v1, (a0)"]
+        B2 --> B4["vadd.vv v3, v1, v2"]
+    end
+```
+
+#### B. Tail / Mask 策略优化 (`ta`/`tu` & `ma`/`mu`)
+
+RVV 允许软件指定未激活元素（Tail 元素与 Masked-off 元素）的处理策略：
+- **`tu`（Tail-Undisturbed，保留原值）**：硬件必须保留目标寄存器尾部旧值，这会在乱序执行（Out-of-Order）核心中引入对目标寄存器的**伪数据依赖（False Dependency）**，迫使寄存器重命名单元等待前序指令写回。
+- **`ta`（Tail-Agnostic，不关心原值）**：硬件可直接覆写或清零尾部，打破指令间虚假依赖，极大加速乱序微架构下的重命名与发射效率。
+- **LLVM 优化**：LLVM 优先推导并生成 `ta` 和 `ma` 策略；只有当能够证明算法逻辑确需保留旧值时才退化为 `tu`。
+
+#### C. Tail-Folding 与无标量尾循环（No Scalar Epilog Loop）
+
+在传统固定宽度 SIMD 编译中，如果数组总长度 $N$ 不能被向量宽度（如 4 或 8）整除，编译器必须在向量循环之后生成一段低效的**标量尾循环（Scalar Epilog Loop）**来处理余数部分。
+
+而在 RVV 中，LLVM 结合 `vsetvli` 的自适应能力实现了 **Tail-Folding（尾部折叠）**：
+
+```c
+// C 语言原始循环
+for (int i = 0; i < N; i++) {
+    c[i] = a[i] + b[i];
+}
+```
+
+LLVM 编译出的精简 RVV 汇编（无任何标量尾循环）：
+```assembly
+# a0 = a, a1 = b, a2 = c, a3 = N (AVL)
+.LBB0_1:
+    vsetvli  t0, a3, e32, m1, ta, ma   # 动态申请本次计算的元素个数 t0 = min(a3, VLMAX)
+    vle32.v  v1, (a0)                   # 向量加载 a[i]
+    vle32.v  v2, (a1)                   # 向量加载 b[i]
+    vadd.vv  v3, v1, v2                 # 向量加法
+    vse32.v  v3, (a2)                   # 向量存储 c[i]
+    slli     t1, t0, 2                  # 字节偏移 = t0 * 4
+    add      a0, a0, t1                 # 推进指针 a
+    add      a1, a1, t1                 # 推进指针 b
+    add      a2, a2, t1                 # 推进指针 c
+    sub      a3, a3, t0                 # 剩余元素数 N = N - t0
+    bnez     a3, .LBB0_1                # 若 N > 0 继续循环；最后一次自动按实际余数安全计算！
+```
+
+#### D. LMUL 启发式选择与寄存器压力权衡
+
+- **吞吐 vs 寄存器压力**：更大的 `LMUL`（如 `LMUL=4` 或 `LMUL=8`）可以成倍增加单条指令吞吐、摊薄控制流开销；但同时会导致逻辑向量寄存器数量骤减（`LMUL=8` 时仅剩 4 组可用），极易导致寄存器溢出到栈（Spill）。
+- LLVM 后端代价模型会综合循环内部活跃变量（Live Ranges）数量，在避免寄存器溢出的前提下自动选择最佳的 `LMUL`。
+
+---
+
+### 3. RVV C/C++ Intrinsics 编程支持
+
+除了依赖编译器自动向量化外，LLVM/Clang 和 GCC 均提供了官方 **RVV C Intrinsics 规范（`riscv_vector.h`）**，允许开发者像调用普通 C 函数一样编写底层控制精准的向量算子：
+
+```c
+#include <riscv_vector.h>
+
+void vec_add_intrinsics(const int32_t *a, const int32_t *b, int32_t *c, size_t n) {
+    size_t vl;
+    for (; n > 0; n -= vl, a += vl, b += vl, c += vl) {
+        // 使用 C 内建函数动态设置 vl (e32, m1)
+        vl = __riscv_vsetvl_e32m1(n);
+        
+        // 向量类型显式绑定
+        vint32m1_t va = __riscv_vle32_v_i32m1(a, vl);
+        vint32m1_t vb = __riscv_vle32_v_i32m1(b, vl);
+        vint32m1_t vc = __riscv_vadd_vv_i32m1(va, vb, vl);
+        
+        __riscv_vse32_v_i32m1(c, vc, vl);
+    }
+}
+```
+
+> [!TIP]
+> 想深入探讨 LLVM 对 RISC-V 向量扩展的自动向量化与优化 Pass，可参考：[问 AI：深入理解 LLVM 的 RISC-V 向量化架构与 RISCVInsertVSETVLI 优化 Pass](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释LLVM编译器如何支持RISC-V向量扩展,包括ScalableVector,LoopVectorizer与VPIntrinsic,RISCVInsertVSETVLIPass的数据流分析与冗余消除,LMUL选择策略以及TailFolding消除尾循环的机制&send_immediately=true&force_search=true)
+
+
+
+---
+
+## 四. 衍生扩展：AME 矩阵扩展与 P 扩展
 
 除了通用 1D 向量扩展（V 扩展）外，RISC-V 社区还在火热推进行业专用的并行扩展提案（手册规范已收录于 [Appendix_A.md]($env.repo/tree/master/rv-exp/Appendix_A.md)）：
 
@@ -113,7 +262,7 @@ flowchart TD
 
 ---
 
-## 三、 实验任务：编写与运行 SIMD 算子代码
+## 五. 实践：编写与运行 SIMD 算子代码
 
 本实验要求你利用模拟器支持的整型向量指令，编写简单的矢量化计算算子，并在模拟器/单元测试中验证其正确性。
 
@@ -169,7 +318,7 @@ cargo test vector_op
 
 ---
 
-## 项目导览
+## 六. 项目导览
 
 - **向量寄存器与类型定义**：[src/isa/riscv/vector/types.rs]($env.repo/tree/master/src/isa/riscv/vector/types.rs)（定义 `Vlmul`, `Vsew`, `Vector` 结构体）
 - **向量模块核心调度**：[src/isa/riscv/vector/mod.rs]($env.repo/tree/master/src/isa/riscv/vector/mod.rs)

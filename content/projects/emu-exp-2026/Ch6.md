@@ -22,7 +22,7 @@ mermaid: true
 
 ---
 
-## 一、 Linux 内核启动流程全貌
+## 一. Linux 内核启动流程全貌
 
 在全系统模拟下，Linux 内核的引导涉及固件、特权级交接、设备树解析以及根文件系统挂载。
 
@@ -127,7 +127,7 @@ S-mode 的 Linux 内核通过 `ecall` 指令请求 M-mode 的 OpenSBI 提供硬�
 
 ---
 
-## 二、 实验小任务一：Initramfs 验证与用户态程序注入
+## 实践 1：Initramfs 验证与用户态程序注入
 
 在这个实验中，你将使用项目提供的预编译镜像启动模拟器，制作一个带有 Ext4 文件系统的 VirtIO-Block 磁盘镜像，并将你在实验一中编写的程序编译为用户态 ELF，放入磁盘中在 Linux 内核上运行！
 
@@ -220,7 +220,7 @@ mount /dev/vda /mnt
 
 ---
 
-## 三、 实践：Alpine Linux Rootfs 部署与系统扩展
+## 实践 2：Alpine Linux Rootfs 部署与系统扩展
 
 在完成了基础验证后，我们来挑战更具成就感的目标：**在模拟器上部署一个真正的通用 Linux 发行版（Alpine Linux）**。
 
