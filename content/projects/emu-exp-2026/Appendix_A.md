@@ -24,3 +24,8 @@ draft: false
 - [Uart 16550](https://pdos.csail.mit.edu/6.S081/2024/lec/16550.pdf) 一类常用的串口协议。
 - [W25Q512JV](https://datasheet4u.com/pdf/1411833/W25Q512JV.pdf) 512bits (64mbytes) `SPI-FLASH` 设备。
 - [sifive-u540](https://www.sifive.com/document-file/freedom-u540-c000-manual) 芯片数据手册，其中包含 Sifive-SPI，CLINT，和中断相关的介绍。
+
+## :crab: Rust 库文档
+
+[Tokio 官方文档](https://tokio.rs/): `Tokio` 是 Rust 的一个无栈协程运行时实现。
+[Clap](https://docs.rs/clap/latest/clap/): `Clap` 是一个命令行解析工具, 支持使用派生宏来非常便捷且直观地实现命令行参数解析.

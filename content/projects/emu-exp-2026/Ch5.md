@@ -137,9 +137,29 @@ pub trait PlicDevice: DeviceTrait {
 
 ---
 
-### 2. 异步任务运行时：`TaskSpawner`
+### 2. 异步任务运行时：`TaskSpawner` 与 Tokio 框架
 
-为了处理耗时的 I/O、后台延时或网络等待，模拟器在 [src/task_spawner.rs]($env.repo/tree/master/src/task_spawner.rs) 中提供了基于 **Tokio 异步运行时** 的轻量级异步任务派发器 `TaskSpawner`：
+在全系统模拟器中，CPU 主循环（`step_batch` / `step_impl`）运行在主线程上，以极高的频率逐条取指并推进模拟时钟。如果某个外设需要等待一段时间（如定时器超时、串口传输延迟）或处理阻塞式 I/O（如网络数据收发、磁盘镜像读写），如果在主线程中直接调用 `thread::sleep` 或同步阻塞 I/O，**将彻底冻结 CPU 的指令执行**。
+
+为了解决这一问题，模拟器将外设的耗时操作与异步事件解耦至后台的 **Tokio 异步运行时**。
+
+#### 什么是 Tokio？
+
+[Tokio](https://tokio.rs/) 是 Rust 生态中最流行、工业级成熟的事件驱动异步运行时（Asynchronous Runtime）。它提供了：
+1. **轻量级异步多任务（Tasks）**：类似于操作系统线程，但由用户态协程调度器管理，创建和切换开销极小，单个线程内即可并发运行成千上万个轻量任务。
+2. **高精度异步定时器（`tokio::time`）**：支持毫秒/微秒级非阻塞定时等待（如 `sleep`、`sleep_until`），在等待期间让出 CPU 给其他任务执行。
+3. **丰富的并发通信原语（Channels）**：提供了单生产者单消费者（`oneshot`）、多生产者单消费者（`mpsc`）、多广播通道（`broadcast`）以及单一状态观察通道（`watch`）等跨任务同步机制。
+4. **事件驱动 I/O（Reactor 反应器模型）**：底层封装了 OS 的多路复用接口（Linux 的 `epoll`、macOS 的 `kqueue`、Windows 的 `IOCP`），支持高吞吐网络与文件并发读写。
+
+- [Tokio 官方文档](https://tokio.rs/)
+- [Tokio API 查阅 (docs.rs)](https://docs.rs/tokio)
+
+> [!TIP]
+> 想深入探讨 Rust 异步编程与 Tokio 底层机制，可参考：[问 AI：深入理解 Rust Tokio 异步运行时与事件驱动模型](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释Rust的Tokio异步运行时工作原理,Reactor与Executor模型,异步任务Task,通道Channel以及如何在同步模拟器中嵌入Tokio事件循环&send_immediately=true&force_search=true)
+
+#### 模拟器的 `TaskSpawner` 设计
+
+在 [src/task_spawner.rs]($env.repo/tree/master/src/task_spawner.rs) 中，模拟器构建了一个轻量级的任务派发器 `TaskSpawner`，它在后台维护一个独立的单线程 Tokio 运行时：
 
 ```rust
 pub struct TaskSpawner {
@@ -261,9 +281,9 @@ flowchart TD
 
 ---
 
-## 四. 内存屏障、可见性与 VirtIO 统一异步 I/O 架构构想
+## 四. 内存屏障、可见性与 VirtIO 统一异步 I/O 架构
 
-在编写具有 DMA（Direct Memory Access）能力或带异步 Backend 的外设（例如磁盘读取、网卡接收包、VirtIO 队列处理）时，必须严格处理**跨线程内存可见性**。
+在编写具有 DMA（Direct Memory Access）能力或带异步 Backend 的外设（例如串口读写, 磁盘读取、网卡接收包、VirtIO 队列处理）时，必须严格处理**跨线程内存可见性**。
 
 ### 1. 内存乱序与可见性陷阱（Memory Visibility & Reordering）
 
@@ -309,10 +329,10 @@ sequenceDiagram
 
 ---
 
-### 2. VirtIO 统一后台异步 I/O 线程架构（构想设计）
+### 2. VirtIO 统一后台异步 I/O 线程架构
 
 > [!NOTE]
-> 该统一后台 I/O 架构目前处于前瞻构思阶段，旨在展示大型模拟器中减少线程开销的设计思路，当前模拟器代码暂未完全落地。
+> VirtIO 异步行为刚刚实现, 可能还不稳定, 请批判性的分析源码, 有问题大胆提交 issue.
 
 在 VirtIO 的工业级模拟中，如果每个 VirtIO 设备（Block 磁盘、Net 网卡、Console、FS）都独占启动一个后台线程，会导致宿主系统线程频繁上下文切换与资源浪费。最优架构是构建一个**统一的 VirtIO 后台 I/O 服务线程（Unified VirtIO Background Thread）**：
 
@@ -338,7 +358,7 @@ flowchart TD
 ```
 
 #### 架构核心要点：
-1. **单一 Worker 统一调度**：提供一个统一的后台 I/O 线程，集中管理所有 VirtIO 设备的队列任务。
+1. **单一 Tasks 统一调度**：提供一个统一的后台 I/O 线程，集中管理所有设备的队列任务。
 2. **直接操作物理 RAM**：异步线程根据描述符表提供的物理地址（`paddr`）直接切片操作宿主分配的 RAM 内存块。
 3. **安全的中断递交**：I/O 完成并回写 Used Ring 后，原子执行 `isr.fetch_or(1, Ordering::Release)`。主线程 PLIC 在下一次周期检查时通过 `Acquire` 读观察到中断，无缝触发 Guest 内核驱动。
 
@@ -349,7 +369,7 @@ flowchart TD
 在真实物理世界中，模拟一套复杂的真实硬件（如 Intel e1000 网卡或 NVMe 控制器）需要模拟成百上千个复杂的寄存器，导致频繁且昂贵的 VM-Exit 陷入开销。为此，现代虚拟化技术广泛采用了 **VirtIO 半虚拟化（Paravirtualization）标准**。
 
 > [!TIP]
-> 想了解 VirtIO 规范的演进与底层细节，可参考：[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=true&force_search=true)
+> 想了解 VirtIO 规范的演进与底层细节，可以[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=true&force_search=true)
 
 ### 1. 半虚拟化 (Paravirtualization) vs 全虚拟化 (Full Virtualization)
 
@@ -435,7 +455,7 @@ timeline
 - **SampleTimer 参考外设**：[src/device/sample_timer.rs]($env.repo/tree/master/src/device/sample_timer.rs)（演示 `TaskSpawner`、`watch::channel` 与 `PlicDevice` 电平报告的完整定时器）
 - **VirtIO MMIO 传输层**：[src/device/virtio/virtio_mmio.rs]($env.repo/tree/master/src/device/virtio/virtio_mmio.rs)（VirtIO 控制寄存器、Feature 协商与 Doorbell 门铃机制）
 - **Virtqueue 队列机制**：[src/device/virtio/virtio_queue.rs]($env.repo/tree/master/src/device/virtio/virtio_queue.rs)（Descriptor Table、Available Ring 与 Used Ring 共享内存实现）
-- **VirtIO Block 设备实现**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)（半虚拟化块设备参考实现）
+- **VirtIO Block 设备实现**：[src/device/virtio/virtio_blk.rs]($env.repo/tree/master/src/device/virtio/virtio_blk.rs)（半虚拟化块设备参考实现, 支持异步io）
 - **板卡总线与 IRQ 连接**：[src/board/virt.rs]($env.repo/tree/master/src/board/virt.rs)（板卡外设初始化、`TaskSpawner` 注入与 PLIC 中断管线挂载）
 
 ---
