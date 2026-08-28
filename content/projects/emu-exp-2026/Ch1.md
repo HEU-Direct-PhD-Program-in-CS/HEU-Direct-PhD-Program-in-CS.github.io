@@ -130,7 +130,7 @@ flowchart LR
    - 通常，属性相同的多个 Section 会被合并归入同一个 Segment（例如只读的 `.text` 和 `.rodata` 归入一个只读代码段，可读写的 `.data` 和 `.bss` 归入一个数据段），以减少内存对齐与映射开销。
 
 > [!TIP]
-> 想深入探讨 ELF 文件结构与装载机制，可以 [问 AI：深入理解 ELF 文件格式、Section 与 Segment 的区别以及装载过程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释ELF文件格式结构,ELFHeader,ProgramHeaderTable与SectionHeaderTable的区别,LinkingView与ExecutionView,以及模拟器或操作系统如何解析并装载ELF到内存&send_immediately=true&force_search=true)
+> 想深入探讨 ELF 文件结构与装载机制，可以 [问 AI：深入理解 ELF 文件格式、Section 与 Segment 的区别以及装载过程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释ELF文件格式结构,ELFHeader,ProgramHeaderTable与SectionHeaderTable的区别,LinkingView与ExecutionView,以及模拟器或操作系统如何解析并装载ELF到内存&send_immediately=false&force_search=true)
 
 #### 1.2. 模拟器如何加载 ELF 文件到 RAM
 

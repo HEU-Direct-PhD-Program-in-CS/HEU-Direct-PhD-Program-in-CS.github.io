@@ -29,7 +29,7 @@ mermaid: true
 ### 1. 引导启动链路与特权级交接
 
 > [!TIP]
-> 想深入了解 RISC-V Linux 内核启动的底层细节，可参考：[问 AI：深入理解 RISC-V Linux 内核引导启动流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V架构下Linux内核的启动流程,从OpenSBI初始化,mret切换到S-mode,head.S内核入口,页表建立到挂载Rootfs启动PID1的完整步骤&send_immediately=true&force_search=true)
+> 想深入了解 RISC-V Linux 内核启动的底层细节，可参考：[问 AI：深入理解 RISC-V Linux 内核引导启动流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V架构下Linux内核的启动流程,从OpenSBI初始化,mret切换到S-mode,head.S内核入口,页表建立到挂载Rootfs启动PID1的完整步骤&send_immediately=false&force_search=true)
 
 ```mermaid
 sequenceDiagram
@@ -55,7 +55,7 @@ sequenceDiagram
 ### 2. 设备树 (Device Tree / DTS & DTB)
 
 > [!TIP]
-> 想深入了解设备树语法与 Linux 解析原理，可参考：[问 AI：深入理解 RISC-V 设备树 DTS 规范与 Linux 解析流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V设备树DTS语法,DTC编译器,chosen节点bootargs参数以及Linux内核如何解析DTB发现硬件&send_immediately=true&force_search=true)
+> 想深入了解设备树语法与 Linux 解析原理，可参考：[问 AI：深入理解 RISC-V 设备树 DTS 规范与 Linux 解析流程](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V设备树DTS语法,DTC编译器,chosen节点bootargs参数以及Linux内核如何解析DTB发现硬件&send_immediately=false&force_search=true)
 
 设备树实现了硬件描述与内核源码的解耦。在本项目 [dts/virt.dts]($env.repo/tree/master/dts/virt.dts) 中描述了模拟器的虚拟板卡布局（包含 `chosen` 节点、`memory@80000000`、`uart0`、`plic` 等）：
 
@@ -109,7 +109,7 @@ dtc -I dts -O dtb -o dts/virt.dtb dts/virt.dts
 ### 3. OpenSBI 与 SBI 接口规范
 
 > [!TIP]
-> 想深入了解 OpenSBI 固件与 SBI 规范，可参考：[问 AI：深入理解 RISC-V OpenSBI 固件与 SBI 规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释RISC-V%20SBI规范,OpenSBI固件的作用,M-mode与S-mode交接机制以及Ecall触发SBI服务的原理&send_immediately=true&force_search=true)
+> 想深入了解 OpenSBI 固件与 SBI 规范，可参考：[问 AI：深入理解 RISC-V OpenSBI 固件与 SBI 规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释RISC-V%20SBI规范,OpenSBI固件的作用,M-mode与S-mode交接机制以及Ecall触发SBI服务的原理&send_immediately=false&force_search=true)
 
 S-mode 的 Linux 内核通过 `ecall` 指令请求 M-mode 的 OpenSBI 提供硬件服务（`a7` 为 EID 扩展号，`a6` 为 FID 函数号，`a0`~`a5` 传递参数）：
 - **Console Extension (EID: `0x01` / `0x4442434E`)**：控制台字符打印。

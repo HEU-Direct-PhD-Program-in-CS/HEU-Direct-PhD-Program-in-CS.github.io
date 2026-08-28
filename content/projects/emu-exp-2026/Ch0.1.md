@@ -21,7 +21,7 @@ showTableOfContents: true
 通过十多年的发展，RISC-V这一星星之火已有燎原之势。倪光南院士表示，未来RISC-V很可能发展成为世界主流CPU之一，从而在CPU领域形成Intel (x86)、ARM、RISC-V三分天下的格局。
 
 > [!TIP]
-> 点击此处让 [AI](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true) 介绍 :smile:
+> 点击此处让 [AI](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=false&force_search=true) 介绍 :smile:
 
 ## HERE
 

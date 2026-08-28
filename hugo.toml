@@ -1,4 +1,4 @@
-baseURL = "https://heu-direct-phd-program-in-cs.github.io/"
+baseURL = "https://heu-cs-dphd.github.io/"
 defaultContentLanguage = "zh_cn"
 enableEmoji = true
 enableRobotsTXT = true
@@ -80,7 +80,7 @@ title = "HEU本博班's Blog"
   [[menu.main]]
     identifier = "github"
     pre = "<span data-feather='github'></span>"
-    url = "https://github.com/HEU-Direct-PhD-Program-in-CS"
+    url = "https://github.com/heu-cs-dphd"
     weight = 5
 
   [[menu.main]]

@@ -42,7 +42,7 @@ HTML 等标记语言不直接显示内容, 而是会通过着色器, 指导着�
 
 ### `markdown` 语法
 
-[blog](https://github.com/HEU-Direct-PhD-Program-in-CS/HEU-Direct-PhD-Program-in-CS.github.io/blob/master/content/posts/hello-world.md) 内查看.
+[blog](https://github.com/HEU-CS-DPhD/heu-cs-dphd.github.io/blob/master/content/posts/hello-world.md) 内查看.
 
 - 插入普通图片: `![替代文本](url "标题")`
 - 插入base64图片:   

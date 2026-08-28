@@ -67,7 +67,7 @@ flowchart TD
    - PLIC 负责完成优先权仲裁，并将最高优先级的中断信号汇总输出给 CPU Core。
 
 > [!TIP]
-> 想深入探讨 RISC-V 体系结构基础，可参考：[问 AI：什么是 RISC-V，为什么要学习 RISC-V？](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=true&force_search=true)
+> 想深入探讨 RISC-V 体系结构基础，可参考：[问 AI：什么是 RISC-V，为什么要学习 RISC-V？](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=什么是riscv,为什么要学riscv&send_immediately=false&force_search=true)
 
 ---
 
@@ -104,7 +104,7 @@ sequenceDiagram
 ```
 
 > [!TIP]
-> 欲了解更多 PLIC 的寄存器偏移与硬件规范细节，可查阅：[问 AI：深入理解 RISC-V PLIC 中断控制器规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V的PLIC中断控制器规范,包括Priority,Pending,Enable,Threshold,Claim和Complete机制&send_immediately=true&force_search=true) 或附录中的 `PLIC` 手册
+> 欲了解更多 PLIC 的寄存器偏移与硬件规范细节，可查阅：[问 AI：深入理解 RISC-V PLIC 中断控制器规范](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释RISC-V的PLIC中断控制器规范,包括Priority,Pending,Enable,Threshold,Claim和Complete机制&send_immediately=false&force_search=true) 或附录中的 `PLIC` 手册
 
 ---
 
@@ -155,7 +155,7 @@ pub trait PlicDevice: DeviceTrait {
 - [Tokio API 查阅 (docs.rs)](https://docs.rs/tokio)
 
 > [!TIP]
-> 想深入探讨 Rust 异步编程与 Tokio 底层机制，可参考：[问 AI：深入理解 Rust Tokio 异步运行时与事件驱动模型](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释Rust的Tokio异步运行时工作原理,Reactor与Executor模型,异步任务Task,通道Channel以及如何在同步模拟器中嵌入Tokio事件循环&send_immediately=true&force_search=true)
+> 想深入探讨 Rust 异步编程与 Tokio 底层机制，可参考：[问 AI：深入理解 Rust Tokio 异步运行时与事件驱动模型](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=详细解释Rust的Tokio异步运行时工作原理,Reactor与Executor模型,异步任务Task,通道Channel以及如何在同步模拟器中嵌入Tokio事件循环&send_immediately=false&force_search=true)
 
 #### 模拟器的 `TaskSpawner` 设计
 
@@ -369,7 +369,7 @@ flowchart TD
 在真实物理世界中，模拟一套复杂的真实硬件（如 Intel e1000 网卡或 NVMe 控制器）需要模拟成百上千个复杂的寄存器，导致频繁且昂贵的 VM-Exit 陷入开销。为此，现代虚拟化技术广泛采用了 **VirtIO 半虚拟化（Paravirtualization）标准**。
 
 > [!TIP]
-> 想了解 VirtIO 规范的演进与底层细节，可以[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=true&force_search=true)
+> 想了解 VirtIO 规范的演进与底层细节，可以[问 AI：深入理解 VirtIO 规范与半虚拟化机制](https://kimi.moonshot.cn/_prefill_chat?prefill_prompt=深入解释VirtIO规范,Split%20Virtqueue结构,Available%20Ring,Used%20Ring,Doorbell门铃机制与半虚拟化工作原理&send_immediately=false&force_search=true)
 
 ### 1. 半虚拟化 (Paravirtualization) vs 全虚拟化 (Full Virtualization)
 
