@@ -272,13 +272,23 @@ An example with commento:
 
 ## Syntax Highlighting
 
-Hugo lets you choose the color scheme for the codeblocks. You can choose from the options here: https://xyproto.github.io/splash/docs/all.html
-
-After choosing your theme, just update the `pygmentsStyle`  attribute in hugo.toml.
+The theme provides separate syntax palettes for light and dark mode. Customize
+the colors under `params.codeBlock.light` and `params.codeBlock.dark` in
+`hugo.toml`:
 
 ```toml
-pygmentsStyle = "monokai"
+[params.codeBlock.light]
+  background = "#f6f8fa"
+  keyword = "#cf222e"
+
+[params.codeBlock.dark]
+  background = "#161b22"
+  keyword = "#ff7b72"
 ```
+
+The available color keys are `background`, `text`, `border`, `comment`,
+`keyword`, `name`, `string`, `number`, `operator`, `punctuation`, `variable`,
+`tag`, `builtin`, `constant`, and `error`.
 
 You can read more about syntax highlighting on the [official hugo docs](https://gohugo.io/content-management/syntax-highlighting/).
 

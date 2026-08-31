@@ -308,13 +308,15 @@ a:hover .feather-sun {
 /* CODE BLOCKS */
 code,
 pre {
-  background-color: var(--light-tertiary-color);
+  background-color: var(--code-block-bg);
   box-sizing: border-box;
-  color: white;
+  color: var(--code-block-text);
   font-family: var(--code-font-family);
 }
 
 pre {
+  border: 1px solid var(--code-block-border);
+  border-radius: 6px;
   font-size: 0.95rem;
   overflow: auto;
   padding: 20px;
@@ -333,6 +335,8 @@ code {
 }
 
 pre code {
+  background: transparent;
+  color: inherit;
   font-family: inherit;
   font-size: 0.9em;
 }

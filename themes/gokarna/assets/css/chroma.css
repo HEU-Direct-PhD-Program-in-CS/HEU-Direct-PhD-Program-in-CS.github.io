@@ -1,0 +1,132 @@
+/*
+ * Chroma token palette. Hugo emits these classes when
+ * markup.highlight.noClasses is false. The variables are declared in the
+ * document head so a site's config can override the palette without editing
+ * the theme stylesheet.
+ */
+.highlight,
+.highlight .chroma {
+  background-color: var(--code-block-bg);
+  color: var(--code-block-text);
+}
+
+.highlight .chroma {
+  overflow-x: auto;
+}
+
+.highlight .chroma .line {
+  display: flex;
+}
+
+.highlight .chroma .ln,
+.highlight .chroma .lnt {
+  color: var(--code-token-comment);
+  user-select: none;
+}
+
+/* Error and diff tokens */
+.highlight .chroma .err { color: var(--code-token-error); }
+.highlight .chroma .gd { color: var(--code-token-error); }
+.highlight .chroma .gi { color: var(--code-token-tag); }
+.highlight .chroma .ge { font-style: italic; }
+.highlight .chroma .gs { font-weight: 700; }
+.highlight .chroma .gl { text-decoration: underline; }
+
+/* Comments */
+.highlight .chroma .c,
+.highlight .chroma .ch,
+.highlight .chroma .cm,
+.highlight .chroma .c1,
+.highlight .chroma .cs,
+.highlight .chroma .cp,
+.highlight .chroma .cpf {
+  color: var(--code-token-comment);
+}
+
+/* Keywords and operators */
+.highlight .chroma .k,
+.highlight .chroma .kc,
+.highlight .chroma .kd,
+.highlight .chroma .kn,
+.highlight .chroma .kp,
+.highlight .chroma .kr,
+.highlight .chroma .kt {
+  color: var(--code-token-keyword);
+}
+
+.highlight .chroma .o,
+.highlight .chroma .ow,
+.highlight .chroma .or {
+  color: var(--code-token-operator);
+}
+
+/* Names, functions and built-ins */
+.highlight .chroma .na,
+.highlight .chroma .nc,
+.highlight .chroma .nd,
+.highlight .chroma .nf,
+.highlight .chroma .fm,
+.highlight .chroma .nn {
+  color: var(--code-token-name);
+}
+
+.highlight .chroma .nb,
+.highlight .chroma .bp {
+  color: var(--code-token-builtin);
+}
+
+.highlight .chroma .no,
+.highlight .chroma .nl,
+.highlight .chroma .nx {
+  color: var(--code-token-constant);
+}
+
+/* Variables */
+.highlight .chroma .nv,
+.highlight .chroma .vc,
+.highlight .chroma .vg,
+.highlight .chroma .vi,
+.highlight .chroma .vm {
+  color: var(--code-token-variable);
+}
+
+/* Strings and numbers */
+.highlight .chroma .s,
+.highlight .chroma .sa,
+.highlight .chroma .sb,
+.highlight .chroma .sc,
+.highlight .chroma .dl,
+.highlight .chroma .sd,
+.highlight .chroma .s2,
+.highlight .chroma .se,
+.highlight .chroma .sh,
+.highlight .chroma .si,
+.highlight .chroma .sx,
+.highlight .chroma .sr,
+.highlight .chroma .s1,
+.highlight .chroma .ss {
+  color: var(--code-token-string);
+}
+
+.highlight .chroma .m,
+.highlight .chroma .mb,
+.highlight .chroma .mf,
+.highlight .chroma .mh,
+.highlight .chroma .mi,
+.highlight .chroma .il,
+.highlight .chroma .mo {
+  color: var(--code-token-number);
+}
+
+.highlight .chroma .p {
+  color: var(--code-token-punctuation);
+}
+
+.highlight .chroma .nt,
+.highlight .chroma .nd {
+  color: var(--code-token-tag);
+}
+
+.highlight .chroma .w {
+  color: inherit;
+}

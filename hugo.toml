@@ -6,8 +6,6 @@ locale = "zh"
 # Build draft pages so that their URLs still render. The theme layouts remove
 # them from every navigational/indexing surface.
 buildDrafts = true
-# Choose one of emacs, trac or perldoc
-pygmentsStyle = "monokai"
 theme = "gokarna"
 title = "HEU本博班's Blog"
 
@@ -51,6 +49,41 @@ title = "HEU本博班's Blog"
     {name = "twitch", url = "https://example.com"},
     {name = "email", url = "mailto:example@example.com"}
   ]
+
+# Syntax highlighting palette. Any value can be changed independently.
+[params.codeBlock.light]
+  background = "#f6f8fa"
+  text = "#24292f"
+  border = "#d0d7de"
+  comment = "#656d76"
+  keyword = "#cf222e"
+  name = "#8250df"
+  string = "#0a3069"
+  number = "#0550ae"
+  operator = "#0550ae"
+  punctuation = "#24292f"
+  variable = "#953800"
+  tag = "#116329"
+  builtin = "#0550ae"
+  constant = "#0550ae"
+  error = "#82071e"
+
+[params.codeBlock.dark]
+  background = "#161b22"
+  text = "#e6edf3"
+  border = "#30363d"
+  comment = "#8b949e"
+  keyword = "#ff7b72"
+  name = "#d2a8ff"
+  string = "#a5d6ff"
+  number = "#79c0ff"
+  operator = "#ff7b72"
+  punctuation = "#c9d1d9"
+  variable = "#ffa657"
+  tag = "#7ee787"
+  builtin = "#79c0ff"
+  constant = "#79c0ff"
+  error = "#ff7b72"
 
 [menu]
   [[menu.main]]
@@ -96,6 +129,14 @@ title = "HEU本博班's Blog"
     weight = 7
 
 [markup]
+  [markup.highlight]
+    # Keep token classes in the generated HTML so the theme can provide
+    # separate, accessible palettes for light and dark mode.
+    noClasses = false
+    lineNos = false
+    lineNumbersInTable = true
+    tabWidth = 4
+    wrapperClass = "highlight"
   [markup.tableOfContents]
     startLevel = 1
     endLevel = 4

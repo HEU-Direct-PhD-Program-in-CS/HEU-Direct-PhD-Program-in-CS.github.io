@@ -6,6 +6,21 @@
         :root {
             --accent-color: {{ .Site.Params.AccentColor | default "#FF4D4D" }};
             --font-size: {{ .Site.Params.FontSize | default "1.1rem" }};
+            --code-block-bg: {{ .Site.Params.CodeBlock.Light.Background | default "#f6f8fa" }};
+            --code-block-text: {{ .Site.Params.CodeBlock.Light.Text | default "#24292f" }};
+            --code-block-border: {{ .Site.Params.CodeBlock.Light.Border | default "#d0d7de" }};
+            --code-token-comment: {{ .Site.Params.CodeBlock.Light.Comment | default "#656d76" }};
+            --code-token-keyword: {{ .Site.Params.CodeBlock.Light.Keyword | default "#cf222e" }};
+            --code-token-name: {{ .Site.Params.CodeBlock.Light.Name | default "#8250df" }};
+            --code-token-string: {{ .Site.Params.CodeBlock.Light.String | default "#0a3069" }};
+            --code-token-number: {{ .Site.Params.CodeBlock.Light.Number | default "#0550ae" }};
+            --code-token-operator: {{ .Site.Params.CodeBlock.Light.Operator | default "#0550ae" }};
+            --code-token-punctuation: {{ .Site.Params.CodeBlock.Light.Punctuation | default "#24292f" }};
+            --code-token-variable: {{ .Site.Params.CodeBlock.Light.Variable | default "#953800" }};
+            --code-token-tag: {{ .Site.Params.CodeBlock.Light.Tag | default "#116329" }};
+            --code-token-builtin: {{ .Site.Params.CodeBlock.Light.Builtin | default "#0550ae" }};
+            --code-token-constant: {{ .Site.Params.CodeBlock.Light.Constant | default "#0550ae" }};
+            --code-token-error: {{ .Site.Params.CodeBlock.Light.Error | default "#82071e" }};
         }
     </style>
 
@@ -47,7 +62,10 @@
     {{ $cssMain := resources.Get "css/main.css" | minify }}
     <link rel="stylesheet" type="text/css" href="{{ $cssMain.RelPermalink }}">
 
-    {{ $cssDark := resources.Get "css/dark.css" | minify }}
+    {{ $cssChroma := resources.Get "css/chroma.css" | minify }}
+    <link rel="stylesheet" type="text/css" href="{{ $cssChroma.RelPermalink }}">
+
+    {{ $cssDark := resources.Get "css/dark.css" | resources.ExecuteAsTemplate "css/dark.css" . | minify }}
     <link id="dark-theme" rel="stylesheet" href="{{ $cssDark.RelPermalink }}">
 
     {{ $jsBundle := resources.Match "js/**.js" | resources.Concat "js/bundle.js" | minify | resources.Fingerprint "sha256" }}

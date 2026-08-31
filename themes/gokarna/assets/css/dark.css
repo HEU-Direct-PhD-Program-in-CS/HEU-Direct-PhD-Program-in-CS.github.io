@@ -3,6 +3,21 @@
   --dark-secondary-color: #2d333b;
   --dark-tertiary-color: #646464;
   --dark-text-color: white;
+  --code-block-bg: {{ .Site.Params.CodeBlock.Dark.Background | default "#161b22" }};
+  --code-block-text: {{ .Site.Params.CodeBlock.Dark.Text | default "#e6edf3" }};
+  --code-block-border: {{ .Site.Params.CodeBlock.Dark.Border | default "#30363d" }};
+  --code-token-comment: {{ .Site.Params.CodeBlock.Dark.Comment | default "#8b949e" }};
+  --code-token-keyword: {{ .Site.Params.CodeBlock.Dark.Keyword | default "#ff7b72" }};
+  --code-token-name: {{ .Site.Params.CodeBlock.Dark.Name | default "#d2a8ff" }};
+  --code-token-string: {{ .Site.Params.CodeBlock.Dark.String | default "#a5d6ff" }};
+  --code-token-number: {{ .Site.Params.CodeBlock.Dark.Number | default "#79c0ff" }};
+  --code-token-operator: {{ .Site.Params.CodeBlock.Dark.Operator | default "#ff7b72" }};
+  --code-token-punctuation: {{ .Site.Params.CodeBlock.Dark.Punctuation | default "#c9d1d9" }};
+  --code-token-variable: {{ .Site.Params.CodeBlock.Dark.Variable | default "#ffa657" }};
+  --code-token-tag: {{ .Site.Params.CodeBlock.Dark.Tag | default "#7ee787" }};
+  --code-token-builtin: {{ .Site.Params.CodeBlock.Dark.Builtin | default "#79c0ff" }};
+  --code-token-constant: {{ .Site.Params.CodeBlock.Dark.Constant | default "#79c0ff" }};
+  --code-token-error: {{ .Site.Params.CodeBlock.Dark.Error | default "#ff7b72" }};
 }
 
 html {
@@ -104,7 +119,8 @@ table th {
 
 code,
 pre {
-  background-color: var(--dark-secondary-color) !important;
+  background-color: var(--code-block-bg) !important;
+  color: var(--code-block-text);
 }
 
 :not(pre) > code {

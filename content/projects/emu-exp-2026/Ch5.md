@@ -50,9 +50,9 @@ flowchart TD
         MSIP["mip.MSIP / sip.SSIP<br/>(软件/核间中断 IPI)"]
     end
 
-    UART -->|IRQ Line| PLIC
-    TimerDev -->|IRQ Line| PLIC
-    VirtIO -->|IRQ Line| PLIC
+    UART -->|PLIC irq_level| PLIC
+    TimerDev -->|PLIC irq_level| PLIC
+    VirtIO -->|PLIC irq_level| PLIC
 
     PLIC -->|MEIP Signal| MEIP
     ACLINT -->|MTIP Signal| MTIP
@@ -468,16 +468,16 @@ timeline
 
 你可以根据个人兴趣从以下项目中选择一个进行实现：
 
-| 选题名称                  | 规范与类型                 | 核心挑战与特色                                                                                             | 验证方式                             |
-| ------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| **VirtIO-Console**        | VirtIO (Device ID 3)       | 实现半虚拟化控制台，支持控制台输入输出                                                                     | Linux 开机输出 `/dev/hvc0`           |
-| **VirtIO-Net**            | VirtIO (Device ID 1)       | 结合 TAP/TUN 宿主网卡，实现网络收发包                                                                      | Linux 内核中 `ping` 联通网络         |
-| **VirtIO-FS / VirtIO-9P** | VirtIO (Device ID 26 / 9P) | 实现文件系统共享，将宿主目录挂载入虚拟机                                                                   | Linux 中 `mount -t 9p` 读写宿主文件  |
-| **VirtIO-RNG**            | VirtIO (Device ID 4)       | 硬件随机数生成器，响应熵池读取                                                                             | Linux 中 `cat /dev/hwrng` 获取随机数 |
+| 选题名称                  | 规范与类型                 | 核心挑战与特色                                                                                              | 验证方式                             |
+| ------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| **VirtIO-Console**        | VirtIO (Device ID 3)       | 实现半虚拟化控制台，支持控制台输入输出                                                                      | Linux 开机输出 `/dev/hvc0`           |
+| **VirtIO-Net**            | VirtIO (Device ID 1)       | 结合 TAP/TUN 宿主网卡，实现网络收发包                                                                       | Linux 内核中 `ping` 联通网络         |
+| **VirtIO-FS / VirtIO-9P** | VirtIO (Device ID 26 / 9P) | 实现文件系统共享，将宿主目录挂载入虚拟机                                                                    | Linux 中 `mount -t 9p` 读写宿主文件  |
+| **VirtIO-RNG**            | VirtIO (Device ID 4)       | 硬件随机数生成器，响应熵池读取                                                                              | Linux 中 `cat /dev/hwrng` 获取随机数 |
 | **GPIO 控制器**           | 自定义 MMIO 设备           | 实现数字输入输出管脚；可通过模拟器终端 `Ctrl+A` 命令模式输入 `1`/`0` 模拟引脚电平变化，并在终端打印日志输出 | 裸机/Linux 驱动中读写 GPIO 寄存器    |
-| **I2C Adapter**           | 自定义 MMIO / I2C 总线     | 实现 I2C 总线控制器，并在总线上挂载虚拟 LED 点阵或传感器                                                   | 读写 I2C 寄存器控制子设备            |
-| **Watchdog Timer**        | 自定义 MMIO 定时器         | 实现看门狗倒计时，超时未“喂狗”触发系统复位或中断                                                           | 编写测试程序验证看门狗复位           |
-| **RGB 颜色输出设备**      | 自定义 MMIO 显示设备       | 接收 RGB888 像素数据，并在终端中显示 ANSI 彩色块输出                                                       | 在终端中打印彩色图像/图案            |
+| **I2C Adapter**           | 自定义 MMIO / I2C 总线     | 实现 I2C 总线控制器，并在总线上挂载虚拟 LED 点阵或传感器                                                    | 读写 I2C 寄存器控制子设备            |
+| **Watchdog Timer**        | 自定义 MMIO 定时器         | 实现看门狗倒计时，超时未“喂狗”触发系统复位或中断                                                            | 编写测试程序验证看门狗复位           |
+| **RGB 颜色输出设备**      | 自定义 MMIO 显示设备       | 接收 RGB888 像素数据，并在终端中显示 ANSI 彩色块输出                                                        | 在终端中打印彩色图像/图案            |
 
 > [!NOTE]
 > 强烈推荐优先尝试 **VirtIO 系列设备** 或 **GPIO / Watchdog** 设备。VirtIO 设备可以无缝使用 Linux Kernel 内置的标准驱动，无需自己为 Linux 编写内核模块！并且当前 `HERE` 模拟器已经实现了完整的 `VirtIOMMIO` 总线协议与 Virtqueue 解析，添加新设备相对清晰规整。
