@@ -1,191 +1,191 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{--accent-color:#FF4D4D;--font-size:1.1rem}</style><title>线程本地变量</title><meta name=description content="TLS变量与GOT表"><meta name=keywords content='blog,gokarna,hugo,post,C语言'><meta property="og:url" content="https://heu-cs-dphd.github.io/posts/thread-local-storage/"><meta property="og:type" content="website"><meta property="og:title" content="线程本地变量"><meta property="og:description" content="TLS变量与GOT表"><meta property="og:image" content="https://heu-cs-dphd.github.io/images/avatar.webp"><meta property="og:image:secure_url" content="https://heu-cs-dphd.github.io/images/avatar.webp"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="线程本地变量"><meta name=twitter:description content="TLS变量与GOT表"><meta property="twitter:domain" content="https://heu-cs-dphd.github.io/posts/thread-local-storage/"><meta property="twitter:url" content="https://heu-cs-dphd.github.io/posts/thread-local-storage/"><meta name=twitter:image content="https://heu-cs-dphd.github.io/images/avatar.webp"><link rel=canonical href=https://heu-cs-dphd.github.io/posts/thread-local-storage/><link rel=stylesheet type=text/css href=/css/normalize.min.css media=print><link rel=stylesheet type=text/css href=/css/main.min.css><link id=dark-theme rel=stylesheet href=/css/dark.min.css><script src=/js/bundle.min.7136b4abac7b277aba8bc933917f4602d39a5c44f5590be687244bc86ef4f162.js integrity="sha256-cTa0q6x7J3q6i8kzkX9GAtOaXET1WQvmhyRLyG708WI="></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css integrity=sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js integrity=sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js integrity=sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],throwOnError:!1})})</script></head><body><script>setThemeByUserPref()</script><header class=header><nav class=header-nav><div class=avatar><a href=https://heu-cs-dphd.github.io/><img src=/images/avatar.webp alt=avatar></a></div><div class=nav-title><a class=nav-brand href=https://heu-cs-dphd.github.io/>HEU本博班's Blog</a></div><div class=nav-links><div class=nav-link><a href=https://heu-cs-dphd.github.io/ aria-label><span data-feather=home></span> Home</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/posts/ aria-label><span data-feather=book></span> Posts</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/projects/ aria-label><span data-feather=code></span> Projects</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/tags/ aria-label><span data-feather=tag></span> Tags</a></div><div class=nav-link><a href=https://github.com/heu-cs-dphd aria-label=github><span data-feather=github></span></a></div><div class=nav-link><a href=https://example.com aria-label=buymeacoffee><span data-feather=coffee></span></a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/index.xml aria-label=rss><span data-feather=rss></span></a></div><span class=nav-icons-divider></span><div class="nav-link dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{--accent-color:#FF4D4D;--font-size:1.1rem;--code-block-bg:#f6f8fa;--code-block-text:#24292f;--code-block-border:#d0d7de;--code-token-comment:#656d76;--code-token-keyword:#cf222e;--code-token-name:#8250df;--code-token-string:#0a3069;--code-token-number:#0550ae;--code-token-operator:#0550ae;--code-token-punctuation:#24292f;--code-token-variable:#953800;--code-token-tag:#116329;--code-token-builtin:#0550ae;--code-token-constant:#0550ae;--code-token-error:#82071e}</style><title>线程本地变量</title><meta name=description content="TLS变量与GOT表"><meta name=keywords content='blog,gokarna,hugo,post,C语言'><meta property="og:url" content="https://heu-cs-dphd.github.io/posts/thread-local-storage/"><meta property="og:type" content="website"><meta property="og:title" content="线程本地变量"><meta property="og:description" content="TLS变量与GOT表"><meta property="og:image" content="https://heu-cs-dphd.github.io/images/avatar.webp"><meta property="og:image:secure_url" content="https://heu-cs-dphd.github.io/images/avatar.webp"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="线程本地变量"><meta name=twitter:description content="TLS变量与GOT表"><meta property="twitter:domain" content="https://heu-cs-dphd.github.io/posts/thread-local-storage/"><meta property="twitter:url" content="https://heu-cs-dphd.github.io/posts/thread-local-storage/"><meta name=twitter:image content="https://heu-cs-dphd.github.io/images/avatar.webp"><link rel=canonical href=https://heu-cs-dphd.github.io/posts/thread-local-storage/><link rel=stylesheet type=text/css href=/css/normalize.min.css media=print><link rel=stylesheet type=text/css href=/css/main.min.css><link rel=stylesheet type=text/css href=/css/chroma.min.css><link id=dark-theme rel=stylesheet href=/css/dark.min.css><script src=/js/bundle.min.7136b4abac7b277aba8bc933917f4602d39a5c44f5590be687244bc86ef4f162.js integrity="sha256-cTa0q6x7J3q6i8kzkX9GAtOaXET1WQvmhyRLyG708WI="></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css integrity=sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js integrity=sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js integrity=sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],throwOnError:!1})})</script></head><body><script>setThemeByUserPref()</script><header class=header><nav class=header-nav><div class=avatar><a href=https://heu-cs-dphd.github.io/><img src=/images/avatar.webp alt=avatar></a></div><div class=nav-title><a class=nav-brand href=https://heu-cs-dphd.github.io/>HEU本博班's Blog</a></div><div class=nav-links><div class=nav-link><a href=https://heu-cs-dphd.github.io/ aria-label><span data-feather=home></span> Home</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/posts/ aria-label><span data-feather=book></span> Posts</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/projects/ aria-label><span data-feather=code></span> Projects</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/tags/ aria-label><span data-feather=tag></span> Tags</a></div><div class=nav-link><a href=https://github.com/heu-cs-dphd aria-label=github><span data-feather=github></span></a></div><div class=nav-link><a href=https://example.com aria-label=buymeacoffee><span data-feather=coffee></span></a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/index.xml aria-label=rss><span data-feather=rss></span></a></div><span class=nav-icons-divider></span><div class="nav-link dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
 <a aria-hidden=true role=switch><span class=theme-toggle-icon data-feather=moon></span></a></div><div class=nav-link id=hamburger-menu-toggle><span class="sr-only hamburger-menu-toggle-screen-reader-target">menu</span>
 <a aria-checked=false aria-labelledby=hamburger-menu-toggle id=hamburger-menu-toggle-target role=switch><span data-feather=menu></span></a></div><ul class="nav-hamburger-list visibility-hidden"><li class=nav-item><a href=https://heu-cs-dphd.github.io/><span data-feather=home></span> Home</a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/posts/><span data-feather=book></span> Posts</a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/projects/><span data-feather=code></span> Projects</a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/tags/><span data-feather=tag></span> Tags</a></li><li class=nav-item><a href=https://github.com/heu-cs-dphd><span data-feather=github></span></a></li><li class=nav-item><a href=https://example.com><span data-feather=coffee></span></a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/index.xml><span data-feather=rss></span></a></li><li class="nav-item dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
-<a role=switch><span class=theme-toggle-icon data-feather=moon></span></a></li></ul></div></nav></header><main id=content><div class="post container"><div class=post-header-section><h1>线程本地变量</h1><small role=doc-subtitle>TLS变量与GOT表</small><p class=post-date>四月 16, 2026</p><ul class=post-tags><li class=post-tag><a href=https://heu-cs-dphd.github.io/tags/post>post</a></li><li class=post-tag><a href=https://heu-cs-dphd.github.io/tags/c%E8%AF%AD%E8%A8%80>C语言</a></li></ul></div><div class=post-content><h2 id=线程本地变量>线程本地变量</h2><p>在多线程应用开发中, 对于不希望在现场间共享, 但是又希望全局可见的变量, 我们提供了一种 <code>tls</code> 变量的实现机制, 允许定义线程本地的全局变量. 在c/cpp中, 可以使用 <code>__thread int data</code> 来定义一个线程本地变量, 该变量在编译后会记录在 <code>.tbss, .tdata</code> 两个段中, 与 <code>.bss, .data</code> 段对应. 由于 <code>.rodata</code> 段不可写入, 因此线程本地的 read-only 对象没有意义.</p><p>为了让每个变量只能访问自己线程的 <code>tls</code> 变量, 需要将其保存在进程上下文中, 在 <code>x86_64</code> 架构中, 与线程相关的变量均被保存与 <code>%fs</code> 寄存器指向的 (Thread Control Block中):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>struct</span> pthread {
-</span></span><span style=display:flex><span>	<span style=color:#75715e>/* Part 1 -- these fields may be external or
-</span></span></span><span style=display:flex><span><span style=color:#75715e>	 * internal (accessed via asm) ABI. Do not change. */</span>
-</span></span><span style=display:flex><span>	<span style=color:#66d9ef>struct</span> pthread <span style=color:#f92672>*</span>self;
-</span></span><span style=display:flex><span><span style=color:#75715e>#ifndef TLS_ABOVE_TP
-</span></span></span><span style=display:flex><span>	<span style=color:#66d9ef>uintptr_t</span> <span style=color:#f92672>*</span>dtv;
-</span></span><span style=display:flex><span><span style=color:#75715e>#endif
-</span></span></span><span style=display:flex><span>	<span style=color:#66d9ef>struct</span> pthread <span style=color:#f92672>*</span>prev, <span style=color:#f92672>*</span>next; <span style=color:#75715e>/* non-ABI */</span>
-</span></span><span style=display:flex><span>	<span style=color:#66d9ef>uintptr_t</span> sysinfo;
-</span></span><span style=display:flex><span>    
-</span></span><span style=display:flex><span>    ...
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>	<span style=color:#75715e>/* Part 2 -- implementation details, non-ABI. */</span>
-</span></span><span style=display:flex><span>	<span style=color:#66d9ef>int</span> tid;
-</span></span><span style=display:flex><span>	<span style=color:#66d9ef>int</span> errno_val;
-</span></span><span style=display:flex><span>	
-</span></span><span style=display:flex><span>    ...
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>	<span style=color:#75715e>/* Part 3 -- the positions of these fields relative to
-</span></span></span><span style=display:flex><span><span style=color:#75715e>	 * the end of the structure is external and internal ABI. */</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#ifdef TLS_ABOVE_TP
-</span></span></span><span style=display:flex><span>	<span style=color:#66d9ef>uintptr_t</span> canary;
-</span></span><span style=display:flex><span>	<span style=color:#66d9ef>uintptr_t</span> <span style=color:#f92672>*</span>dtv;
-</span></span><span style=display:flex><span><span style=color:#75715e>#endif
-</span></span></span><span style=display:flex><span>};
-</span></span></code></pre></div><p>其中 <code>uintptr_t *dtv;</code> 用于维护 <code>tls</code> 变量信息, 由于每个动态链接单元都可能有自己的 <code>tls</code> 变量, 他们散步在虚拟内存空间的不同地方, 因此需要一个机制来访问这些变量.</p><p><img src=/posts_data/thread_local_storage/dtv.png alt=dtv图></p><p>对当前 <code>elf</code> 内部定义的 <code>tls</code> 变量, 默认会通过相对偏移地址访问(PIC). 对其他 <code>shared object</code> 的访问会则会复杂很多, 下面展开分析.</p><hr><h2 id=动态库中的-tls-变量>动态库中的 <code>tls</code> 变量</h2><p>按链接库的加载时机分为两种情况:</p><ol><li>被标记为 DL_NEEDED 的库, 在 main 函数所在的 <code>elf</code> 载入内存前, 就会被连同载入内存.</li><li>使用 dlopen 手动加载的库, 这部分 <code>shared object</code> 的 tls 段内存在 dlopen 时才会动态在内存中分配.</li></ol><h3 id=init-exec-tls-modle>init exec TLS modle</h3><p>在 main 函数执行前被载入内存, 那么为了方便仿存, 动态链接器会将这些 <code>shared object</code> 的 tls 内存段和 tcb(*%fs) 放在连续的内存上, 之后访问 tls 变量就可以直接通过 %fs 偏移.</p><p>从例子开始看起:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span>__thread <span style=color:#66d9ef>int</span> tls_data1;
-</span></span><span style=display:flex><span>__thread <span style=color:#66d9ef>int</span> tls_data2;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>read_tls_data1</span>() {
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> tls_data1;
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>read_tls_data2</span>() {
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> tls_data2;
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>通过 <code>-ftls-model=initial-exec</code> 限制该库只能在 initial 时被加载, 从而获得优化. 观察编译产生的汇编:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -ftls-model<span style=color:#f92672>=</span>initial-exec -fPIC -O2 -S tls.c
-</span></span><span style=display:flex><span>$ cat tls.s
-</span></span><span style=display:flex><span>read_tls_data1:
-</span></span><span style=display:flex><span>        movq    tls_data1@gottpoff<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>, %rax
-</span></span><span style=display:flex><span>        movl    %fs:<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %eax
-</span></span><span style=display:flex><span>        ret
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>read_tls_data2:
-</span></span><span style=display:flex><span>        movq    tls_data2@gottpoff<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>, %rax
-</span></span><span style=display:flex><span>        movl    %fs:<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %eax
-</span></span><span style=display:flex><span>        ret
-</span></span></code></pre></div><p>它首先从 <code>symbol@gottpoff(%rip)</code> 读取一个 offset 到 <code>%rax</code> 寄存器, 再从 <code>%fs:(%rax)</code> 地址读取 TLS 变量的值. 上面提到, 在 initial exec TLS model 下, TLS 空间是可以相对 <code>%fs</code> 寻址的, 但是 offset 无法提前得知, 需要由动态链接器完成重定位.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ as tls.s -o tls.o
-</span></span><span style=display:flex><span>$
-</span></span><span style=display:flex><span> objdump -S -r tls.o
-</span></span><span style=display:flex><span><span style=color:#75715e># omitted</span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000000000</span> &lt;read_tls_data1&gt;:
-</span></span><span style=display:flex><span>   0:   <span style=color:#ae81ff>48</span> 8b <span style=color:#ae81ff>05</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    mov    0x0<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rax        <span style=color:#75715e># 7 &lt;read_tls_data1+0x7&gt;</span>
-</span></span><span style=display:flex><span>                        3: R_X86_64_GOTTPOFF    tls_data1-0x4
-</span></span><span style=display:flex><span>   7:   <span style=color:#ae81ff>64</span> 8b <span style=color:#ae81ff>00</span>                mov    %fs:<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>,%eax
-</span></span><span style=display:flex><span>   a:   c3                      ret
-</span></span><span style=display:flex><span>   b:   0f 1f <span style=color:#ae81ff>44</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          nopl   0x0<span style=color:#f92672>(</span>%rax,%rax,1<span style=color:#f92672>)</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000000010</span> &lt;read_tls_data2&gt;:
-</span></span><span style=display:flex><span>  10:   <span style=color:#ae81ff>48</span> 8b <span style=color:#ae81ff>05</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    mov    0x0<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rax        <span style=color:#75715e># 17 &lt;read_tls_data2+0x7&gt;</span>
-</span></span><span style=display:flex><span>                        13: R_X86_64_GOTTPOFF   tls_data2-0x4
-</span></span><span style=display:flex><span>  17:   <span style=color:#ae81ff>64</span> 8b <span style=color:#ae81ff>00</span>                mov    %fs:<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>,%eax
-</span></span><span style=display:flex><span>  1a:   c3                      ret
-</span></span></code></pre></div><p>在 mov 指令的立即数部分, 创建了一个 <code>R_X86_64_GOTTPOFF</code> 类型的重定位符, 告诉动态链接器, 在 .got 表中填写对应 symbol 相对 <code>%fs</code> 的偏移, 并将 <code>.got</code> entry 的相对 <code>mov</code> 指令的地址填入 <code>mov</code> 的立即数内.</p><p>进一步链接成 .so:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -shared tls.o -o libtls.so
-</span></span><span style=display:flex><span>$
-</span></span><span style=display:flex><span> objdump -D -S -R libtls.so
-</span></span><span style=display:flex><span><span style=color:#75715e># omitted</span>
-</span></span><span style=display:flex><span>Disassembly
-</span></span><span style=display:flex><span> of section .text:
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001100</span> &lt;read_tls_data1&gt;:
-</span></span><span style=display:flex><span>    1100:       <span style=color:#ae81ff>48</span> 8b <span style=color:#ae81ff>05</span> d1 2e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    mov    0x2ed1<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rax        <span style=color:#75715e># 3fd8 &lt;tls_data1+0x3fd4&gt;</span>
-</span></span><span style=display:flex><span>    1107:       <span style=color:#ae81ff>64</span> 8b <span style=color:#ae81ff>00</span>                mov    %fs:<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>,%eax
-</span></span><span style=display:flex><span>    110a:       c3                      ret
-</span></span><span style=display:flex><span>    110b:       0f 1f <span style=color:#ae81ff>44</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          nopl   0x0<span style=color:#f92672>(</span>%rax,%rax,1<span style=color:#f92672>)</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001110</span> &lt;read_tls_data2&gt;:
-</span></span><span style=display:flex><span>    1110:       <span style=color:#ae81ff>48</span> 8b <span style=color:#ae81ff>05</span> a9 2e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    mov    0x2ea9<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rax        <span style=color:#75715e># 3fc0 &lt;tls_data2+0x3fc0&gt;</span>
-</span></span><span style=display:flex><span>    1117:       <span style=color:#ae81ff>64</span> 8b <span style=color:#ae81ff>00</span>                mov    %fs:<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>,%eax
-</span></span><span style=display:flex><span>    111a:       c3                      ret
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>Disassembly
-</span></span><span style=display:flex><span> of section .got:
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>0000000000003fb8
-</span></span><span style=display:flex><span> &lt;.got&gt;:
-</span></span><span style=display:flex><span>        ...
-</span></span><span style=display:flex><span>                        3fc0: R_X86_64_TPOFF64  tls_data2
-</span></span><span style=display:flex><span>                        3fd8: R_X86_64_TPOFF64  tls_data1
-</span></span></code></pre></div><p>可以看到:</p><ol><li>两个 tls 变量被写入了 <code>.got</code> 表中;</li><li><code>.got</code> 的地址被写入了 mov 指令的立即数 (静态链接器完成了符号重定位);</li><li>运行时, 为了读取 tls 变量的值, 先从 <code>.got</code> 表中取出 tls_data 相对 <code>%fs</code> 的偏移, 然后通过 <code>%fs+ offset</code> 访问.</li></ol><h3 id=localglobal-dynamic-tls-model>local/global dynamic TLS model</h3><p>第二种情况是, 该库可能被 <code>dlopen</code> 加载, 因此 tls 段的 base 相对于 <code>%fs</code> 在编译期并不固定.</p><p>此时又分为两种情况:</p><ol><li>要访问的 tls 变量在 <code>shared object</code> 内部, 此时由于 tls base 地址在编译期不确定(由于多个线程会有多个 tls 内存区域, 因此不能通过相对偏移访问 tls). 因此需要通过 <code>__tls_get_addr</code> 函数间接找到 tls_data 的地址. 这种情景叫做 local dynamic TLS model(<code>-ftls-model=local-dynamic</code>).</li><li>要访问的 tls 变量在当前 <code>shared object</code> 外部定义, 此时由于不知道 <code>tls data</code> 在哪个 <code>.so</code> 中, 也不知道它在 so 中的偏移. 这种情景叫做 global dynamic TLS model (<code>-ftls-model=global-dynamic(default)</code>), 为最通用的情况.</li></ol><h4 id=local-dynamic-tls-model>local dynamic TLS model</h4><p>核心函数为 <code>__tls_get_addr</code>, 在 <code>musl</code> 的实现如下:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>#define tls_mod_off_t unsigned long long
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>// tls_mod_off_t[0] -&gt; uint64_t ti_module
-</span></span></span><span style=display:flex><span><span style=color:#75715e>// tls_mod_off_t[1] -&gt; uint64_t ti_offset
-</span></span></span><span style=display:flex><span><span style=color:#75715e>// #define pthread* pthread_t
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>__tls_get_addr</span>(<span style=color:#66d9ef>tls_mod_off_t</span> <span style=color:#f92672>*</span>v)
-</span></span><span style=display:flex><span>{
-</span></span><span style=display:flex><span>	<span style=color:#66d9ef>pthread_t</span> self <span style=color:#f92672>=</span> <span style=color:#a6e22e>__pthread_self</span>();
-</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> (<span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>)(self<span style=color:#f92672>-&gt;</span>dtv[v[<span style=color:#ae81ff>0</span>]] <span style=color:#f92672>+</span> v[<span style=color:#ae81ff>1</span>]);
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>该函数需要两个参数, 第一个参数标识 tls 变量在哪个 <code>shared object</code> 中, 第二个参数标识 tls 变量相对 tls base 的偏移. 根据前面的 dtv 图, <code>pcb->dtv[module_index] + tls_offset</code> 即为目标 tls 变量地址.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -ftls-model<span style=color:#f92672>=</span>local-dynamic -fPIC -O2 -S tls.c
-</span></span><span style=display:flex><span>$ cat tls.s
-</span></span><span style=display:flex><span>read_tls_data1:
-</span></span><span style=display:flex><span>.LFB0:
-</span></span><span style=display:flex><span>        subq    $8, %rsp
-</span></span><span style=display:flex><span>        leaq    tls_data1@tlsld<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>, %rdi
-</span></span><span style=display:flex><span>        call    __tls_get_addr@PLT
-</span></span><span style=display:flex><span>        movl    tls_data1@dtpoff<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %eax
-</span></span><span style=display:flex><span>        addq    $8, %rsp
-</span></span><span style=display:flex><span>        ret
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>read_tls_data2:
-</span></span><span style=display:flex><span>        subq    $8, %rsp
-</span></span><span style=display:flex><span>        leaq    tls_data2@tlsld<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>, %rdi
-</span></span><span style=display:flex><span>        call    __tls_get_addr@PLT
-</span></span><span style=display:flex><span>        movl    tls_data2@dtpoff<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %eax
-</span></span><span style=display:flex><span>        addq    $8, %rsp
-</span></span><span style=display:flex><span>        ret
-</span></span></code></pre></div><p>生成了两个链接器变量:</p><ol><li><code>tls_data1@tlsld</code> 指示链接器生成 <code>R_X86_64_TLSLD</code> 类型的 <code>relocation</code>, 它的意思是在 .got 表中生成一个 entry, 这个 entry 会保存当前动态库对应的编号(由动态链接器在 dlopen 时填入), 然后该编号存入 <code>%rdi</code>, 然后作为参数传给 <code>__tls_get_addr</code> 获取当前 <code>shared object</code> 的 tls base address.</li><li><code>tls_data1@dtpoff</code> 指示链接器生成 <code>R_X86_64_DTPOFF32</code> 类型的 <code>relocation</code>, 在链接时将 <code>tls_data1</code> 在 <code>plt</code> 中的 offset 填入此处, 再与加上 base, 得到 tls data 的实际地址.</li></ol><p>查看生成的 .so 文件</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -shared tls.o -o libtls.so
-</span></span><span style=display:flex><span>$
-</span></span><span style=display:flex><span> objdump -D -R libtls.so
-</span></span><span style=display:flex><span><span style=color:#75715e># omitted</span>
-</span></span><span style=display:flex><span>Disassembly
-</span></span><span style=display:flex><span> of section .text:
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001110</span> &lt;read_tls_data1&gt;:
-</span></span><span style=display:flex><span>    1110:       <span style=color:#ae81ff>48</span> <span style=color:#ae81ff>83</span> ec <span style=color:#ae81ff>08</span>             sub    $0x8,%rsp
-</span></span><span style=display:flex><span>    1114:       <span style=color:#ae81ff>48</span> 8d 3d 9d 2e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    lea    0x2e9d<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rdi        <span style=color:#75715e># 3fb8 &lt;_DYNAMIC+0x1c0&gt;</span>
-</span></span><span style=display:flex><span>    111b:       e8 <span style=color:#ae81ff>10</span> ff ff ff          call   <span style=color:#ae81ff>1030</span> &lt;__tls_get_addr@plt&gt;
-</span></span><span style=display:flex><span>    1120:       8b <span style=color:#ae81ff>80</span> <span style=color:#ae81ff>04</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       mov    0x4<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>,%eax
-</span></span><span style=display:flex><span>    1126:       <span style=color:#ae81ff>48</span> <span style=color:#ae81ff>83</span> c4 <span style=color:#ae81ff>08</span>             add    $0x8,%rsp
-</span></span><span style=display:flex><span>    112a:       c3                      ret
-</span></span><span style=display:flex><span>    112b:       0f 1f <span style=color:#ae81ff>44</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          nopl   0x0<span style=color:#f92672>(</span>%rax,%rax,1<span style=color:#f92672>)</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>0000000000001130</span> &lt;read_tls_data2&gt;:
-</span></span><span style=display:flex><span>    1130:       <span style=color:#ae81ff>48</span> <span style=color:#ae81ff>83</span> ec <span style=color:#ae81ff>08</span>             sub    $0x8,%rsp
-</span></span><span style=display:flex><span>    1134:       <span style=color:#ae81ff>48</span> 8d 3d 7d 2e <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    lea    0x2e7d<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>,%rdi        <span style=color:#75715e># 3fb8 &lt;_DYNAMIC+0x1c0&gt;</span>
-</span></span><span style=display:flex><span>    113b:       e8 f0 fe ff ff          call   <span style=color:#ae81ff>1030</span> &lt;__tls_get_addr@plt&gt;
-</span></span><span style=display:flex><span>    1140:       8b <span style=color:#ae81ff>80</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       mov    0x0<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>,%eax
-</span></span><span style=display:flex><span>    1146:       <span style=color:#ae81ff>48</span> <span style=color:#ae81ff>83</span> c4 <span style=color:#ae81ff>08</span>             add    $0x8,%rsp
-</span></span><span style=display:flex><span>    114a:       c3                      ret
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>Disassembly
-</span></span><span style=display:flex><span> of section .got:
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>0000000000003fb8
-</span></span><span style=display:flex><span> &lt;.got&gt;:
-</span></span><span style=display:flex><span>        ...
-</span></span><span style=display:flex><span>                        3fb8: R_X86_64_DTPMOD64 *ABS*
-</span></span></code></pre></div><p>两个函数调用 <code>__tls_get_addr</code> 时, 使用的参数都是 <code>0x3fb8</code>, 改地址即为 .got 表中保存当前 <code>shared object</code> 编号的地址(后面空了 8 字节的全 0 空间, 表示 <code>ti_offset</code> 为 0).</p><p>特别地, 如果在一个函数里访问多个当前动态库的 TLS 变量, 那么 __tls_get_addr 调用是可以合并的：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span>__thread <span style=color:#66d9ef>int</span> tls_data1;
-</span></span><span style=display:flex><span>__thread <span style=color:#66d9ef>int</span> tls_data2;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>read_tls_data</span>() { <span style=color:#66d9ef>return</span> tls_data1 <span style=color:#f92672>+</span> tls_data2; }
-</span></span></code></pre></div><p>会生成如下的汇编:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -ftls-model<span style=color:#f92672>=</span>local-dynamic -fPIC -O2 -S tls.c
-</span></span><span style=display:flex><span>$ cat tls.s
-</span></span><span style=display:flex><span>read_tls_data:
-</span></span><span style=display:flex><span>.LFB0:
-</span></span><span style=display:flex><span>        subq    $8, %rsp
-</span></span><span style=display:flex><span>        leaq    tls_data1@tlsld<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>, %rdi
-</span></span><span style=display:flex><span>        call    __tls_get_addr@PLT
-</span></span><span style=display:flex><span>        movl    tls_data1@dtpoff<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %edx
-</span></span><span style=display:flex><span>        addl    tls_data2@dtpoff<span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %edx
-</span></span><span style=display:flex><span>        addq    $8, %rsp
-</span></span><span style=display:flex><span>        movl    %edx, %eax
-</span></span><span style=display:flex><span>        ret
-</span></span></code></pre></div><p>这样就减少了一次 __tls_get_addr 的调用.</p><h4 id=global-dynamic-tls-model>global dynamic TLS model</h4><p>最后一种情况, 访问的是外部动态链接库的全局tls变量, 此时只有变量的符号信息, 需要动态链接器去查找其属于哪个库, 偏移是多少.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>$ gcc -ftls-model<span style=color:#f92672>=</span>global-dynamic -fPIC -O2 -S tls.c
-</span></span><span style=display:flex><span>$ cat tls.s
-</span></span><span style=display:flex><span>read_tls_data1:
-</span></span><span style=display:flex><span>        subq    $8, %rsp
-</span></span><span style=display:flex><span>        data16  leaq    tls_data1@tlsgd<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>, %rdi
-</span></span><span style=display:flex><span>        .value  0x6666
-</span></span><span style=display:flex><span>        rex64
-</span></span><span style=display:flex><span>        call    __tls_get_addr@PLT
-</span></span><span style=display:flex><span>        movl    <span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %eax
-</span></span><span style=display:flex><span>        addq    $8, %rsp
-</span></span><span style=display:flex><span>        ret
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>read_tls_data2:
-</span></span><span style=display:flex><span>        subq    $8, %rsp
-</span></span><span style=display:flex><span>        data16  leaq    tls_data2@tlsgd<span style=color:#f92672>(</span>%rip<span style=color:#f92672>)</span>, %rdi
-</span></span><span style=display:flex><span>        .value  0x6666
-</span></span><span style=display:flex><span>        rex64
-</span></span><span style=display:flex><span>        call    __tls_get_addr@PLT
-</span></span><span style=display:flex><span>        movl    <span style=color:#f92672>(</span>%rax<span style=color:#f92672>)</span>, %eax
-</span></span><span style=display:flex><span>        addq    $8, %rsp
-</span></span><span style=display:flex><span>        ret
+<a role=switch><span class=theme-toggle-icon data-feather=moon></span></a></li></ul></div></nav></header><main id=content><div class="post container"><div class=post-header-section><h1>线程本地变量</h1><small role=doc-subtitle>TLS变量与GOT表</small><p class=post-date>四月 16, 2026</p><ul class=post-tags><li class=post-tag><a href=https://heu-cs-dphd.github.io/tags/post>post</a></li><li class=post-tag><a href=https://heu-cs-dphd.github.io/tags/c%E8%AF%AD%E8%A8%80>C语言</a></li></ul></div><div class=post-content><h2 id=线程本地变量>线程本地变量</h2><p>在多线程应用开发中, 对于不希望在现场间共享, 但是又希望全局可见的变量, 我们提供了一种 <code>tls</code> 变量的实现机制, 允许定义线程本地的全局变量. 在c/cpp中, 可以使用 <code>__thread int data</code> 来定义一个线程本地变量, 该变量在编译后会记录在 <code>.tbss, .tdata</code> 两个段中, 与 <code>.bss, .data</code> 段对应. 由于 <code>.rodata</code> 段不可写入, 因此线程本地的 read-only 对象没有意义.</p><p>为了让每个变量只能访问自己线程的 <code>tls</code> 变量, 需要将其保存在进程上下文中, 在 <code>x86_64</code> 架构中, 与线程相关的变量均被保存与 <code>%fs</code> 寄存器指向的 (Thread Control Block中):</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=k>struct</span> <span class=n>pthread</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Part 1 -- these fields may be external or
+</span></span></span><span class=line><span class=cl><span class=cm>	 * internal (accessed via asm) ABI. Do not change. */</span>
+</span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>pthread</span> <span class=o>*</span><span class=n>self</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifndef TLS_ABOVE_TP
+</span></span></span><span class=line><span class=cl>	<span class=kt>uintptr_t</span> <span class=o>*</span><span class=n>dtv</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl>	<span class=k>struct</span> <span class=n>pthread</span> <span class=o>*</span><span class=n>prev</span><span class=p>,</span> <span class=o>*</span><span class=n>next</span><span class=p>;</span> <span class=cm>/* non-ABI */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>uintptr_t</span> <span class=n>sysinfo</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=p>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Part 2 -- implementation details, non-ABI. */</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>tid</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>int</span> <span class=n>errno_val</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>    <span class=p>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=cm>/* Part 3 -- the positions of these fields relative to
+</span></span></span><span class=line><span class=cl><span class=cm>	 * the end of the structure is external and internal ABI. */</span>
+</span></span><span class=line><span class=cl><span class=cp>#ifdef TLS_ABOVE_TP
+</span></span></span><span class=line><span class=cl>	<span class=kt>uintptr_t</span> <span class=n>canary</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>uintptr_t</span> <span class=o>*</span><span class=n>dtv</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><p>其中 <code>uintptr_t *dtv;</code> 用于维护 <code>tls</code> 变量信息, 由于每个动态链接单元都可能有自己的 <code>tls</code> 变量, 他们散步在虚拟内存空间的不同地方, 因此需要一个机制来访问这些变量.</p><p><img src=/posts_data/thread_local_storage/dtv.png alt=dtv图></p><p>对当前 <code>elf</code> 内部定义的 <code>tls</code> 变量, 默认会通过相对偏移地址访问(PIC). 对其他 <code>shared object</code> 的访问会则会复杂很多, 下面展开分析.</p><hr><h2 id=动态库中的-tls-变量>动态库中的 <code>tls</code> 变量</h2><p>按链接库的加载时机分为两种情况:</p><ol><li>被标记为 DL_NEEDED 的库, 在 main 函数所在的 <code>elf</code> 载入内存前, 就会被连同载入内存.</li><li>使用 dlopen 手动加载的库, 这部分 <code>shared object</code> 的 tls 段内存在 dlopen 时才会动态在内存中分配.</li></ol><h3 id=init-exec-tls-modle>init exec TLS modle</h3><p>在 main 函数执行前被载入内存, 那么为了方便仿存, 动态链接器会将这些 <code>shared object</code> 的 tls 内存段和 tcb(*%fs) 放在连续的内存上, 之后访问 tls 变量就可以直接通过 %fs 偏移.</p><p>从例子开始看起:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>__thread</span> <span class=kt>int</span> <span class=n>tls_data1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>__thread</span> <span class=kt>int</span> <span class=n>tls_data2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>read_tls_data1</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>tls_data1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>read_tls_data2</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>tls_data2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>通过 <code>-ftls-model=initial-exec</code> 限制该库只能在 initial 时被加载, 从而获得优化. 观察编译产生的汇编:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ gcc -ftls-model<span class=o>=</span>initial-exec -fPIC -O2 -S tls.c
+</span></span><span class=line><span class=cl>$ cat tls.s
+</span></span><span class=line><span class=cl>read_tls_data1:
+</span></span><span class=line><span class=cl>        movq    tls_data1@gottpoff<span class=o>(</span>%rip<span class=o>)</span>, %rax
+</span></span><span class=line><span class=cl>        movl    %fs:<span class=o>(</span>%rax<span class=o>)</span>, %eax
+</span></span><span class=line><span class=cl>        ret
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>read_tls_data2:
+</span></span><span class=line><span class=cl>        movq    tls_data2@gottpoff<span class=o>(</span>%rip<span class=o>)</span>, %rax
+</span></span><span class=line><span class=cl>        movl    %fs:<span class=o>(</span>%rax<span class=o>)</span>, %eax
+</span></span><span class=line><span class=cl>        ret
+</span></span></code></pre></div><p>它首先从 <code>symbol@gottpoff(%rip)</code> 读取一个 offset 到 <code>%rax</code> 寄存器, 再从 <code>%fs:(%rax)</code> 地址读取 TLS 变量的值. 上面提到, 在 initial exec TLS model 下, TLS 空间是可以相对 <code>%fs</code> 寻址的, 但是 offset 无法提前得知, 需要由动态链接器完成重定位.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ as tls.s -o tls.o
+</span></span><span class=line><span class=cl>$
+</span></span><span class=line><span class=cl> objdump -S -r tls.o
+</span></span><span class=line><span class=cl><span class=c1># omitted</span>
+</span></span><span class=line><span class=cl><span class=m>0000000000000000</span> &lt;read_tls_data1&gt;:
+</span></span><span class=line><span class=cl>   0:   <span class=m>48</span> 8b <span class=m>05</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span>    mov    0x0<span class=o>(</span>%rip<span class=o>)</span>,%rax        <span class=c1># 7 &lt;read_tls_data1+0x7&gt;</span>
+</span></span><span class=line><span class=cl>                        3: R_X86_64_GOTTPOFF    tls_data1-0x4
+</span></span><span class=line><span class=cl>   7:   <span class=m>64</span> 8b <span class=m>00</span>                mov    %fs:<span class=o>(</span>%rax<span class=o>)</span>,%eax
+</span></span><span class=line><span class=cl>   a:   c3                      ret
+</span></span><span class=line><span class=cl>   b:   0f 1f <span class=m>44</span> <span class=m>00</span> <span class=m>00</span>          nopl   0x0<span class=o>(</span>%rax,%rax,1<span class=o>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=m>0000000000000010</span> &lt;read_tls_data2&gt;:
+</span></span><span class=line><span class=cl>  10:   <span class=m>48</span> 8b <span class=m>05</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span>    mov    0x0<span class=o>(</span>%rip<span class=o>)</span>,%rax        <span class=c1># 17 &lt;read_tls_data2+0x7&gt;</span>
+</span></span><span class=line><span class=cl>                        13: R_X86_64_GOTTPOFF   tls_data2-0x4
+</span></span><span class=line><span class=cl>  17:   <span class=m>64</span> 8b <span class=m>00</span>                mov    %fs:<span class=o>(</span>%rax<span class=o>)</span>,%eax
+</span></span><span class=line><span class=cl>  1a:   c3                      ret
+</span></span></code></pre></div><p>在 mov 指令的立即数部分, 创建了一个 <code>R_X86_64_GOTTPOFF</code> 类型的重定位符, 告诉动态链接器, 在 .got 表中填写对应 symbol 相对 <code>%fs</code> 的偏移, 并将 <code>.got</code> entry 的相对 <code>mov</code> 指令的地址填入 <code>mov</code> 的立即数内.</p><p>进一步链接成 .so:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ gcc -shared tls.o -o libtls.so
+</span></span><span class=line><span class=cl>$
+</span></span><span class=line><span class=cl> objdump -D -S -R libtls.so
+</span></span><span class=line><span class=cl><span class=c1># omitted</span>
+</span></span><span class=line><span class=cl>Disassembly
+</span></span><span class=line><span class=cl> of section .text:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=m>0000000000001100</span> &lt;read_tls_data1&gt;:
+</span></span><span class=line><span class=cl>    1100:       <span class=m>48</span> 8b <span class=m>05</span> d1 2e <span class=m>00</span> <span class=m>00</span>    mov    0x2ed1<span class=o>(</span>%rip<span class=o>)</span>,%rax        <span class=c1># 3fd8 &lt;tls_data1+0x3fd4&gt;</span>
+</span></span><span class=line><span class=cl>    1107:       <span class=m>64</span> 8b <span class=m>00</span>                mov    %fs:<span class=o>(</span>%rax<span class=o>)</span>,%eax
+</span></span><span class=line><span class=cl>    110a:       c3                      ret
+</span></span><span class=line><span class=cl>    110b:       0f 1f <span class=m>44</span> <span class=m>00</span> <span class=m>00</span>          nopl   0x0<span class=o>(</span>%rax,%rax,1<span class=o>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=m>0000000000001110</span> &lt;read_tls_data2&gt;:
+</span></span><span class=line><span class=cl>    1110:       <span class=m>48</span> 8b <span class=m>05</span> a9 2e <span class=m>00</span> <span class=m>00</span>    mov    0x2ea9<span class=o>(</span>%rip<span class=o>)</span>,%rax        <span class=c1># 3fc0 &lt;tls_data2+0x3fc0&gt;</span>
+</span></span><span class=line><span class=cl>    1117:       <span class=m>64</span> 8b <span class=m>00</span>                mov    %fs:<span class=o>(</span>%rax<span class=o>)</span>,%eax
+</span></span><span class=line><span class=cl>    111a:       c3                      ret
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Disassembly
+</span></span><span class=line><span class=cl> of section .got:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>0000000000003fb8
+</span></span><span class=line><span class=cl> &lt;.got&gt;:
+</span></span><span class=line><span class=cl>        ...
+</span></span><span class=line><span class=cl>                        3fc0: R_X86_64_TPOFF64  tls_data2
+</span></span><span class=line><span class=cl>                        3fd8: R_X86_64_TPOFF64  tls_data1
+</span></span></code></pre></div><p>可以看到:</p><ol><li>两个 tls 变量被写入了 <code>.got</code> 表中;</li><li><code>.got</code> 的地址被写入了 mov 指令的立即数 (静态链接器完成了符号重定位);</li><li>运行时, 为了读取 tls 变量的值, 先从 <code>.got</code> 表中取出 tls_data 相对 <code>%fs</code> 的偏移, 然后通过 <code>%fs+ offset</code> 访问.</li></ol><h3 id=localglobal-dynamic-tls-model>local/global dynamic TLS model</h3><p>第二种情况是, 该库可能被 <code>dlopen</code> 加载, 因此 tls 段的 base 相对于 <code>%fs</code> 在编译期并不固定.</p><p>此时又分为两种情况:</p><ol><li>要访问的 tls 变量在 <code>shared object</code> 内部, 此时由于 tls base 地址在编译期不确定(由于多个线程会有多个 tls 内存区域, 因此不能通过相对偏移访问 tls). 因此需要通过 <code>__tls_get_addr</code> 函数间接找到 tls_data 的地址. 这种情景叫做 local dynamic TLS model(<code>-ftls-model=local-dynamic</code>).</li><li>要访问的 tls 变量在当前 <code>shared object</code> 外部定义, 此时由于不知道 <code>tls data</code> 在哪个 <code>.so</code> 中, 也不知道它在 so 中的偏移. 这种情景叫做 global dynamic TLS model (<code>-ftls-model=global-dynamic(default)</code>), 为最通用的情况.</li></ol><h4 id=local-dynamic-tls-model>local dynamic TLS model</h4><p>核心函数为 <code>__tls_get_addr</code>, 在 <code>musl</code> 的实现如下:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#define tls_mod_off_t unsigned long long
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// tls_mod_off_t[0] -&gt; uint64_t ti_module
+</span></span></span><span class=line><span class=cl><span class=c1>// tls_mod_off_t[1] -&gt; uint64_t ti_offset
+</span></span></span><span class=line><span class=cl><span class=c1>// #define pthread* pthread_t
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=o>*</span><span class=nf>__tls_get_addr</span><span class=p>(</span><span class=kt>tls_mod_off_t</span> <span class=o>*</span><span class=n>v</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kt>pthread_t</span> <span class=n>self</span> <span class=o>=</span> <span class=nf>__pthread_self</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=p>(</span><span class=kt>void</span> <span class=o>*</span><span class=p>)(</span><span class=n>self</span><span class=o>-&gt;</span><span class=n>dtv</span><span class=p>[</span><span class=n>v</span><span class=p>[</span><span class=mi>0</span><span class=p>]]</span> <span class=o>+</span> <span class=n>v</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>该函数需要两个参数, 第一个参数标识 tls 变量在哪个 <code>shared object</code> 中, 第二个参数标识 tls 变量相对 tls base 的偏移. 根据前面的 dtv 图, <code>pcb->dtv[module_index] + tls_offset</code> 即为目标 tls 变量地址.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ gcc -ftls-model<span class=o>=</span>local-dynamic -fPIC -O2 -S tls.c
+</span></span><span class=line><span class=cl>$ cat tls.s
+</span></span><span class=line><span class=cl>read_tls_data1:
+</span></span><span class=line><span class=cl>.LFB0:
+</span></span><span class=line><span class=cl>        subq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        leaq    tls_data1@tlsld<span class=o>(</span>%rip<span class=o>)</span>, %rdi
+</span></span><span class=line><span class=cl>        call    __tls_get_addr@PLT
+</span></span><span class=line><span class=cl>        movl    tls_data1@dtpoff<span class=o>(</span>%rax<span class=o>)</span>, %eax
+</span></span><span class=line><span class=cl>        addq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        ret
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>read_tls_data2:
+</span></span><span class=line><span class=cl>        subq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        leaq    tls_data2@tlsld<span class=o>(</span>%rip<span class=o>)</span>, %rdi
+</span></span><span class=line><span class=cl>        call    __tls_get_addr@PLT
+</span></span><span class=line><span class=cl>        movl    tls_data2@dtpoff<span class=o>(</span>%rax<span class=o>)</span>, %eax
+</span></span><span class=line><span class=cl>        addq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        ret
+</span></span></code></pre></div><p>生成了两个链接器变量:</p><ol><li><code>tls_data1@tlsld</code> 指示链接器生成 <code>R_X86_64_TLSLD</code> 类型的 <code>relocation</code>, 它的意思是在 .got 表中生成一个 entry, 这个 entry 会保存当前动态库对应的编号(由动态链接器在 dlopen 时填入), 然后该编号存入 <code>%rdi</code>, 然后作为参数传给 <code>__tls_get_addr</code> 获取当前 <code>shared object</code> 的 tls base address.</li><li><code>tls_data1@dtpoff</code> 指示链接器生成 <code>R_X86_64_DTPOFF32</code> 类型的 <code>relocation</code>, 在链接时将 <code>tls_data1</code> 在 <code>plt</code> 中的 offset 填入此处, 再与加上 base, 得到 tls data 的实际地址.</li></ol><p>查看生成的 .so 文件</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ gcc -shared tls.o -o libtls.so
+</span></span><span class=line><span class=cl>$
+</span></span><span class=line><span class=cl> objdump -D -R libtls.so
+</span></span><span class=line><span class=cl><span class=c1># omitted</span>
+</span></span><span class=line><span class=cl>Disassembly
+</span></span><span class=line><span class=cl> of section .text:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=m>0000000000001110</span> &lt;read_tls_data1&gt;:
+</span></span><span class=line><span class=cl>    1110:       <span class=m>48</span> <span class=m>83</span> ec <span class=m>08</span>             sub    <span class=nv>$0</span>x8,%rsp
+</span></span><span class=line><span class=cl>    1114:       <span class=m>48</span> 8d 3d 9d 2e <span class=m>00</span> <span class=m>00</span>    lea    0x2e9d<span class=o>(</span>%rip<span class=o>)</span>,%rdi        <span class=c1># 3fb8 &lt;_DYNAMIC+0x1c0&gt;</span>
+</span></span><span class=line><span class=cl>    111b:       e8 <span class=m>10</span> ff ff ff          call   <span class=m>1030</span> &lt;__tls_get_addr@plt&gt;
+</span></span><span class=line><span class=cl>    1120:       8b <span class=m>80</span> <span class=m>04</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span>       mov    0x4<span class=o>(</span>%rax<span class=o>)</span>,%eax
+</span></span><span class=line><span class=cl>    1126:       <span class=m>48</span> <span class=m>83</span> c4 <span class=m>08</span>             add    <span class=nv>$0</span>x8,%rsp
+</span></span><span class=line><span class=cl>    112a:       c3                      ret
+</span></span><span class=line><span class=cl>    112b:       0f 1f <span class=m>44</span> <span class=m>00</span> <span class=m>00</span>          nopl   0x0<span class=o>(</span>%rax,%rax,1<span class=o>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=m>0000000000001130</span> &lt;read_tls_data2&gt;:
+</span></span><span class=line><span class=cl>    1130:       <span class=m>48</span> <span class=m>83</span> ec <span class=m>08</span>             sub    <span class=nv>$0</span>x8,%rsp
+</span></span><span class=line><span class=cl>    1134:       <span class=m>48</span> 8d 3d 7d 2e <span class=m>00</span> <span class=m>00</span>    lea    0x2e7d<span class=o>(</span>%rip<span class=o>)</span>,%rdi        <span class=c1># 3fb8 &lt;_DYNAMIC+0x1c0&gt;</span>
+</span></span><span class=line><span class=cl>    113b:       e8 f0 fe ff ff          call   <span class=m>1030</span> &lt;__tls_get_addr@plt&gt;
+</span></span><span class=line><span class=cl>    1140:       8b <span class=m>80</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span>       mov    0x0<span class=o>(</span>%rax<span class=o>)</span>,%eax
+</span></span><span class=line><span class=cl>    1146:       <span class=m>48</span> <span class=m>83</span> c4 <span class=m>08</span>             add    <span class=nv>$0</span>x8,%rsp
+</span></span><span class=line><span class=cl>    114a:       c3                      ret
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Disassembly
+</span></span><span class=line><span class=cl> of section .got:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>0000000000003fb8
+</span></span><span class=line><span class=cl> &lt;.got&gt;:
+</span></span><span class=line><span class=cl>        ...
+</span></span><span class=line><span class=cl>                        3fb8: R_X86_64_DTPMOD64 *ABS*
+</span></span></code></pre></div><p>两个函数调用 <code>__tls_get_addr</code> 时, 使用的参数都是 <code>0x3fb8</code>, 改地址即为 .got 表中保存当前 <code>shared object</code> 编号的地址(后面空了 8 字节的全 0 空间, 表示 <code>ti_offset</code> 为 0).</p><p>特别地, 如果在一个函数里访问多个当前动态库的 TLS 变量, 那么 __tls_get_addr 调用是可以合并的：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>__thread</span> <span class=kt>int</span> <span class=n>tls_data1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=n>__thread</span> <span class=kt>int</span> <span class=n>tls_data2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>read_tls_data</span><span class=p>()</span> <span class=p>{</span> <span class=k>return</span> <span class=n>tls_data1</span> <span class=o>+</span> <span class=n>tls_data2</span><span class=p>;</span> <span class=p>}</span>
+</span></span></code></pre></div><p>会生成如下的汇编:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ gcc -ftls-model<span class=o>=</span>local-dynamic -fPIC -O2 -S tls.c
+</span></span><span class=line><span class=cl>$ cat tls.s
+</span></span><span class=line><span class=cl>read_tls_data:
+</span></span><span class=line><span class=cl>.LFB0:
+</span></span><span class=line><span class=cl>        subq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        leaq    tls_data1@tlsld<span class=o>(</span>%rip<span class=o>)</span>, %rdi
+</span></span><span class=line><span class=cl>        call    __tls_get_addr@PLT
+</span></span><span class=line><span class=cl>        movl    tls_data1@dtpoff<span class=o>(</span>%rax<span class=o>)</span>, %edx
+</span></span><span class=line><span class=cl>        addl    tls_data2@dtpoff<span class=o>(</span>%rax<span class=o>)</span>, %edx
+</span></span><span class=line><span class=cl>        addq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        movl    %edx, %eax
+</span></span><span class=line><span class=cl>        ret
+</span></span></code></pre></div><p>这样就减少了一次 __tls_get_addr 的调用.</p><h4 id=global-dynamic-tls-model>global dynamic TLS model</h4><p>最后一种情况, 访问的是外部动态链接库的全局tls变量, 此时只有变量的符号信息, 需要动态链接器去查找其属于哪个库, 偏移是多少.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ gcc -ftls-model<span class=o>=</span>global-dynamic -fPIC -O2 -S tls.c
+</span></span><span class=line><span class=cl>$ cat tls.s
+</span></span><span class=line><span class=cl>read_tls_data1:
+</span></span><span class=line><span class=cl>        subq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        data16  leaq    tls_data1@tlsgd<span class=o>(</span>%rip<span class=o>)</span>, %rdi
+</span></span><span class=line><span class=cl>        .value  0x6666
+</span></span><span class=line><span class=cl>        rex64
+</span></span><span class=line><span class=cl>        call    __tls_get_addr@PLT
+</span></span><span class=line><span class=cl>        movl    <span class=o>(</span>%rax<span class=o>)</span>, %eax
+</span></span><span class=line><span class=cl>        addq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        ret
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>read_tls_data2:
+</span></span><span class=line><span class=cl>        subq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        data16  leaq    tls_data2@tlsgd<span class=o>(</span>%rip<span class=o>)</span>, %rdi
+</span></span><span class=line><span class=cl>        .value  0x6666
+</span></span><span class=line><span class=cl>        rex64
+</span></span><span class=line><span class=cl>        call    __tls_get_addr@PLT
+</span></span><span class=line><span class=cl>        movl    <span class=o>(</span>%rax<span class=o>)</span>, %eax
+</span></span><span class=line><span class=cl>        addq    <span class=nv>$8</span>, %rsp
+</span></span><span class=line><span class=cl>        ret
 </span></span></code></pre></div><p>这次出现了一些不一样的内容: <code>data16、.value 0x6666 和 rex64</code>; 实际上, 这些是无用的指令前缀, 不影响指令的语义, 但是保证了这段代码有足够的长度, 方便后续链接器进行优化. 除了这些奇怪的前缀, 核心就是 <code>symbol@tlsgd(%rip)</code> 语法, 它会创建 <code>R_X86_64_TLSGD</code> relocation, 表示让链接器在 .got 中创建一对 entry, 一个表示 <code>ti_module</code>, 另一个表示 <code>ti_offset</code>, 构成一个 <code>tls_index</code> 结构体. 与 <code>local dynamic</code> 相比, 多了一个 <code>ti_offset</code> 无法在链接时得知, 需要动态链接器给出. 将 .got 中的 <code>tls_index</code> 结构体作为参数传给 <code>__tls_get_addr</code> 函数, 获得 <code>tls_data</code> 实际的地址.</p><p>在 <code>shared object</code> 加载时, 动态链接器会将 .got 表中的 <code>ti_module</code> 和 <code>ti_offset</code> 和其他 .got 表中的变量一起填入.</p></div><div class=prev-next></div><svg id="btt-button" class="arrow-logo" height="1em" viewBox="0 0 384 512" onclick="scrollToTop()" title="Go to top"><path d="M177 159.7l136 136c9.4 9.4 9.4 24.6.0 33.9l-22.6 22.6c-9.4 9.4-24.6 9.4-33.9.0L160 255.9l-96.4 96.4c-9.4 9.4-24.6 9.4-33.9.0L7 329.7c-9.4-9.4-9.4-24.6.0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/></svg>
 <script>let backToTopButton=document.getElementById("btt-button");window.onscroll=function(){scrollFunction()};function scrollFunction(){document.body.scrollTop>20||document.documentElement.scrollTop>20?backToTopButton.style.display="block":backToTopButton.style.display="none"}function scrollToTop(){window.scrollTo(0,0)}</script></div><aside class=post-toc><nav id=toc><nav id=TableOfContents><ul><li><ul><li><a href=#线程本地变量>线程本地变量</a></li><li><a href=#动态库中的-tls-变量>动态库中的 <code>tls</code> 变量</a><ul><li><a href=#init-exec-tls-modle>init exec TLS modle</a></li><li><a href=#localglobal-dynamic-tls-model>local/global dynamic TLS model</a><ul><li><a href=#local-dynamic-tls-model>local dynamic TLS model</a></li><li><a href=#global-dynamic-tls-model>global dynamic TLS model</a></li></ul></li></ul></li></ul></li></ul></nav></nav></aside></main><footer class=footer><span>&copy; 2026 The Marauders</span>
 <span>Made with &#10084;&#65039; using <a target=_blank href=https://github.com/gokarna-theme/gokarna-hugo>Gokarna</a></span></footer></body></html>

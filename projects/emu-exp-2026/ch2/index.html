@@ -1,30 +1,30 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{--accent-color:#FF4D4D;--font-size:1.1rem}</style><title>Chapter 0x02 - 指令集扩展与译码执行</title><meta name=description content="本章概览 本章将深入 RISC-V 体系结构的指令编码规范与模拟器的前端译码/执行架构。模拟器如何从一段二进制指令数据中，快速且准确地识别出指令类型、提取操作数（寄存器编号、立即数），并最终分发给后端执行逻辑，是理解处理器硬件设计与模拟器实现的核心。
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{--accent-color:#FF4D4D;--font-size:1.1rem;--code-block-bg:#f6f8fa;--code-block-text:#24292f;--code-block-border:#d0d7de;--code-token-comment:#656d76;--code-token-keyword:#cf222e;--code-token-name:#8250df;--code-token-string:#0a3069;--code-token-number:#0550ae;--code-token-operator:#0550ae;--code-token-punctuation:#24292f;--code-token-variable:#953800;--code-token-tag:#116329;--code-token-builtin:#0550ae;--code-token-constant:#0550ae;--code-token-error:#82071e}</style><title>Chapter 0x02 - 指令集扩展与译码执行</title><meta name=description content="本章概览 本章将深入 RISC-V 体系结构的指令编码规范与模拟器的前端译码/执行架构。模拟器如何从一段二进制指令数据中，快速且准确地识别出指令类型、提取操作数（寄存器编号、立即数），并最终分发给后端执行逻辑，是理解处理器硬件设计与模拟器实现的核心。
 通过本章学习与实验，你将完成以下内容：
 掌握 RISC-V 的各种标 …"><meta name=keywords content='blog,gokarna,hugo'><meta property="og:url" content="https://heu-cs-dphd.github.io/projects/emu-exp-2026/ch2/"><meta property="og:type" content="website"><meta property="og:title" content="Chapter 0x02 - 指令集扩展与译码执行"><meta property="og:description" content="本章概览 本章将深入 RISC-V 体系结构的指令编码规范与模拟器的前端译码/执行架构。模拟器如何从一段二进制指令数据中，快速且准确地识别出指令类型、提取操作数（寄存器编号、立即数），并最终分发给后端执行逻辑，是理解处理器硬件设计与模拟器实现的核心。
 通过本章学习与实验，你将完成以下内容：
 掌握 RISC-V 的各种标 …"><meta property="og:image" content="https://heu-cs-dphd.github.io/images/avatar.webp"><meta property="og:image:secure_url" content="https://heu-cs-dphd.github.io/images/avatar.webp"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Chapter 0x02 - 指令集扩展与译码执行"><meta name=twitter:description content="本章概览 本章将深入 RISC-V 体系结构的指令编码规范与模拟器的前端译码/执行架构。模拟器如何从一段二进制指令数据中，快速且准确地识别出指令类型、提取操作数（寄存器编号、立即数），并最终分发给后端执行逻辑，是理解处理器硬件设计与模拟器实现的核心。
 通过本章学习与实验，你将完成以下内容：
-掌握 RISC-V 的各种标 …"><meta property="twitter:domain" content="https://heu-cs-dphd.github.io/projects/emu-exp-2026/ch2/"><meta property="twitter:url" content="https://heu-cs-dphd.github.io/projects/emu-exp-2026/ch2/"><meta name=twitter:image content="https://heu-cs-dphd.github.io/images/avatar.webp"><link rel=canonical href=https://heu-cs-dphd.github.io/projects/emu-exp-2026/ch2/><link rel=stylesheet type=text/css href=/css/normalize.min.css media=print><link rel=stylesheet type=text/css href=/css/main.min.css><link id=dark-theme rel=stylesheet href=/css/dark.min.css><script src=/js/bundle.min.7136b4abac7b277aba8bc933917f4602d39a5c44f5590be687244bc86ef4f162.js integrity="sha256-cTa0q6x7J3q6i8kzkX9GAtOaXET1WQvmhyRLyG708WI="></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css integrity=sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js integrity=sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js integrity=sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],throwOnError:!1})})</script></head><body><script>setThemeByUserPref()</script><header class=header><nav class=header-nav><div class=avatar><a href=https://heu-cs-dphd.github.io/><img src=/images/avatar.webp alt=avatar></a></div><div class=nav-title><a class=nav-brand href=https://heu-cs-dphd.github.io/>HEU本博班's Blog</a></div><div class=nav-links><div class=nav-link><a href=https://heu-cs-dphd.github.io/ aria-label><span data-feather=home></span> Home</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/posts/ aria-label><span data-feather=book></span> Posts</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/projects/ aria-label><span data-feather=code></span> Projects</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/tags/ aria-label><span data-feather=tag></span> Tags</a></div><div class=nav-link><a href=https://github.com/heu-cs-dphd aria-label=github><span data-feather=github></span></a></div><div class=nav-link><a href=https://example.com aria-label=buymeacoffee><span data-feather=coffee></span></a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/index.xml aria-label=rss><span data-feather=rss></span></a></div><span class=nav-icons-divider></span><div class="nav-link dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
+掌握 RISC-V 的各种标 …"><meta property="twitter:domain" content="https://heu-cs-dphd.github.io/projects/emu-exp-2026/ch2/"><meta property="twitter:url" content="https://heu-cs-dphd.github.io/projects/emu-exp-2026/ch2/"><meta name=twitter:image content="https://heu-cs-dphd.github.io/images/avatar.webp"><link rel=canonical href=https://heu-cs-dphd.github.io/projects/emu-exp-2026/ch2/><link rel=stylesheet type=text/css href=/css/normalize.min.css media=print><link rel=stylesheet type=text/css href=/css/main.min.css><link rel=stylesheet type=text/css href=/css/chroma.min.css><link id=dark-theme rel=stylesheet href=/css/dark.min.css><script src=/js/bundle.min.7136b4abac7b277aba8bc933917f4602d39a5c44f5590be687244bc86ef4f162.js integrity="sha256-cTa0q6x7J3q6i8kzkX9GAtOaXET1WQvmhyRLyG708WI="></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css integrity=sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js integrity=sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js integrity=sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh crossorigin=anonymous></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}],throwOnError:!1})})</script></head><body><script>setThemeByUserPref()</script><header class=header><nav class=header-nav><div class=avatar><a href=https://heu-cs-dphd.github.io/><img src=/images/avatar.webp alt=avatar></a></div><div class=nav-title><a class=nav-brand href=https://heu-cs-dphd.github.io/>HEU本博班's Blog</a></div><div class=nav-links><div class=nav-link><a href=https://heu-cs-dphd.github.io/ aria-label><span data-feather=home></span> Home</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/posts/ aria-label><span data-feather=book></span> Posts</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/projects/ aria-label><span data-feather=code></span> Projects</a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/tags/ aria-label><span data-feather=tag></span> Tags</a></div><div class=nav-link><a href=https://github.com/heu-cs-dphd aria-label=github><span data-feather=github></span></a></div><div class=nav-link><a href=https://example.com aria-label=buymeacoffee><span data-feather=coffee></span></a></div><div class=nav-link><a href=https://heu-cs-dphd.github.io/index.xml aria-label=rss><span data-feather=rss></span></a></div><span class=nav-icons-divider></span><div class="nav-link dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
 <a aria-hidden=true role=switch><span class=theme-toggle-icon data-feather=moon></span></a></div><div class=nav-link id=hamburger-menu-toggle><span class="sr-only hamburger-menu-toggle-screen-reader-target">menu</span>
 <a aria-checked=false aria-labelledby=hamburger-menu-toggle id=hamburger-menu-toggle-target role=switch><span data-feather=menu></span></a></div><ul class="nav-hamburger-list visibility-hidden"><li class=nav-item><a href=https://heu-cs-dphd.github.io/><span data-feather=home></span> Home</a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/posts/><span data-feather=book></span> Posts</a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/projects/><span data-feather=code></span> Projects</a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/tags/><span data-feather=tag></span> Tags</a></li><li class=nav-item><a href=https://github.com/heu-cs-dphd><span data-feather=github></span></a></li><li class=nav-item><a href=https://example.com><span data-feather=coffee></span></a></li><li class=nav-item><a href=https://heu-cs-dphd.github.io/index.xml><span data-feather=rss></span></a></li><li class="nav-item dark-theme-toggle"><span class="sr-only dark-theme-toggle-screen-reader-target">theme</span>
 <a role=switch><span class=theme-toggle-icon data-feather=moon></span></a></li></ul></div></nav></header><main id=content><div class="post container"><div class=post-header-section><h1>Chapter 0x02 - 指令集扩展与译码执行</h1></div><div class=post-content><h2 id=本章概览>本章概览</h2><p>本章将深入 RISC-V 体系结构的<strong>指令编码规范</strong>与模拟器的<strong>前端译码/执行架构</strong>。模拟器如何从一段二进制指令数据中，快速且准确地识别出指令类型、提取操作数（寄存器编号、立即数），并最终分发给后端执行逻辑，是理解处理器硬件设计与模拟器实现的核心。</p><p>通过本章学习与实验，你将完成以下内容：</p><ol><li>掌握 RISC-V 的各种标准指令格式编码及其硬件设计理念。</li><li>理解模拟器前端从 <code>data/instr_dict.json</code> 元数据、<code>build.rs</code> 自动代码生成到 <code>funct_decoder</code> / <code>mask_decoder</code> 双级译码器以及 <code>icache</code> 缓存的技术链路。</li><li>实践在模拟器中扩展全新的自定义指令（以 RISC-V P 扩展 Packed-SIMD 为引导示例），开启 <code>custom-instr</code> feature 并完成 log 输出。</li><li>学习使用 <code>TestCPUBuilder</code>、<code>ExecTester</code> 和 <code>CPUChecker</code> 为 CPU 指令编写 Rust 单元测试。</li><li>掌握在 C 语言裸机程序中通过内嵌汇编（<code>asm volatile</code>）调用自定义指令并封装为 C 语言 API 函数。</li></ol><hr><h2 id=一-risc-v-指令格式与编码体系>一. RISC-V 指令格式与编码体系</h2><h3 id=risc-v-指令格式的设计理念>RISC-V 指令格式的设计理念</h3><p>在设计精简指令集（RISC）时，指令格式的规整性直接决定了硬件译码逻辑的复杂度、芯片面积以及运行主频。RISC-V 在指令编码上体现了高度优雅的硬件友好设计理念：</p><ol><li><p><strong>固定寄存器位置（Fixed Register Location）</strong>：</p><ul><li>通用源寄存器 1（<code>rs1</code>）固定位于 bit [19:15]。</li><li>通用源寄存器 2（<code>rs2</code>）固定位于 bit [24:20]。</li><li>目标寄存器（<code>rd</code>）固定位于 bit [11:7]。
 无论指令属于 R 型、I 型、S 型还是 B 型，寄存器索引在 32 位指令中的位置<strong>完全不变</strong>。这意味着硬件流水线可以在取指（IF）完成后，在指令类型尚未完全译码出来的同时，并行发起寄存器堆（Register File）的读操作，极大降低了流水线译码（ID）阶段的延迟。</li></ul></li><li><p><strong>统一的符号位位置（Fixed Sign Bit Location）</strong>：
 所有包含立即数的指令格式（I, S, B, U, J 型），其立即数的最高符号位固定位于指令的 <strong>bit 31</strong>。硬件进行符号位扩展（Sign Extension）时，无需判断指令类型，只需将 bit 31 直接复制填满高位即可，避免了多路选择器（Mux）造成的额外硬件延迟。</p></li><li><p><strong>对称拆分立即数（Split Immediates in S/B/U/J）</strong>：
 在 B 型（条件跳转）和 J 型（无条件跳转）指令中，立即数的编码看似被打碎交错拼凑。例如 B 型立即数被拆分为 <code>imm[12|10:5|4:1|11]</code>。这种设计是为了保证 <code>rs1</code> 和 <code>rs2</code> 的位置不受侵占，同时让 S 型与 B 型、U 型与 J 型指令之间控制信号的扇出（Fan-out）电路最小化，硬件多路选择器的输入引脚最大程度重用。</p></li><li><p><strong>固定指令长度与对齐（Fixed 32-bit Alignment）</strong>：
-标准 RV32/RV64 基础指令集长度均为 32 位，且要求 4 字节对齐。低 2 位（bit [1:0]）固定为 <code>11</code>（当低 2 位不为 <code>11</code> 时代表 16 位压缩指令 RVC）。</p></li></ol><h3 id=标准指令格式解析>标准指令格式解析</h3><p>RISC-V 定义了 6 种基本的指令格式：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-text data-lang=text><span style=display:flex><span>31          25 24      20 19      15 14  12 11       7 6        0
-</span></span><span style=display:flex><span>┌─────────────┬──────────┬──────────┬──────┬───────────┬──────────┐
-</span></span><span style=display:flex><span>│   funct7    │   rs2    │   rs1    │funct3│    rd     │  opcode  │  R-type
-</span></span><span style=display:flex><span>├─────────────┴──────────┼──────────┼──────┼───────────┼──────────┤
-</span></span><span style=display:flex><span>│      imm[11:0]         │   rs1    │funct3│    rd     │  opcode  │  I-type
-</span></span><span style=display:flex><span>├─────────────┬──────────┼──────────┼──────┼───────────┼──────────┤
-</span></span><span style=display:flex><span>│  imm[11:5]  │   rs2    │   rs1    │funct3│ imm[4:0]  │  opcode  │  S-type
-</span></span><span style=display:flex><span>├─────────────┬──────────┼──────────┼──────┼───────────┼──────────┤
-</span></span><span style=display:flex><span>│imm[12|10:5] │   rs2    │   rs1    │funct3│imm[4:1|11]│  opcode  │  B-type
-</span></span><span style=display:flex><span>├─────────────┴──────────┴──────────┴──────┼───────────┼──────────┤
-</span></span><span style=display:flex><span>│               imm[31:12]                 │    rd     │  opcode  │  U-type
-</span></span><span style=display:flex><span>├──────────────────────────────────────────┼───────────┼──────────┤
-</span></span><span style=display:flex><span>│            imm[20|10:1|11|19:12]         │    rd     │  opcode  │  J-type
-</span></span><span style=display:flex><span>└──────────────────────────────────────────┴───────────┴──────────┘
+标准 RV32/RV64 基础指令集长度均为 32 位，且要求 4 字节对齐。低 2 位（bit [1:0]）固定为 <code>11</code>（当低 2 位不为 <code>11</code> 时代表 16 位压缩指令 RVC）。</p></li></ol><h3 id=标准指令格式解析>标准指令格式解析</h3><p>RISC-V 定义了 6 种基本的指令格式：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>31          25 24      20 19      15 14  12 11       7 6        0
+</span></span><span class=line><span class=cl>┌─────────────┬──────────┬──────────┬──────┬───────────┬──────────┐
+</span></span><span class=line><span class=cl>│   funct7    │   rs2    │   rs1    │funct3│    rd     │  opcode  │  R-type
+</span></span><span class=line><span class=cl>├─────────────┴──────────┼──────────┼──────┼───────────┼──────────┤
+</span></span><span class=line><span class=cl>│      imm[11:0]         │   rs1    │funct3│    rd     │  opcode  │  I-type
+</span></span><span class=line><span class=cl>├─────────────┬──────────┼──────────┼──────┼───────────┼──────────┤
+</span></span><span class=line><span class=cl>│  imm[11:5]  │   rs2    │   rs1    │funct3│ imm[4:0]  │  opcode  │  S-type
+</span></span><span class=line><span class=cl>├─────────────┬──────────┼──────────┼──────┼───────────┼──────────┤
+</span></span><span class=line><span class=cl>│imm[12|10:5] │   rs2    │   rs1    │funct3│imm[4:1|11]│  opcode  │  B-type
+</span></span><span class=line><span class=cl>├─────────────┴──────────┴──────────┴──────┼───────────┼──────────┤
+</span></span><span class=line><span class=cl>│               imm[31:12]                 │    rd     │  opcode  │  U-type
+</span></span><span class=line><span class=cl>├──────────────────────────────────────────┼───────────┼──────────┤
+</span></span><span class=line><span class=cl>│            imm[20|10:1|11|19:12]         │    rd     │  opcode  │  J-type
+</span></span><span class=line><span class=cl>└──────────────────────────────────────────┴───────────┴──────────┘
 </span></span></code></pre></div><ul><li><strong>R-type（Register）</strong>：寄存器-寄存器算术/逻辑指令（如 <code>add</code>, <code>sub</code>, <code>and</code>, <code>or</code>）。使用 <code>opcode</code> + <code>funct3</code> + <code>funct7</code> 唯一确定操作类型。</li><li><strong>I-type（Immediate）</strong>：寄存器-立即数指令及加载（Load）指令（如 <code>addi</code>, <code>lw</code>, <code>jalr</code>）。<code>imm[11:0]</code> 提供 12 位有符号立即数。</li><li><strong>S-type（Store）</strong>：存储指令（如 <code>sw</code>, <code>sb</code>, <code>sd</code>）。立即数被拆分为高 7 位（<code>imm[11:5]</code>）和低 5 位（<code>imm[4:0]</code>），以便空出 <code>rs2</code> 位置。</li><li><strong>B-type（Branch）</strong>：条件跳转指令（如 <code>beq</code>, <code>bne</code>, <code>blt</code>）。立即数编码表示以 2 字节为单位的相对 PC 偏移量，最低位 <code>imm[0]</code> 默认为 0 不存储。</li><li><strong>U-type（Upper Immediate）</strong>：加载高位立即数指令（如 <code>lui</code>, <code>auipc</code>）。包含 20 位高位立即数 <code>imm[31:12]</code>。</li><li><strong>J-type（Jump）</strong>：无条件跳转指令（如 <code>jal</code>）。提供 20 位跳转偏移量。</li></ul><h3 id=指令空间划分与-custom-opcode>指令空间划分与 Custom Opcode</h3><p>为了鼓励学术研究与特定领域的加速扩展，RISC-V 官方架构规范明确保留了 4 组用于自定义指令的 <strong>Custom Opcode 空间</strong>：</p><table><thead><tr><th>名称</th><th>Opcode (7-bit)</th><th>二进制表示</th></tr></thead><tbody><tr><td><code>custom-0</code></td><td><code>0x0B</code></td><td><code>0b0001011</code></td></tr><tr><td><code>custom-1</code></td><td><code>0x2B</code></td><td><code>0b0101011</code></td></tr><tr><td><code>custom-2</code></td><td><code>0x5B</code></td><td><code>0b1011011</code></td></tr><tr><td><code>custom-3</code></td><td><code>0x7B</code></td><td><code>0b1111011</code></td></tr></tbody></table><p>任何在此空间内的指令均保证不会与未来的 RISC-V 官方标准指令冲突。在本章的实验中，我们将使用 <code>custom-0</code> 和 <code>custom-1</code> 空间来扩展你自己的指令。</p><hr><h2 id=二-模拟器前端译码架构>二. 模拟器前端译码架构</h2><p>本模拟器采用了“<strong>数据驱动的代码生成 + 双级高效译码器 + 取指译码缓存（iCache）</strong>”的前端架构。整体数据流与控制流如下所示：</p><pre tabindex=0><code class=language-mermaid data-lang=mermaid>flowchart TD
     subgraph BuildPhase[&#34;编译阶段 (Build Time)&#34;]
         J1[&#34;data/instr_dict.json&#34;] --&gt; B[&#34;build.rs&#34;]
@@ -43,19 +43,19 @@
 </code></pre><h3 id=1-从-json-到-rust-代码生成>1. 从 JSON 到 Rust 代码生成</h3><p>模拟器避免了手工编写繁琐且易错的按位 mask 拆解代码，而是将所有指令的编码规则统一存储在 JSON 文件中：</p><ul><li><a href=https://github.com/here-emulator/here/tree/master/data/instr_dict.json>data/instr_dict.json</a>
 ：包含 RISC-V 标准指令集，该文件实际上由 <a href=https://github.com/riscv/riscv-opcodes>riscv-opcodes</a>
 项目生成。</li><li><a href=https://github.com/here-emulator/here/tree/master/data/instr_dict_custom.json>data/instr_dict_custom.json</a>
-：包含用户自定义扩展指令。</li></ul><p>JSON 描述项示例：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span><span style=color:#e6db74>&#34;add&#34;</span><span style=color:#960050;background-color:#1e0010>:</span> {
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;encoding&#34;</span>: <span style=color:#e6db74>&#34;0000000----------000-----0110011&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;variable_fields&#34;</span>: [
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;rd&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;rs1&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;rs2&#34;</span>
-</span></span><span style=display:flex><span>  ],
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;extension&#34;</span>: [
-</span></span><span style=display:flex><span>   <span style=color:#e6db74>&#34;rv_i&#34;</span>
-</span></span><span style=display:flex><span>  ],
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;match&#34;</span>: <span style=color:#e6db74>&#34;0x33&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;mask&#34;</span>: <span style=color:#e6db74>&#34;0xfe00707f&#34;</span>
-</span></span><span style=display:flex><span>}<span style=color:#960050;background-color:#1e0010>,</span>
+：包含用户自定义扩展指令。</li></ul><p>JSON 描述项示例：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=s2>&#34;add&#34;</span><span class=err>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;encoding&#34;</span><span class=p>:</span> <span class=s2>&#34;0000000----------000-----0110011&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;variable_fields&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;rd&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;rs1&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;rs2&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>],</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;extension&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>   <span class=s2>&#34;rv_i&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>],</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;match&#34;</span><span class=p>:</span> <span class=s2>&#34;0x33&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;mask&#34;</span><span class=p>:</span> <span class=s2>&#34;0xfe00707f&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span><span class=err>,</span>
 </span></span></code></pre></div><p>其中：</p><ul><li><code>encoding</code> 描述 32 位的具体比特分布（<code>-</code> 表示变量位）。</li><li><code>match</code> 为固定位的期望匹配值，<code>mask</code> 掩码用于过滤掉变量位（计算公式：<code>raw_instr & mask == match</code>）。</li><li><code>variable_fields</code> 声明包含的操作数。</li></ul><p>在编译阶段，<a href=https://github.com/here-emulator/here/tree/master/build.rs>build.rs</a>
 会读取并解析这些 JSON 文件，根据指令的变量字段自动推导其所属格式 <code>InstrFormat</code>（如 <code>R</code>, <code>I</code>, <code>S</code>, <code>B</code>, <code>U</code>, <code>J</code>），并在 <code>OUT_DIR</code> 下自动生成 <code>rvinstr_gen.rs</code>。生成的代码包含：</p><ul><li><code>RiscvInstr</code> 枚举类型（包含所有已定义的指令枚举值）。</li><li>各扩展指令数组表（如 <code>TABLE_RV32I</code>, <code>TABLE_RVCUSTOM0</code> 等）。</li></ul><h3 id=2-双级译码器结构-decoder>2. 双级译码器结构 (<code>Decoder</code>)</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/decoder/mod.rs>src/isa/riscv/decoder/mod.rs</a>
 中，<code>Decoder</code> 结合了两种不同特性的译码子系统：</p><pre tabindex=0><code class=language-mermaid data-lang=mermaid>flowchart TD
@@ -70,134 +70,134 @@
 </code></pre><ol><li><p><strong><code>funct_decoder</code>（基数表快速查找）</strong>：
 针对标准指令中占绝大多数、形式非常规整的指令（通过 Opcode 与 <code>funct3</code>/<code>funct7</code> 可建立直接映射），采用表驱动查找，时间复杂度为 $O(1)$，极其高效。</p></li><li><p><strong><code>mask_decoder</code>（掩码/Key 线性查找）</strong>：
 对于无法放入 <code>funct_decoder</code> 的稀疏或特殊掩码指令，采用掩码匹配：线性遍历 <code>(raw_instr & mask) == key</code> 找到对应指令描述。</p></li><li><p><strong><code>decode_info</code> 提取操作数</strong>：
-一旦匹配成功，<code>Decoder</code> 会根据指令的 <code>InstrFormat</code> 从原始 32 位机器码 <code>raw_instr</code> 中提取出 <code>rd</code>、<code>rs1</code>、<code>rs2</code> 以及符号扩展后的 <code>imm</code>，打包封装为 <code>RVInstrInfo</code> 枚举与 <code>DecodeInstr</code> 结构体：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>pub</span> <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>DecodeInstr</span> {
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pub</span> instr: <span style=color:#a6e22e>RiscvInstr</span>,
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pub</span> info: <span style=color:#a6e22e>RVInstrInfo</span>,
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pub</span> len: <span style=color:#a6e22e>WordType</span>,
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div></li></ol><h3 id=3-cpu-主循环中的译码阶段-step_impl>3. CPU 主循环中的译码阶段 (<code>step_impl</code>)</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/executor.rs>src/isa/riscv/executor.rs</a>
-中，<code>RVCPU::step_impl()</code> 负责控制单个时钟周期的指令推进流程：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>step_impl</span>(<span style=color:#f92672>&amp;</span><span style=color:#66d9ef>mut</span> self) {
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// 1. 尝试从指令缓存 (icache) 中按当前 PC 直接获取已译码指令
-</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> DecodeInstr { instr, info, len: <span style=color:#a6e22e>_</span> } <span style=color:#f92672>=</span> <span style=color:#66d9ef>if</span> <span style=color:#66d9ef>let</span> Some(decode_instr) <span style=color:#f92672>=</span> self.icache.get(self.pc) {
-</span></span><span style=display:flex><span>        decode_instr
-</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
-</span></span><span style=display:flex><span>        <span style=color:#75715e>// 2. icache 未命中，从内存 fetch 原始机器码
-</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> raw_instr <span style=color:#f92672>=</span> <span style=color:#66d9ef>match</span> self.ifetch() {
-</span></span><span style=display:flex><span>            Ok(bytes) <span style=color:#f92672>=&gt;</span> bytes,
-</span></span><span style=display:flex><span>            Err(err) <span style=color:#f92672>=&gt;</span> {
-</span></span><span style=display:flex><span>                TrapController::take_exception(self, err.cause, err.tval);
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span>;
-</span></span><span style=display:flex><span>            }
-</span></span><span style=display:flex><span>        };
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#75715e>// 3. 调用前端译码器 decode() 进行译码
-</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> decoder_result <span style=color:#f92672>=</span> self.decoder.decode(raw_instr);
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>let</span> Some(decode_instr) <span style=color:#f92672>=</span> decoder_result <span style=color:#66d9ef>else</span> {
-</span></span><span style=display:flex><span>            <span style=color:#75715e>// 译码失败，触发 IllegalInstruction 异常
-</span></span></span><span style=display:flex><span>            TrapController::take_exception(self, Exception::IllegalInstruction, raw_instr.val <span style=color:#66d9ef>as</span> WordType);
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span>;
-</span></span><span style=display:flex><span>        };
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#75715e>// 4. 将译码结果写入 icache 供后续重用
-</span></span></span><span style=display:flex><span>        self.icache.put(self.pc, decode_instr.clone());
-</span></span><span style=display:flex><span>        decode_instr
-</span></span><span style=display:flex><span>    };
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// 5. 将译码后的指令与操作数送入后端分发执行
-</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> excute_result <span style=color:#f92672>=</span> self.execute(instr, info);
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// ... 处理异常与 PC 更新 ...
-</span></span></span><span style=display:flex><span>}
-</span></span></code></pre></div><hr><h2 id=实践-1设计与实现自定义指令扩展>实践 1：设计与实现自定义指令扩展</h2><p>自定义扩展指令的完整开发流程如下图所示：</p><pre tabindex=0><code class=language-mermaid data-lang=mermaid>flowchart LR
+一旦匹配成功，<code>Decoder</code> 会根据指令的 <code>InstrFormat</code> 从原始 32 位机器码 <code>raw_instr</code> 中提取出 <code>rd</code>、<code>rs1</code>、<code>rs2</code> 以及符号扩展后的 <code>imm</code>，打包封装为 <code>RVInstrInfo</code> 枚举与 <code>DecodeInstr</code> 结构体：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>pub</span><span class=w> </span><span class=k>struct</span> <span class=nc>DecodeInstr</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>pub</span><span class=w> </span><span class=n>instr</span>: <span class=nc>RiscvInstr</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>pub</span><span class=w> </span><span class=n>info</span>: <span class=nc>RVInstrInfo</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>pub</span><span class=w> </span><span class=n>len</span>: <span class=nc>WordType</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div></li></ol><h3 id=3-cpu-主循环中的译码阶段-step_impl>3. CPU 主循环中的译码阶段 (<code>step_impl</code>)</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/executor.rs>src/isa/riscv/executor.rs</a>
+中，<code>RVCPU::step_impl()</code> 负责控制单个时钟周期的指令推进流程：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=k>fn</span> <span class=nf>step_impl</span><span class=p>(</span><span class=o>&amp;</span><span class=k>mut</span><span class=w> </span><span class=bp>self</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 1. 尝试从指令缓存 (icache) 中按当前 PC 直接获取已译码指令
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=n>DecodeInstr</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=n>instr</span><span class=p>,</span><span class=w> </span><span class=n>info</span><span class=p>,</span><span class=w> </span><span class=n>len</span>: <span class=nc>_</span><span class=w> </span><span class=p>}</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>if</span><span class=w> </span><span class=kd>let</span><span class=w> </span><span class=nb>Some</span><span class=p>(</span><span class=n>decode_instr</span><span class=p>)</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>icache</span><span class=p>.</span><span class=n>get</span><span class=p>(</span><span class=bp>self</span><span class=p>.</span><span class=n>pc</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>decode_instr</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 2. icache 未命中，从内存 fetch 原始机器码
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>let</span><span class=w> </span><span class=n>raw_instr</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>match</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>ifetch</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=nb>Ok</span><span class=p>(</span><span class=n>bytes</span><span class=p>)</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=n>bytes</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=nb>Err</span><span class=p>(</span><span class=n>err</span><span class=p>)</span><span class=w> </span><span class=o>=&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>TrapController</span>::<span class=n>take_exception</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span><span class=w> </span><span class=n>err</span><span class=p>.</span><span class=n>cause</span><span class=p>,</span><span class=w> </span><span class=n>err</span><span class=p>.</span><span class=n>tval</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>return</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 3. 调用前端译码器 decode() 进行译码
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>let</span><span class=w> </span><span class=n>decoder_result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>decoder</span><span class=p>.</span><span class=n>decode</span><span class=p>(</span><span class=n>raw_instr</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>let</span><span class=w> </span><span class=nb>Some</span><span class=p>(</span><span class=n>decode_instr</span><span class=p>)</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>decoder_result</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 译码失败，触发 IllegalInstruction 异常
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>TrapController</span>::<span class=n>take_exception</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span><span class=w> </span><span class=n>Exception</span>::<span class=n>IllegalInstruction</span><span class=p>,</span><span class=w> </span><span class=n>raw_instr</span><span class=p>.</span><span class=n>val</span><span class=w> </span><span class=k>as</span><span class=w> </span><span class=n>WordType</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 4. 将译码结果写入 icache 供后续重用
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=bp>self</span><span class=p>.</span><span class=n>icache</span><span class=p>.</span><span class=n>put</span><span class=p>(</span><span class=bp>self</span><span class=p>.</span><span class=n>pc</span><span class=p>,</span><span class=w> </span><span class=n>decode_instr</span><span class=p>.</span><span class=n>clone</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>decode_instr</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 5. 将译码后的指令与操作数送入后端分发执行
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=n>excute_result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=bp>self</span><span class=p>.</span><span class=n>execute</span><span class=p>(</span><span class=n>instr</span><span class=p>,</span><span class=w> </span><span class=n>info</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// ... 处理异常与 PC 更新 ...
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><hr><h2 id=实践-1设计与实现自定义指令扩展>实践 1：设计与实现自定义指令扩展</h2><p>自定义扩展指令的完整开发流程如下图所示：</p><pre tabindex=0><code class=language-mermaid data-lang=mermaid>flowchart LR
     A[&#34;1. 构思指令语义与编码&#34;] --&gt; B[&#34;2. 配置 instr_dict_custom.json&#34;]
     B --&gt; C[&#34;3. 开启 custom-instr Feature&#34;]
     C --&gt; D[&#34;4. 编写 CPU 单元测试 (cpu_test)&#34;]
     D --&gt; E[&#34;5. C 语言 asm volatile 封装与调用&#34;]
 </code></pre><p>您可以先自行查看一条指令(如 addi )是如何从被读入, 到译码完成的.</p><h3 id=1-构思自定义扩展指令以-packed-simd-为例>1. 构思自定义扩展指令（以 Packed-SIMD 为例）</h3><p>在许多嵌入式或 DSP 场景中，处理 8-bit（如图像像素）或 16-bit（如音频采样）数据时，使用 32 位通用寄存器一次只算一个整数效率较低。RISC-V P 扩展（Packed SIMD）允许将一个 32 位寄存器看作 4 个 8 位整数，并用单条指令并行完成 4 组加法。</p><p>我们设计一条属于 <code>custom-0</code> 空间的加法指令 <code>padd8</code>（Packed Add 8-bit）：</p><ul><li><strong>指令名称</strong>：<code>padd8</code></li><li><strong>指令格式</strong>：R-type（使用 <code>rd</code>, <code>rs1</code>, <code>rs2</code>）</li><li><strong>Opcode</strong>：<code>0b0001011</code> (<code>0x0B</code>，即 <code>custom-0</code>)</li><li><strong>funct3</strong>：<code>0b000</code></li><li><strong>funct7</strong>：<code>0b0000000</code></li><li><strong>编码 (encoding)</strong>：<code>0000000----------000-----0001011</code></li><li><strong>Match</strong>：<code>0x0B</code></li><li><strong>Mask</strong>：<code>0xFE00707F</code></li></ul><h3 id=2-在模拟器中注册与开启扩展>2. 在模拟器中注册与开启扩展</h3><p>步骤一：在 <a href=https://github.com/here-emulator/here/tree/master/data/instr_dict_custom.json>data/instr_dict_custom.json</a>
-中加入你的指令定义：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span><span style=color:#f92672>&#34;padd8&#34;</span>: {
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;encoding&#34;</span>: <span style=color:#e6db74>&#34;0000000----------000-----0001011&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;variable_fields&#34;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;rd&#34;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;rs1&#34;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;rs2&#34;</span>
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;extension&#34;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;rv_custom0&#34;</span>
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;match&#34;</span>: <span style=color:#e6db74>&#34;0x0b&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;mask&#34;</span>: <span style=color:#e6db74>&#34;0xfe00707f&#34;</span>
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>}
+中加入你的指令定义：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=nt>&#34;padd8&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;encoding&#34;</span><span class=p>:</span> <span class=s2>&#34;0000000----------000-----0001011&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;variable_fields&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;rd&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;rs1&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;rs2&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=p>],</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;extension&#34;</span><span class=p>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;rv_custom0&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=p>],</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;match&#34;</span><span class=p>:</span> <span class=s2>&#34;0x0b&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;mask&#34;</span><span class=p>:</span> <span class=s2>&#34;0xfe00707f&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
 </span></span></code></pre></div><p>步骤二：启用模拟器的 <code>custom-instr</code> 功能特性。在 <a href=https://github.com/here-emulator/here/tree/master/Cargo.toml>Cargo.toml</a>
 中，<code>custom-instr</code> feature 会在编译时激活 <code>instr_dict_custom.json</code> 的解析，并将 <code>TABLE_RVCUSTOM0</code> 注入到 CPU <code>Decoder</code> 中。</p><p>步骤三：在后端执行点（如 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/executor.rs>src/isa/riscv/executor.rs</a>
-的 <code>execute</code> 方法或匹配分支中）添加初步的后端日志响应。作为阶段性验证，无需立即实现复杂的算术，直接打印 log 确认指令被成功触发即可：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span>log::<span style=color:#a6e22e>info!</span>(<span style=color:#e6db74>&#34;[Custom-Instr] Executed PADD8: rd={}, rs1={}, rs2={}&#34;</span>, rd, rs1, rs2);
-</span></span></code></pre></div><p>运行编译命令验证配置：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>cargo build --features custom-instr
+的 <code>execute</code> 方法或匹配分支中）添加初步的后端日志响应。作为阶段性验证，无需立即实现复杂的算术，直接打印 log 确认指令被成功触发即可：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=n>log</span>::<span class=fm>info!</span><span class=p>(</span><span class=s>&#34;[Custom-Instr] Executed PADD8: rd={}, rs1={}, rs2={}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>rd</span><span class=p>,</span><span class=w> </span><span class=n>rs1</span><span class=p>,</span><span class=w> </span><span class=n>rs2</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></div><p>运行编译命令验证配置：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>cargo build --features custom-instr
 </span></span></code></pre></div><hr><h2 id=实践-2编写-cpu-单元测试>实践 2：编写 CPU 单元测试</h2><p>在把自定义指令接入裸机程序之前，最佳实践是先在 Rust 侧编写<strong>单元测试</strong>，验证指令能否被正确译码和执行。</p><h3 id=1-模拟器测试构件介绍>1. 模拟器测试构件介绍</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/cpu_tester.rs>src/isa/riscv/cpu_tester.rs</a>
 中，项目提供了一套极为方便的测试链式构建器：</p><ul><li><strong><code>TestCPUBuilder</code></strong>：用于初始化一个仅含 RAM 的纯净测试 CPU。<ul><li><code>.reg(idx, val)</code>：初始化通用寄存器。</li><li><code>.pc(val)</code>：设置初始 PC。</li><li><code>.mem(addr, val)</code>：写入测试内存。</li></ul></li><li><strong><code>ExecTester</code></strong>：提供伪随机数生成工具（如 <code>rand_word()</code>, <code>rand_reg_idx()</code>），方便生成测试数据。</li><li><strong><code>CPUChecker</code></strong>：测试完成后的断言工具。<ul><li><code>.reg(idx, expected_val)</code>：断言寄存器值。</li><li><code>.pc(expected_pc)</code>：断言执行后 PC 跳转位置。</li></ul></li></ul><h3 id=2-编写单元测试用例>2. 编写单元测试用例</h3><p>在 <a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/cpu_test.rs>src/isa/riscv/cpu_test.rs</a>
-中添加属于你的测试函数（使用 <code>run_test_exec_decode</code> 或 <code>run_test_cpu_step</code>）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#75715e>#[test]</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#[cfg(feature = </span><span style=color:#e6db74>&#34;custom-instr&#34;</span><span style=color:#75715e>)]</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>test_custom_padd8_decode_and_exec</span>() {
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// 构造 padd8 x3, x1, x2 的机器码
-</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// funct7=0, rs1=1, rs2=2, funct3=0, rd=3, opcode=0x0B
-</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// 0000000_00010_00001_000_00011_0001011 = 0x0020818B
-</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> raw_instr: <span style=color:#66d9ef>u32</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x0020818B</span>;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    run_test_exec_decode(
-</span></span><span style=display:flex><span>        raw_instr,
-</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>builder<span style=color:#f92672>|</span> {
-</span></span><span style=display:flex><span>            builder
-</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0x01020304</span>)   <span style=color:#75715e>// rs1
-</span></span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>0x05060708</span>)   <span style=color:#75715e>// rs2
-</span></span></span><span style=display:flex><span>                .pc(<span style=color:#ae81ff>0x80000000</span>)
-</span></span><span style=display:flex><span>        },
-</span></span><span style=display:flex><span>        <span style=color:#f92672>|</span>checker<span style=color:#f92672>|</span> {
-</span></span><span style=display:flex><span>            checker
-</span></span><span style=display:flex><span>                .reg(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>0x06080A0C</span>)   <span style=color:#75715e>// rd
-</span></span></span><span style=display:flex><span>                .pc(<span style=color:#ae81ff>0x80000004</span>)       <span style=color:#75715e>// 验证 PC 推进了 4 字节
-</span></span></span><span style=display:flex><span>        },
-</span></span><span style=display:flex><span>    );
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>使用以下命令运行该测试：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>cargo test --features custom-instr test_custom_padd8
+中添加属于你的测试函数（使用 <code>run_test_exec_decode</code> 或 <code>run_test_cpu_step</code>）：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-rust data-lang=rust><span class=line><span class=cl><span class=cp>#[test]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cp>#[cfg(feature = </span><span class=s>&#34;custom-instr&#34;</span><span class=cp>)]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=k>fn</span> <span class=nf>test_custom_padd8_decode_and_exec</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 构造 padd8 x3, x1, x2 的机器码
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// funct7=0, rs1=1, rs2=2, funct3=0, rd=3, opcode=0x0B
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 0000000_00010_00001_000_00011_0001011 = 0x0020818B
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>let</span><span class=w> </span><span class=n>raw_instr</span>: <span class=kt>u32</span> <span class=o>=</span><span class=w> </span><span class=mh>0x0020818B</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>run_test_exec_decode</span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>raw_instr</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=o>|</span><span class=n>builder</span><span class=o>|</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>builder</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=n>reg</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=w> </span><span class=mh>0x01020304</span><span class=p>)</span><span class=w>   </span><span class=c1>// rs1
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=n>reg</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=w> </span><span class=mh>0x05060708</span><span class=p>)</span><span class=w>   </span><span class=c1>// rs2
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=n>pc</span><span class=p>(</span><span class=mh>0x80000000</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>},</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=o>|</span><span class=n>checker</span><span class=o>|</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>checker</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=n>reg</span><span class=p>(</span><span class=mi>3</span><span class=p>,</span><span class=w> </span><span class=mh>0x06080A0C</span><span class=p>)</span><span class=w>   </span><span class=c1>// rd
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=n>pc</span><span class=p>(</span><span class=mh>0x80000004</span><span class=p>)</span><span class=w>       </span><span class=c1>// 验证 PC 推进了 4 字节
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>},</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>使用以下命令运行该测试：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>cargo <span class=nb>test</span> --features custom-instr test_custom_padd8
 </span></span></code></pre></div><hr><h2 id=实践-3c-语言内嵌汇编与函数封装>实践 3：C 语言内嵌汇编与函数封装</h2><p>成功在模拟器端支持自定义指令后，下一步是在裸机 C 语言客户端程序中使用它。</p><h3 id=1-gcc-内嵌汇编语法-asm-volatile与-insn>1. GCC 内嵌汇编语法 (<code>asm volatile</code>)与 <code>.insn</code></h3><p>直接编写汇编时，传统 GNU 汇编器（<code>riscv64-unknown-elf-gcc</code>）可能尚未认识你的自定义指令名字（如 <code>padd8</code>）。RISC-V 汇编器提供了一个强大的伪指令 <strong><code>.insn</code></strong>(see <a href=https://github.com/riscv-non-isa/riscv-asm-manual>riscv-asm-manual</a>
-，允许开发者直接用通用格式拼装任何机器指令：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>// .insn r opcode, funct3, funct7, rd, rs1, rs2
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>asm</span> <span style=color:#a6e22e>volatile</span> (
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// 使用实际的 opcode, funct3 和 funct7 代替中间三个 0
-</span></span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;.insn r 0x0b, 0, 0, %0, %1, %2&#34;</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;=r&#34;</span>(rd_val)    <span style=color:#75715e>// 输出操作数 %0
-</span></span></span><span style=display:flex><span>    <span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;r&#34;</span>(rs1_val),   <span style=color:#75715e>// 输入操作数 %1
-</span></span></span><span style=display:flex><span>      <span style=color:#e6db74>&#34;r&#34;</span>(rs2_val)    <span style=color:#75715e>// 输入操作数 %2
-</span></span></span><span style=display:flex><span>);
-</span></span></code></pre></div><h3 id=2-c-语言-api-函数封装>2. C 语言 API 函数封装</h3><p>为了提供良好的编程抽象，你应该将底层 <code>asm volatile</code> 封装为干净的内联 C 函数（Header 库），供上层应用程序调用：</p><p>在 <code>test_resources/include/custom_ops.h</code> 中：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>#ifndef CUSTOM_OPS_H
-</span></span></span><span style=display:flex><span><span style=color:#75715e>#define CUSTOM_OPS_H
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdint.h&gt;</span><span style=color:#75715e>
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>inline</span> <span style=color:#66d9ef>uint32_t</span> <span style=color:#a6e22e>padd8</span>(<span style=color:#66d9ef>uint32_t</span> a, <span style=color:#66d9ef>uint32_t</span> b) {
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint32_t</span> result;
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>asm</span> <span style=color:#66d9ef>volatile</span> (
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;.insn r 0x0b, 0, 0, %0, %1, %2&#34;</span>
-</span></span><span style=display:flex><span>        <span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;=r&#34;</span>(result)
-</span></span><span style=display:flex><span>        <span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;r&#34;</span>(a), <span style=color:#e6db74>&#34;r&#34;</span>(b)
-</span></span><span style=display:flex><span>    );
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> result;
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#endif </span><span style=color:#75715e>// CUSTOM_OPS_H
-</span></span></span></code></pre></div><p>在裸机主程序（如 <code>test_resources/src/main.c</code>）中直接使用该函数：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&#34;io.h&#34;</span><span style=color:#75715e>
-</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&#34;custom_ops.h&#34;</span><span style=color:#75715e>
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint32_t</span> a <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x01020304</span>;
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint32_t</span> b <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x05060708</span>;
-</span></span><span style=display:flex><span>    
-</span></span><span style=display:flex><span>    <span style=color:#75715e>// 调用我们封装的自定义指令
-</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>uint32_t</span> res <span style=color:#f92672>=</span> <span style=color:#a6e22e>padd8</span>(a, b);
-</span></span><span style=display:flex><span>    
-</span></span><span style=display:flex><span>    <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;Custom padd8 finished!</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
-</span></span><span style=display:flex><span>    <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;%x&#34;</span>, res);
-</span></span><span style=display:flex><span>    
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
-</span></span><span style=display:flex><span>}
+，允许开发者直接用通用格式拼装任何机器指令：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// .insn r opcode, funct3, funct7, rd, rs1, rs2
+</span></span></span><span class=line><span class=cl><span class=k>asm</span> <span class=nf>volatile</span> <span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 使用实际的 opcode, funct3 和 funct7 代替中间三个 0
+</span></span></span><span class=line><span class=cl>    <span class=s>&#34;.insn r 0x0b, 0, 0, %0, %1, %2&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=o>:</span> <span class=s>&#34;=r&#34;</span><span class=p>(</span><span class=n>rd_val</span><span class=p>)</span>    <span class=c1>// 输出操作数 %0
+</span></span></span><span class=line><span class=cl>    <span class=o>:</span> <span class=s>&#34;r&#34;</span><span class=p>(</span><span class=n>rs1_val</span><span class=p>),</span>   <span class=c1>// 输入操作数 %1
+</span></span></span><span class=line><span class=cl>      <span class=s>&#34;r&#34;</span><span class=p>(</span><span class=n>rs2_val</span><span class=p>)</span>    <span class=c1>// 输入操作数 %2
+</span></span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span></code></pre></div><h3 id=2-c-语言-api-函数封装>2. C 语言 API 函数封装</h3><p>为了提供良好的编程抽象，你应该将底层 <code>asm volatile</code> 封装为干净的内联 C 函数（Header 库），供上层应用程序调用：</p><p>在 <code>test_resources/include/custom_ops.h</code> 中：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#ifndef CUSTOM_OPS_H
+</span></span></span><span class=line><span class=cl><span class=cp>#define CUSTOM_OPS_H
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdint.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kr>inline</span> <span class=kt>uint32_t</span> <span class=nf>padd8</span><span class=p>(</span><span class=kt>uint32_t</span> <span class=n>a</span><span class=p>,</span> <span class=kt>uint32_t</span> <span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint32_t</span> <span class=n>result</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>asm</span> <span class=k>volatile</span> <span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s>&#34;.insn r 0x0b, 0, 0, %0, %1, %2&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=o>:</span> <span class=s>&#34;=r&#34;</span><span class=p>(</span><span class=n>result</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=o>:</span> <span class=s>&#34;r&#34;</span><span class=p>(</span><span class=n>a</span><span class=p>),</span> <span class=s>&#34;r&#34;</span><span class=p>(</span><span class=n>b</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#endif </span><span class=c1>// CUSTOM_OPS_H
+</span></span></span></code></pre></div><p>在裸机主程序（如 <code>test_resources/src/main.c</code>）中直接使用该函数：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;io.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;custom_ops.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint32_t</span> <span class=n>a</span> <span class=o>=</span> <span class=mh>0x01020304</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>uint32_t</span> <span class=n>b</span> <span class=o>=</span> <span class=mh>0x05060708</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 调用我们封装的自定义指令
+</span></span></span><span class=line><span class=cl>    <span class=kt>uint32_t</span> <span class=n>res</span> <span class=o>=</span> <span class=nf>padd8</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;Custom padd8 finished!</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;%x&#34;</span><span class=p>,</span> <span class=n>res</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
 </span></span></code></pre></div><hr><h2 id=项目导览>项目导览</h2><ul><li><strong>指令描述 JSON 文件</strong>：<a href=https://github.com/here-emulator/here/tree/master/data/instr_dict.json>data/instr_dict.json</a>
 与 <a href=https://github.com/here-emulator/here/tree/master/data/instr_dict_custom.json>data/instr_dict_custom.json</a></li><li><strong>代码生成脚本</strong>：<a href=https://github.com/here-emulator/here/tree/master/build.rs>build.rs</a></li><li><strong>前端译码器实现</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/decoder/mod.rs>src/isa/riscv/decoder/mod.rs</a>
 （<code>funct_decoder</code>, <code>mask_decoder</code>）</li><li><strong>CPU 步进与指令分发</strong>：<a href=https://github.com/here-emulator/here/tree/master/src/isa/riscv/executor.rs>src/isa/riscv/executor.rs</a>
