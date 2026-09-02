@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reset.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/monokai.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <!-- Standalone Custom Styles (YSYX Minimalist Theme aligned with riscv_intro) -->
   <style>
     :root {
@@ -17,7 +16,7 @@
       --r-heading-color: #0f172a;
       --r-heading-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       --r-main-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      --r-code-font: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, monospace;
+      --r-code-font: 'JetBrains Mono', 'Fira Code', Consolas, Menlo, Monaco, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', monospace;
       --r-link-color: #1d4ed8;
       --r-selection-background-color: #bfdbfe;
       --r-selection-color: #1e3a8a;
@@ -38,11 +37,24 @@
       color: #1e293b;
     }
 
-    .reveal .slides {
+    .reveal:not(.overview) .slides {
       text-align: left;
       border-style: groove;
       border-width: 2px;
       overflow: hidden;
+    }
+
+    .reveal.overview .slides {
+      text-align: left;
+      overflow: visible !important;
+      border: none !important;
+    }
+
+    .reveal.overview .slides section {
+      border: 2px solid #cbd5e1 !important;
+      border-radius: 4px;
+      background-color: #ffffff !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .reveal .slides section,
@@ -298,6 +310,9 @@
 
     .reveal pre code {
       font-family: var(--r-code-font);
+      font-synthesis: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       padding: 8px 10px;
       max-height: 420px;
       overflow-x: hidden;
@@ -396,7 +411,7 @@
     .hljs { color: #0f172a; }
     .hljs-keyword { color: #d73a49 !important; font-weight: 600; }
     .hljs-string { color: #032f62 !important; }
-    .hljs-comment { color: #6a737d !important; font-style: italic; }
+    .hljs-comment { color: #6a737d !important; font-style: normal; font-family: var(--r-code-font); font-synthesis: none; }
     .hljs-number { color: #005cc5 !important; }
     .hljs-title, .hljs-function, .hljs-class .hljs-title { color: #6f42c1 !important; font-weight: 600; }
     .hljs-type, .hljs-built_in { color: #e36209 !important; }
@@ -442,6 +457,13 @@
             <div class="card-light">
               <div style="font-weight:700; color:#d97706; margin-bottom:4px;">❖ 算力与系统</div>
               <div class="text-xs text-muted">Linux 引导 · Alpine 生态 · SIMD 向量</div>
+            </div>
+          </div>
+
+          <div style="width: 90%; margin: 70px auto 0 auto; display: flex; justify-content: flex-end;">
+            <div style="text-align: left; line-height: 1.45;">
+              <div style="font-weight: 600; font-size: 0.85em; color: #1e293b;">WanDejun(万德俊)</div>
+              <div style="font-size: 0.75em; color: #64748b; font-family: var(--r-code-font);">wandejun666@gmail.com</div>
             </div>
           </div>
         </div>
@@ -550,7 +572,7 @@
 
           <div class="card-light">
             <div class="flex-between" style="margin-bottom: 6px;">
-              <span class="font-bold" style="color: #d97706;">Ch07 向量计算 (SIMD)</span>
+              <span class="font-bold" style="color: #d97706;">Ch07 SIMD</span>
               <span class="badge-amber">算力加速</span>
             </div>
             <ul style="margin-left: 14px;">
@@ -1139,8 +1161,10 @@ for (int i = 0; i &lt; total; i++) {
 }</code></pre>
             </div>
           </div>
-          <div class="card-emerald text-xs" style="margin-top: 8px;">
-            <b>综合任务达成标准</b>：实现自定义算术指令的 <code>ExecTrait</code>，接入 <code>exec_mapping.rs</code> 路由，通过全部 Rust 测试与裸机 Golden Model 验证！
+          <div style="margin-top: 8px;">
+            <div class="card-emerald text-xs">
+              <b>综合任务达成标准</b>：实现自定义算术指令的 <code>ExecTrait</code>，接入 <code>exec_mapping.rs</code> 路由，通过全部 Rust 测试与裸机 Golden Model 验证！
+            </div>
           </div>
         </section>
       </section>
@@ -1629,30 +1653,39 @@ sudo umount /mnt/alpine</code></pre>
       <!-- ========================================== -->
       <section>
         <h2>◈ 实验通关路线与首节实验课行动清单</h2>
-        <div class="grid-2 mt-1">
-          <div class="card-light">
-            <div class="font-bold text-xs" style="margin-bottom: 6px;">• 第一节实验课建议完成清单 (Today's Checklist)</div>
-            <div class="space-y-sm text-xs">
-              <div class="items-center"><span class="badge-blue font-mono">Step 1</span> <div><b>拉取源码并配置环境</b>：克隆 <code>here</code> 仓库，安装 Rust nightly 与 RISC-V GCC 交叉编译器。</div></div>
-              <div class="items-center"><span class="badge-blue font-mono">Step 2</span> <div><b>运行 Demo 并熟悉 <code>rvdb</code></b>：使用 <code>-g</code> 体验单步调试、反汇编查看与寄存器打印。</div></div>
-              <div class="items-center"><span class="badge-blue font-mono">Step 3</span> <div><b>完成 Ch01 裸机程序移植</b>：选择一个经典 C 语言小程序移植到模拟器裸机环境运行！</div></div>
+        <div class="grid-2 mt-1" style="grid-template-columns: 1.35fr 0.8fr; align-items: stretch;">
+          <div class="card-light" style="display: flex; flex-direction: column; justify-content: center; padding: 12px 14px;">
+            <div class="font-bold text-xs" style="margin-bottom: 8px;">• 第一节实验课建议完成清单 (Today's Checklist)</div>
+            <div class="space-y-sm text-xs" style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                <span class="badge-blue font-mono" style="flex-shrink: 0; padding: 1px 6px;">Step 1</span>
+                <span><b>配置环境</b>：克隆 <code>here</code> 仓库，安装 Rust 与 RISC-V GCC 工具链</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                <span class="badge-blue font-mono" style="flex-shrink: 0; padding: 1px 6px;">Step 2</span>
+                <span><b>熟悉调试</b>：使用 <code>-g</code> 体验 <code>rvdb</code> 单步反汇编与寄存器观察</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                <span class="badge-blue font-mono" style="flex-shrink: 0; padding: 1px 6px;">Step 3</span>
+                <span><b>裸机移植</b>：完成 Ch01，将经典 C 小程序移植至模拟器运行验证</span>
+              </div>
             </div>
           </div>
 
-          <div class="space-y">
-            <div class="card-emerald">
-              <div class="font-bold text-xs" style="margin-bottom: 4px;">◈ 实验学习方法与建议</div>
-              <div class="text-xs" style="line-height: 1.45;">
-                • <b>软硬协同思考</b>：始终对比观察“软件客户程序在做什么”与“模拟器硬件状态机在如何演进”。<br/>
-                • <b>测试驱动开发 (TDD)</b>：善用 <code>TestCPUBuilder</code> 与 Golden Model 自动化比对。<br/>
-                • <b>善用 AI 与文档辅助</b>：遇到架构疑惑可参考实验手册中的 AI 导引与规范链接。
-              </div>
+          <div class="card-emerald" style="display: flex; flex-direction: column; justify-content: center; padding: 12px 14px;">
+            <div class="font-bold text-xs" style="margin-bottom: 6px;">◈ 实验学习方法与建议</div>
+            <div class="text-xs" style="line-height: 1.55;">
+              • <b>软硬协同</b>：观察“程序行为”与“状态演进”。<br/>
+              • <b>测试驱动 (TDD)</b>：善用自动化比对验证。<br/>
+              • <b>AI 与文档</b>：参考手册 AI 导引与规范链接。
             </div>
+          </div>
+        </div>
 
-            <div style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: #ffffff; padding: 14px 16px; border-radius: 10px; text-align: center;">
-              <div style="font-weight: 700; font-size: 1.05em; margin-bottom: 2px;">祝大家在 RISC-V 系统体系结构探索中收获满满！</div>
-              <div class="text-xs" style="color: #bfdbfe; font-family: var(--r-code-font);">Happy Hacking in HERE Emulator!</div>
-            </div>
+        <div style="margin-top: 90px;">
+          <div style="background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border: 1px solid #bfdbfe; color: #1e40af; padding: 18px 24px; border-radius: 10px; text-align: center; box-shadow: 0 1px 3px rgba(37, 99, 235, 0.05);">
+            <div style="font-weight: 700; font-size: 1.1em; color: #1e3a8a; margin-bottom: 5px;">祝大家在 RISC-V 系统体系结构探索中收获满满！</div>
+            <div class="text-xs" style="color: #2563eb; font-family: var(--r-code-font); font-weight: 500;">Happy Hacking in HERE Emulator!</div>
           </div>
         </div>
       </section>
@@ -1664,7 +1697,6 @@ sudo umount /mnt/alpine</code></pre>
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/math/math.js"></script>
   <script>
     Reveal.initialize({
       controls: true,
@@ -1698,8 +1730,7 @@ sudo umount /mnt/alpine</code></pre>
       mobileViewDistance: 2,
       plugins: [
         RevealHighlight,
-        RevealNotes,
-        RevealMath.KaTeX
+        RevealNotes
       ],
       highlight: {
         highlightOnLoad: true

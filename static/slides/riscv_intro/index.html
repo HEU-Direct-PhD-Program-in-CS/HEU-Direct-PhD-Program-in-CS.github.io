@@ -3,48 +3,24 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="pandoc">
-  <!-- page title -->
-  <title>riscv 简介</title>
+  <title>RISC-V 简介</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reset.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
-  <!-- 1. 高亮主题 CSS -->
-  <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/atom-one-dark.min.css">
-  <!-- 2. 高亮插件 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/markdown/markdown.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/github.min.css">
+  <link rel="stylesheet" href="css/theme.css" />
 
   <!-- 加载 MathJax 库 -->
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
-    .reveal .sourceCode {
-      /* see #7635 */
-    }
-
-    code {
-      white-space: pre-wrap;
-    }
-
-    span.smallcaps {
-      font-variant: small-caps;
-    }
-
-    span.underline {
-      text-decoration: underline;
-    }
-
     div.columns {
       display: flex;
       width: 100%;
       gap: 5px;
-      /* 列间距 */
     }
 
     div.column {
@@ -52,105 +28,7 @@
       vertical-align: top;
       width: 50%;
     }
-
-    div.hanging-indent {
-      margin-left: 1.5em;
-      text-indent: -1.5em;
-    }
-
-    ul.task-list {
-      list-style: none;
-    }
-
-    pre>code.sourceCode {
-      white-space: pre;
-      position: relative;
-    }
-
-    pre>code.sourceCode>span {
-      display: inline-block;
-      line-height: 1.25;
-    }
-
-    pre>code.sourceCode>span:empty {
-      height: 1.2em;
-    }
-
-    code.sourceCode>span {
-      color: inherit;
-      text-decoration: inherit;
-    }
-
-    div.sourceCode {
-      margin: 1em 0;
-    }
-
-    pre.sourceCode {
-      margin: 0;
-    }
-
-    @media screen {
-      div.sourceCode {
-        overflow: auto;
-      }
-    }
-
-    @media print {
-      pre>code.sourceCode {
-        white-space: pre-wrap;
-      }
-
-      pre>code.sourceCode>span {
-        text-indent: -5em;
-        padding-left: 5em;
-      }
-    }
-
-    pre.numberSource code {
-      counter-reset: source-line 0;
-    }
-
-    pre.numberSource code>span {
-      position: relative;
-      left: -4em;
-      counter-increment: source-line;
-    }
-
-    pre.numberSource code>span>a:first-child::before {
-      content: counter(source-line);
-      position: relative;
-      left: -1em;
-      text-align: right;
-      vertical-align: baseline;
-      border: none;
-      display: inline-block;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      padding: 0 4px;
-      width: 4em;
-      color: #aaaaaa;
-    }
-
-    pre.numberSource {
-      margin-left: 3em;
-      border-left: 1px solid #aaaaaa;
-      padding-left: 4px;
-    }
-
-    div.sourceCode {}
-
-    @media screen {
-      pre>code.sourceCode>span>a:first-child::before {
-        text-decoration: underline;
-      }
-    }
   </style>
-
-  <link rel="stylesheet" href="theme.css" />
 </head>
 
 <body>
@@ -263,7 +141,7 @@
             <ul>激励事件;</ul>
             <ul>状态转移规则: $next: S * E -> S$;</ul>
             <ul>初始状态: $S_0$;</ul>
-            <img src="resources/img/自动机.png"
+            <img src="img/自动机.png"
               style="display:block; margin-left: auto; margin-right: auto; width: 70%; height: auto;">
           </div>
         </section>
@@ -278,7 +156,7 @@
               从下图我们很容易看出: 图灵机由输入的 program 和一条无限长的纸带组成. <br>
               输入的program 可以看作是激励(input), 纸带的内容和读写头的位置就可以看作是状态(state). <br>
             </p>
-            <img src="resources/img/图灵机.jpg"
+            <img src="img/图灵机.jpg"
               style="display:block; margin-left: auto; margin-right: auto; width: 55%; height: auto;">
           </div>
         </section>
@@ -290,24 +168,43 @@
           <div style="margin-left: 3%; margin-right: 3%; font-size: 0.85em;">
             <p>回到我们的cpu, 举个例子:</p>
 
-            <table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
-              <th>
-                <img src="resources/img/add.c.png"
-                  style="display:block; margin-left: auto; margin-right: auto; width: 85%; height: auto;">
-              </th>
-              <th>
-                <img src="resources/img/add.ll.png"
-                  style="display:block; margin-left: auto; margin-right: auto; width: 60%; height: auto;">
-              </th>
-            </table>
+            <div style="display: flex; gap: 15px; margin: 8px 0; align-items: stretch;">
+              <div style="flex: 1;">
+                <div style="font-size: 0.85em; font-weight: bold; color: #475569; margin-bottom: 2px;">• C 源码 (a.c)
+                </div>
+                <pre style="margin: 0;"><code class="language-c" data-trim data-noescape>
+int f() {
+    int a = 1;
+    int b = 2;
+    return a + b;
+}
+                </code></pre>
+              </div>
+              <div style="flex: 1.4;">
+                <div style="font-size: 0.85em; font-weight: bold; color: #475569; margin-bottom: 2px;">• LLVM IR (a.ll)
+                </div>
+                <pre style="margin: 0;"><code class="language-llvm" data-trim data-noescape>
+define dso_local i32 @f() #0 {
+  %1 = alloca i32, align 4
+  %2 = alloca i32, align 4
+  store i32 1, ptr %1, align 4
+  store i32 2, ptr %2, align 4
+  %3 = load i32, ptr %1, align 4
+  %4 = load i32, ptr %2, align 4
+  %5 = add nsw i32 %3, %4
+  ret i32 %5
+}
+                </code></pre>
+              </div>
+            </div>
 
-            <p> 假设我们的 CPU 只有5个寄存器, 和一个pc寄存器: {r1-r5; pc}, 指令长度为1 </p>
-            <p> 那么忽略掉alloc之后的状态转移如下:</p>
-            <div style="font-size: 0.8em; margin-left: 15%;">
+            <p style="margin-top: 10px;"> 假设我们的 CPU 只有5个寄存器和一个 pc 寄存器: <code>{r1-r5; pc}</code>，指令长度为 1 </p>
+            <p> 那么忽略掉 alloc 之后的状态转移如下：</p>
+            <div style="font-size: 0.8em; margin-left: 10%;">
               <p> (0, 0, 0, 0, 0, 3) </p>
-              <p> --[store]-> (1, 0, 0 ,0, 0, 4) --[store]-> (1, 2, 0 ,0, 0, 5) </p>
-              <p> ---[load]-> (1, 2, 1 ,0, 0, 6) ---[load]-> (1, 2, 1 ,2, 0, 7) </p>
-              <p> ----[add]-> (1, 2, 1 ,2, 3, 8) ----[ret]-> output 3 </p>
+              <p> --[store]-&gt; (1, 0, 0, 0, 0, 4) --[store]-&gt; (1, 2, 0, 0, 0, 5) </p>
+              <p> ---[load]-&gt; (1, 2, 1, 0, 0, 6) ---[load]-&gt; (1, 2, 1, 2, 0, 7) </p>
+              <p> ----[add]-&gt; (1, 2, 1, 2, 3, 8) ----[ret]-&gt; output 3 </p>
             </div>
           </div>
         </section>
@@ -336,26 +233,14 @@
 
           <div style="margin-left: 3%; margin-right: 3%; font-size: 0.85em;margin-top: -2%  ;">
             <table cellspacing="1" style="border-collapse: collapse; width: 100%;">
-              <tr>
-                <th>
-                  <img src="resources/img/riscv-manual1.png"
-                    style="display:block; margin-left: auto; margin-right: auto; width: 45%; height: auto;">
-                </th>
-                <th>
-                  <img src="resources/img/menu1.png"
-                    style="display:block; margin-left: auto; margin-right: auto; width: 68%; height: auto; margin-top: -10%;">
-                </th>
-              </tr>
-              <tr>
-                <th>
-                  <img src="resources/img/riscv-manual2.png"
-                    style="display:block; margin-left: auto; margin-right: auto; width: 45%; height: auto;">
-                </th>
-                <th style="margin-top: -3%;">
-                  <img src="resources/img/menu2.png"
-                    style="display:block; margin-left: auto; margin-right: auto; width: 78%; height: auto;">
-                </th>
-              </tr>
+              <th>
+                  <img src="img/riscv-manual.png"
+                    style="display:block; margin-left: auto; margin-right: auto; width: 100%; height: auto;">
+              </th>
+              <th>
+                <img src="img/riscv-manual-menu.png"
+                  style="display:block; margin-left: auto; margin-right: auto; width: 90%; height: auto; margin-top: 10%;">
+              </th>
             </table>
         </section>
 
@@ -412,10 +297,10 @@
               <p>x86 的 MOV 指令:</p>
             </div>
 
-            <div style="display:flex; align-items:flex-start; gap:1em;">
+            <div style="display:flex; align-items:flex-start; gap:1.2em; margin-top: 5px;">
               <!-- 左边代码 -->
-              <div style="flex:1; max-width:50%;">
-                <pre style="font-size:0.6em; font-family:monospace; margin-left:3%; white-space:pre;">
+              <div style="flex:1.15; max-width:56%;">
+                <pre style="margin: 0; font-size: 0.58em; line-height: 1.32;"><code class="language-x86asm" data-trim data-noescape style="padding: 8px 12px; line-height: 1.32;">
 ; 1. 寄存器 ← 寄存器
 mov rax, rbx    ; 64位
 mov eax, edx    ; 32位
@@ -437,12 +322,12 @@ mov eax, DWORD PTR [rbp+8]
 ; 5. 内存 ← 立即数
 mov QWORD PTR [rsp], 0
 mov BYTE PTR [rdi], 1
-                </pre>
+                </code></pre>
               </div>
 
               <!-- 右边图片 -->
-              <div style="flex:1; text-align:center;">
-                <img src="resources/img/x86-move.png" style="width:90%; height:auto;">
+              <div style="flex:0.85; text-align:center;">
+                <img src="img/x86-move.png" style="max-height: 385px; width: auto; max-width: 95%;">
               </div>
             </div>
           </div>
@@ -511,7 +396,7 @@ mov BYTE PTR [rdi], 1
               <li> 而armv7 的 指令数量大约在 300-400 条. </li>
               <li> 但是与 x86 的 2500+ 的指令数量相比呢. </li>
             </ul>
-            <img src="resources/img/x86指令数量.png" style="margin-left: 25%; width: 50%; height: auto;">
+            <img src="img/x86指令数量.png" style="margin-left: 25%; width: 50%; height: auto;">
             <p> 指数级增长😂 </p>
           </div>
         </section>
@@ -525,7 +410,7 @@ mov BYTE PTR [rdi], 1
           <h1>
             回到正题 --- RISC-V
           </h1>
-          <img src="resources/img/riscv.png"
+          <img src="img/riscv.png"
             style="display:block; margin-left: auto; margin-right: auto; width: 20%; height: auto; margin-top: -25%;">
         </section>
 
@@ -576,7 +461,7 @@ mov BYTE PTR [rdi], 1
         <section class="slide level2">
           <h2>指令格式(1)</h2>
           <div style="margin-left: 3%; margin-right: 3%; font-size: 0.8em;">
-            <img src="resources/img/riscv指令模式.png"
+            <img src="img/riscv指令模式.png"
               style="display:block; margin-left: auto; margin-right: auto; width: 90%; height: auto;">
             <ul>
               <li> 指令格式固定
@@ -597,7 +482,7 @@ mov BYTE PTR [rdi], 1
         <section class="slide level2">
           <h2>指令格式(2)</h2>
           <div style="margin-left: 3%; margin-right: 3%; font-size: 0.7em;">
-            <img src="resources/img/riscv指令拆分.png"
+            <img src="img/riscv指令拆分.png"
               style="display:block; margin-left: auto; margin-right: auto; width: 90%; height: auto;">
             <p> 标识一条指令, 依次通过 opcode -> func3 -> func7 三级: </p>
             <ul>
@@ -625,10 +510,13 @@ mov BYTE PTR [rdi], 1
                 </ul>
               </li>
               <li>
-                不需要授权费用, 嵌入式领域相比arm在成本上更有优势.
+                不需要授权费用, 相比arm在成本上更有优势.
                 <ul>
                   <li>
                     截至2024年 riscv 出货量: 百亿颗;
+                  </li>
+                  <li>
+                    2025年全年销售额超过50亿, arm为300亿, 已经形成追赶态势. 并且在中国市场, riscv占比更高, 且已经出现 riscv 高性能云服务器集群商业化落地的案例.
                   </li>
                 </ul>
               </li>
@@ -642,25 +530,43 @@ mov BYTE PTR [rdi], 1
           <div style="margin-left: 3%; margin-right: 3%; font-size: 1em;">
             <ul>
               <li>
-                riscv 将寄存器区分为了 a, s, t 三类,
-                在函数调用时, t寄存器由调用者保存, s寄存器由被调用者保存, a寄存器用于传递参数.
-                通过更多的寄存器数量 (32个, arm/x86 只有16个, 并且寄存器数量增加
-                导致的性能损耗和成本增加几乎可以忽略不计) 简化了编译器的寄存器分配, 实现更高效的寄存器调度.
+                riscv 将寄存器区分为了 <code>a</code>, <code>s</code>, <code>t</code> 三类：函数调用时，<code>t</code>
+                寄存器由调用者保存，<code>s</code> 寄存器由被调用者保存，<code>a</code> 寄存器用于传递参数。通过 32 个通用寄存器（相比 ARM/x86 的 16 个）简化了编译器寄存器调度。
               </li>
               <li>
-                将 x0(zero) 寄存器固定为 0, 从而简化掉了与立即数0比较的指令, 减少了对指令空间(opcode编码)的使用.
-                <table style="margin-top: -2%;">
-                  <tr>
-                    <td>
-                      <img src="resources/img/compare_zero_c.png"
-                        style="display:block; margin-left: auto; margin-right: auto; width: 100%; height: auto;">
-                    </td>
-                    <td>
-                      <img src="resources/img/compare_zero_asm.png"
-                        style="display:block; margin-left: auto; margin-right: auto; width: 60%; height: auto;">
-                    </td>
-                  </tr>
-                </table>
+                将 <code>x0 (zero)</code> 寄存器硬连线为 0，从而简化了与立即数 0 比较的指令，减少指令空间占用：
+                <div style="display: flex; gap: 14px; margin-top: 6px; align-items: stretch;">
+                  <div style="flex: 0.85;">
+                    <div style="font-size: 0.75em; font-weight: bold; color: #475569; margin-bottom: 2px;">• C 源码
+                      (compare_zero.c)</div>
+                    <pre style="margin: 0; font-size: 0.58em; line-height: 1.3;"><code class="language-c" data-trim data-noescape style="padding: 8px 12px; line-height: 1.3;">
+int is_zero(int a) {
+    if (a == 0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+                    </code></pre>
+                  </div>
+                  <div style="flex: 1.35;">
+                    <div style="font-size: 0.75em; font-weight: bold; color: #475569; margin-bottom: 2px;">• RISC-V 汇编
+                      (compare_zero.S)</div>
+                    <pre style="margin: 0; font-size: 0.58em; line-height: 1.3;"><code class="language-mipsasm" data-trim data-noescape style="padding: 8px 12px; line-height: 1.3;">
+0000000000000000 &lt;is_zero&gt;:
+  14: sw    a5, -20(s0)
+  18: lw    a5, -20(s0)
+  20: bne   a5, zero, 2c &lt;.L2&gt;  # 与 zero(x0) 比较
+  24: addi  a5, zero, 1         # 利用 zero 写入立即数 1
+  28: jal   zero, 30 &lt;.L3&gt;
+000000000000002c &lt;.L2&gt;:
+  2c: addi  a5, zero, 0         # 利用 zero 写入立即数 0
+0000000000000030 &lt;.L3&gt;:
+  30: addi  a0, a5, 0
+  40: jalr  zero, 0(ra)
+                    </code></pre>
+                  </div>
+                </div>
               </li>
             </ul>
           </div>
@@ -716,6 +622,34 @@ mov BYTE PTR [rdi], 1
             </ul>
           </div>
         </section>
+
+        <!-- Page4.4 -->
+        <section class="slide level2">
+          <h2>RISC-V 发展近况</h2>
+          <div style="margin-left: 3%; margin-right: 3%; font-size: 0.9em;">
+            <ul>
+              <li>
+                riscv 因其开源的特性, 基本霸占了 GPU, NPU, 屏幕主控, 磁盘主控 等协处理器的主控生态, 各家可以根据自身需要添加少量场景专用指令, 固件直接可以使用riscv开发, 灵活性极高.
+              </li>
+              <li>
+                riscv 碎片化问题在 2023 年末得到了关注, rva 和 rvb 标准指令扩展包被制定出来, 分别针对高性能计算和嵌入式linux场景, 方便硬件设计与软件适配. 同时还行制定 rvm
+                标准扩展指令包, 用于MCU场景.
+              </li>
+              <li>
+                面对如今AI爆火, 传统的算力都是 host + device 的模式, 会产生通讯开销, 总线设计复杂, 任务依赖中断推动. 而 riscv 希望避开 The Wheel of Reincarnation,
+                提供一个 self-host 的解决方案, 于是
+                针对不同场景, 提出了四类不同的 矩阵(加速)扩展, 预期在明年二季度, 这四个扩展都会冻结并发布.
+              </li>
+              <li>
+                安全领域, riscv 也在稳步推进芯片安全扩展, CHIRY 等扩展提供的更强的应用层内存安全保证
+              </li>
+              <li>
+                同时, 由于32位指令空间基本已经消耗殆尽, 目前已经重启了 48 位指令空间的编码工作.
+              </li>
+            </ul>
+          </div>
+        </section>
+
       </section>
 
 
@@ -731,175 +665,59 @@ mov BYTE PTR [rdi], 1
   </div>
 
 
-  <!-- reveal.js plugins -->
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/zoom/zoom.js"></script>
+  <!-- Reveal.js & Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/markdown/markdown.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/math/math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/search/search.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/zoom/zoom.js"></script>
 
-  <!-- control of slides -->
   <script>
-    // Full list of configuration options available at:
-    // https://revealjs.com/config/
     Reveal.initialize({
-      // Display controls in the bottom right corner
       controls: true,
-
-      // Help the user learn the controls by providing hints, for example by
-      // bouncing the down arrow when they first encounter a vertical slide
       controlsTutorial: true,
-
-      // Determines where controls appear, "edges" or "bottom-right"
       controlsLayout: 'bottom-right',
-
-      // Visibility rule for backwards navigation arrows; "faded", "hidden"
-      // or "visible"
       controlsBackArrows: 'faded',
-
-      // Display a presentation progress bar
       progress: true,
-
-      // Display the page number of the current slide
-      slideNumber: false,
-
-      // 'all', 'print', or 'speaker'
+      slideNumber: "c/t",
       showSlideNumber: 'all',
-
-      // Add the current slide number to the URL hash so that reloading the
-      // page/copying the URL will return you to the same slide
       hash: true,
-
-      // Start with 1 for the hash rather than 0
       hashOneBasedIndex: false,
-
-      // Flags if we should monitor the hash and change slides accordingly
       respondToHashChanges: true,
-
-      // Push each slide change to the browser history
       history: false,
-
-      // Enable keyboard shortcuts for navigation
       keyboard: true,
-
-      // Enable the slide overview mode
       overview: true,
-
-      // Disables the default reveal.js slide layout (scaling and centering)
-      // so that you can use custom CSS layout
       disableLayout: false,
-
-      // Vertical centering of slides
-      center: true,
-
-      // Enables touch navigation on devices with touch input
+      center: false,
       touch: true,
-
-      // Loop the presentation
       loop: false,
-
-      // Change the presentation direction to be RTL
       rtl: false,
-
-      // see https://revealjs.com/vertical-slides/#navigation-mode
       navigationMode: 'default',
-
-      // Randomizes the order of slides each time the presentation loads
       shuffle: false,
-
-      // Turns fragments on and off globally
       fragments: true,
-
-      // Flags whether to include the current fragment in the URL,
-      // so that reloading brings you to the same fragment position
       fragmentInURL: true,
-
-      // Flags if the presentation is running in an embedded mode,
-      // i.e. contained within a limited portion of the screen
       embedded: false,
-
-      // Flags if we should show a help overlay when the questionmark
-      // key is pressed
       help: true,
-
-      // Flags if it should be possible to pause the presentation (blackout)
       pause: true,
-
-      // Flags if speaker notes should be visible to all viewers
       showNotes: false,
-
-      // Global override for autoplaying embedded media (null/true/false)
       autoPlayMedia: null,
-
-      // Global override for preloading lazy-loaded iframes (null/true/false)
       preloadIframes: null,
-
-      // Number of milliseconds between automatically proceeding to the
-      // next slide, disabled when set to 0, this value can be overwritten
-      // by using a data-autoslide attribute on your slides
       autoSlide: 0,
-
-      // Stop auto-sliding after user input
       autoSlideStoppable: true,
-
-      // Use this method for navigation when auto-sliding
       autoSlideMethod: null,
-
-      // Specify the average time in seconds that you think you will spend
-      // presenting each slide. This is used to show a pacing timer in the
-      // speaker view
       defaultTiming: null,
-
-      // Enable slide navigation via mouse wheel
       mouseWheel: true,
-
-      // The display mode that will be used to show slides
       display: 'block',
-
-      // Hide cursor if inactive
       hideInactiveCursor: true,
-
-      // Time before the cursor is hidden (in ms)
       hideCursorTime: 5000,
-
-      // Opens links in an iframe preview overlay
       previewLinks: false,
-
-      // Transition style (none/fade/slide/convex/concave/zoom)
       transition: 'slide',
-
-      // Transition speed (default/fast/slow)
-      transitionSpeed: 'default',
-
-      // Transition style for full page slide backgrounds
-      // (none/fade/slide/convex/concave/zoom)
+      transitionSpeed: 'fast',
       backgroundTransition: 'fade',
-
-      // Number of slides away from the current that are visible
       viewDistance: 3,
-
-      // Number of slides away from the current that are visible on mobile
-      // devices. It is advisable to set this to a lower number than
-      // viewDistance in order to save resources.
       mobileViewDistance: 2,
-
-      // math: {
-      //   mathjax: 'resources/mathjax/MathJax.js',
-      //   config: 'TeX-AMS_HTML-full',
-      //   tex2jax: {
-      //     inlineMath: [['\\(', '\\)']],
-      //     displayMath: [['\\[', '\\]']],
-      //     balanceBraces: true,
-      //     processEscapes: false,
-      //     processRefs: true,
-      //     processEnvironments: true,
-      //     preview: 'TeX',
-      //     skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-      //     ignoreClass: 'tex2jax_ignore',
-      //     processClass: 'tex2jax_process'
-      //   },
-      // },
-
-      // reveal.js plugins
       plugins: [
         RevealMath,
         RevealNotes,
@@ -909,18 +727,8 @@ mov BYTE PTR [rdi], 1
         RevealHighlight
       ],
       highlight: {
-        highlightOnLoad: true // 自动高亮
+        highlightOnLoad: true
       }
-    });
-  </script>
-
-  <!-- slideNumber -->
-  <script>
-    Reveal.configure({
-      slideNumber: "c/t",
-      center: false,
-      transitionSpeed: "fast",
-      /*  embedded: true */
     });
   </script>
 </body>
