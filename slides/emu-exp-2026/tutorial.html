@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>计算机系统结构课程实践：基于 Rust 的 RISC-V 教学模拟器 HERE</title>
+  <!-- Reveal.js CDN Styles -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <!-- Standalone Custom Styles (YSYX Minimalist Theme) -->
+  <style>
+    :root {
+      --r-background-color: #ffffff;
+      --r-main-color: #1e293b;
+      --r-heading-color: #0f172a;
+      --r-heading-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --r-main-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --r-code-font: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, monospace;
+      --r-link-color: #1d4ed8;
+      --r-selection-background-color: #bfdbfe;
+      --r-selection-color: #1e3a8a;
+    }
+
+    body {
+      background-color: #ffffff;
+      color: #1e293b;
+      font-family: var(--r-main-font);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .reveal {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1.45;
+    }
+
+    .reveal .slides {
+      text-align: left;
+    }
+
+    .reveal .slides section {
+      padding: 10px 16px;
+      box-sizing: border-box;
+    }
+
+    /* Headings (YSYX Style) */
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-family: var(--r-heading-font);
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: -0.01em;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    .reveal h1 {
+      font-size: 2.2em;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .reveal h2 {
+      font-size: 1.35em;
+      text-align: left;
+      border-bottom: 2px solid #cbd5e1;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .reveal h3 {
+      font-size: 1.1em;
+      text-align: left;
+      margin-bottom: 8px;
+    }
+
+    .reveal h4 {
+      font-size: 0.95em;
+      text-align: left;
+      margin-bottom: 6px;
+    }
+
+    /* Title Slide & Cover */
+    .cover-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 600px;
+    }
+
+    .cover-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 9999px;
+      color: #1d4ed8;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .cover-title {
+      font-size: 2.4em;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+
+    .cover-subtitle {
+      font-size: 1.15em;
+      color: #475569;
+      max-width: 900px;
+      margin-bottom: 30px;
+    }
+
+    /* Grids & Columns */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    /* Cards (Minimalist Academic) */
+    .card-light {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-slate {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #334155;
+    }
+
+    .card-blue {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #1e40af;
+    }
+
+    .card-emerald {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #065f46;
+    }
+
+    .card-amber {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #92400e;
+    }
+
+    .card-purple {
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #6b21a8;
+    }
+
+    .card-rose {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #9f1239;
+    }
+
+    /* Badges */
+    .badge-blue {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 0.72em;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge-emerald {
+      display: inline-block;
+      background: #d1fae5;
+      color: #047857;
+      font-size: 0.72em;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .badge-purple {
+      display: inline-block;
+      background: #ede9fe;
+      color: #6d28d9;
+      font-size: 0.72em;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      border: 1px solid #ddd6fe;
+    }
+
+    .badge-amber {
+      display: inline-block;
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 0.72em;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      border: 1px solid #fde68a;
+    }
+
+    .badge-slate {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.72em;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Code & Pre (Clean & Monospace) */
+    .reveal pre {
+      margin: 6px 0 8px 0;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      box-shadow: none;
+      font-size: 0.65em;
+      line-height: 1.42;
+      width: 100%;
+    }
+
+    .reveal pre code {
+      font-family: var(--r-code-font);
+      padding: 8px 10px;
+      max-height: 420px;
+      overflow: auto;
+      color: #0f172a;
+      background: transparent;
+    }
+
+    .reveal code:not(pre code) {
+      font-family: var(--r-code-font);
+      font-size: 0.88em;
+      background: #f1f5f9;
+      color: #0369a1;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Lists */
+    .reveal ul {
+      display: block;
+      margin: 4px 0 6px 16px;
+      padding: 0;
+      list-style-type: disc;
+    }
+
+    .reveal ul.clean-list {
+      margin-left: 0;
+      list-style: none;
+    }
+
+    .reveal li {
+      margin-bottom: 3px;
+      line-height: 1.42;
+    }
+
+    /* Tables (Academic Style) */
+    .reveal table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.72em;
+      margin: 6px 0;
+    }
+
+    .reveal th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      border-bottom: 2px solid #cbd5e1;
+      padding: 5px 8px;
+      text-align: left;
+    }
+
+    .reveal td {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 5px 8px;
+      vertical-align: middle;
+    }
+
+    .reveal tr:nth-child(even) td {
+      background-color: #fafbfc;
+    }
+
+    /* Spacers & Utilities */
+    .space-y > * + * { margin-top: 8px; }
+    .space-y-sm > * + * { margin-top: 4px; }
+    .text-xs { font-size: 0.78em; }
+    .text-sm { font-size: 0.88em; }
+    .text-muted { color: #64748b; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .font-mono { font-family: var(--r-code-font); }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .items-center { display: flex; align-items: center; gap: 6px; }
+
+    .reveal .controls {
+      color: #2563eb !important;
+    }
+
+    .reveal .progress {
+      color: #2563eb !important;
+      height: 3px;
+    }
+
+    /* Syntax Highlighting Colors */
+    .hljs-keyword { color: #d73a49; font-weight: 600; }
+    .hljs-string { color: #032f62; }
+    .hljs-comment { color: #6a737d; font-style: italic; }
+    .hljs-number { color: #005cc5; }
+    .hljs-title, .hljs-function { color: #6f42c1; font-weight: 600; }
+    .hljs-type, .hljs-built_in { color: #e36209; }
+    .hljs-attr { color: #22863a; }
+    .hljs-params { color: #24292e; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ========================================== -->
+      <!-- SLIDE 1: COVER (Horizontal) -->
+      <!-- ========================================== -->
+      <section>
+        <div class="cover-container">
+          <div class="cover-tag">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#2563eb;"></span>
+            2026 计算机系统结构课程实践
+          </div>
+          <div class="cover-title">
+            基于 Rust 的 RISC-V 教学模拟器 <span style="background:#0f172a; color:#fff; padding:2px 10px; border-radius:6px; font-family:var(--r-code-font);">HERE</span>
+          </div>
+          <div class="cover-subtitle">
+            从裸机程序、指令扩展与前端译码，到特权级中断、系统外设、Linux 引导与 SIMD 向量加速
+          </div>
+
+          <div class="grid-4" style="width: 100%; max-width: 1080px;">
+            <div class="card-light">
+              <div style="font-weight:700; color:#2563eb; margin-bottom:4px;">❖ 极速上手</div>
+              <div class="text-xs text-muted">环境配置 · rvdb 调试 · ELF 裸机移植</div>
+            </div>
+            <div class="card-light">
+              <div style="font-weight:700; color:#4f46e5; margin-bottom:4px;">❖ 微架构扩展</div>
+              <div class="text-xs text-muted">指令译码 · 后端计算 · Trait 模块化</div>
+            </div>
+            <div class="card-light">
+              <div style="font-weight:700; color:#0d9488; margin-bottom:4px;">❖ 系统软硬件</div>
+              <div class="text-xs text-muted">Trap 特权级 · PLIC 中断 · VirtIO 外设</div>
+            </div>
+            <div class="card-light">
+              <div style="font-weight:700; color:#d97706; margin-bottom:4px;">❖ 算力与系统</div>
+              <div class="text-xs text-muted">Linux 引导 · Alpine 生态 · SIMD 向量</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SLIDE 2: ROADMAP (Horizontal) -->
+      <!-- ========================================== -->
+      <section>
+        <h2>◈ 课程实验全景路线图 (Roadmap)</h2>
+        <p class="text-xs text-muted" style="margin-bottom: 12px;">
+          8 大阶段渐进式构建，系统性打通“指令集 &rarr; 微架构 &rarr; 特权级 &rarr; 外设驱动 &rarr; Linux OS &rarr; 向量 AI”能力链路
+        </p>
+
+        <div class="grid-4 text-xs">
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #1d4ed8;">Ch00 环境与调试</span>
+              <span class="badge-blue">认知基石</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li>Rust & 交叉编译器</li>
+              <li>轻量调试器 <code>rvdb</code></li>
+              <li>GDB Remote 联调</li>
+              <li>MMIO 内存拓扑</li>
+            </ul>
+          </div>
+
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #1d4ed8;">Ch01 裸机程序</span>
+              <span class="badge-blue">系统起步</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li>源码到 ELF 二进制</li>
+              <li>ELF 双重视角</li>
+              <li><code>linker.ld</code> 链接脚本</li>
+              <li>实践：自选裸机移植</li>
+            </ul>
+          </div>
+
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #4f46e5;">Ch02 扩展与译码</span>
+              <span class="badge-purple">前端设计</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li>指令格式编码哲学</li>
+              <li>代码生成 (JSON)</li>
+              <li>双级译码器 & 缓存</li>
+              <li><code>.insn</code> C 汇编封装</li>
+            </ul>
+          </div>
+
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #4f46e5;">Ch03 后端执行单元</span>
+              <span class="badge-purple">执行引擎</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li><code>ExecTrait</code> 纯计算解耦</li>
+              <li>SIMD 进位隔离</li>
+              <li><code>normal_exec</code> 流水推进</li>
+              <li>Golden Model 比对</li>
+            </ul>
+          </div>
+
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #0d9488;">Ch04 中断与特权级</span>
+              <span class="badge-emerald">控制机制</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li>M / S / U 特权级体系</li>
+              <li>同步异常 vs 异步中断</li>
+              <li>CSR 状态机 & <code>mret</code></li>
+              <li>实践：Monitor 调度</li>
+            </ul>
+          </div>
+
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #0d9488;">Ch05 外设与 VirtIO</span>
+              <span class="badge-emerald">设备系统</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li>PLIC 统一电平采样</li>
+              <li>Tokio 异步任务运行时</li>
+              <li>Virtqueue 共享环</li>
+              <li>实践：开发系统外设</li>
+            </ul>
+          </div>
+
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #d97706;">Ch06 Linux 全系统</span>
+              <span class="badge-amber">系统整合</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li>OpenSBI &rarr; Kernel 引导</li>
+              <li>设备树 DTS 硬件描述</li>
+              <li>VirtIO-Block 磁盘镜像</li>
+              <li>部署 Alpine Linux</li>
+            </ul>
+          </div>
+
+          <div class="card-light">
+            <div class="flex-between" style="margin-bottom: 6px;">
+              <span class="font-bold" style="color: #d97706;">Ch07 向量计算 (SIMD)</span>
+              <span class="badge-amber">算力加速</span>
+            </div>
+            <ul style="margin-left: 14px;">
+              <li>RVV 1.0 VLA 变长架构</li>
+              <li>LLVM 循环向量化 Pass</li>
+              <li>P 扩展 / AME 矩阵扩展</li>
+              <li>向量点积与 GEMM 算子</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 00: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 00.1 -->
+        <section>
+          <h2>❖ Chapter 0x00.1 - 实验环境与 HERE 架构</h2>
+          <div class="grid-2 mt-1">
+            <div class="space-y">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 教学模拟器 HERE 概览</div>
+                <div class="text-xs text-muted" style="line-height: 1.45;">
+                  <b>HERE (HEU Educational Rust-based Emulator)</b> 是一款自主开发的开源教学用 RISC-V 模拟器：
+                  <ul>
+                    <li><b>指令集支持</b>：完整 RV64GC 标准指令集 + V 扩展 1.0</li>
+                    <li><b>系统外设</b>：UART, CLINT, PLIC, VirtIO-Block/Net 等</li>
+                    <li><b>调试生态</b>：内置交互式 <code>rvdb</code> 调试器与 GDB Server</li>
+                    <li><b>技术选型</b>：基于 Rust 语言实现，兼具原生执行性能与内存安全</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="card-slate">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 快速构建与运行 Demo</div>
+                <pre><code class="language-bash">git clone https://github.com/here-emulator/here.git
+git submodule update --init --recursive
+cd ./test_resources && make
+cargo run --release -- ./bin/main.elf</code></pre>
+              </div>
+            </div>
+
+            <div class="space-y">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• Rust Nightly 工具链配置</div>
+                <pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+rustup default nightly</code></pre>
+              </div>
+
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• RISC-V 交叉编译器安装</div>
+                <pre><code class="language-bash">export PATH=/opt/riscv/bin:$PATH
+riscv64-unknown-elf-gcc --version</code></pre>
+                <div class="text-xs text-muted" style="margin-top: 4px;">
+                  包含 <code>gcc</code>, <code>gdb</code>, <code>objdump</code>, <code>readelf</code> 等完整 GNU 工具链。
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 00.2 -->
+        <section>
+          <h2>❖ Chapter 0x00.2 - 调试体系：rvdb 与 GDB 联动</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="flex-between" style="margin-bottom: 6px;">
+                <span class="font-bold text-xs">• 内置轻量调试器 <code>rvdb</code></span>
+                <span class="badge-blue"><code>-g</code> / <code>--debug</code></span>
+              </div>
+              <table class="text-xs">
+                <thead>
+                  <tr><th style="width: 25%">命令</th><th>功能描述与典型用途</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>p</code> / <code>print</code></td><td>打印通用/浮点/向量寄存器、CSR 或指定内存</td></tr>
+                  <tr><td><code>l</code> / <code>list</code></td><td>打印当前 PC 及前后反汇编机器指令</td></tr>
+                  <tr><td><code>s</code> / <code>step</code></td><td>单步步进执行单条指令</td></tr>
+                  <tr><td><code>b</code> / <code>break</code></td><td>在指定虚拟/物理地址设置断点</td></tr>
+                  <tr><td><code>c</code> / <code>continue</code></td><td>继续连续执行，可配合周期上限参数</td></tr>
+                  <tr><td><code>h</code> / <code>history</code></td><td>查看最近退休指令历史记录 (Trace)</td></tr>
+                  <tr><td><code>f-trace</code></td><td>追踪查看历史函数调用流栈</td></tr>
+                </tbody>
+              </table>
+              <div class="text-xs text-muted" style="margin-top: 4px;">直接回车默认重复上一条调试指令；<code>Ctrl+A, X</code> 强制退出。</div>
+            </div>
+
+            <div class="space-y">
+              <div class="card-light">
+                <div class="flex-between" style="margin-bottom: 4px;">
+                  <span class="font-bold text-xs">• GDB Remote 远程调试</span>
+                  <span class="badge-purple"><code>-G</code> / <code>--gdb</code></span>
+                </div>
+                <pre><code class="language-bash"># 终端 1：启动模拟器并监听 GDB 连接
+cargo run --release -- ./bin/main.elf -G
+
+# 终端 2：连接 GDB 进行源码级单步调试
+riscv64-unknown-elf-gdb ./bin/main.elf
+(gdb) target remote :1234
+(gdb) b main
+(gdb) continue</code></pre>
+              </div>
+
+              <div class="card-amber">
+                <div class="font-bold text-xs" style="margin-bottom: 2px;">◈ 调试选型建议</div>
+                <div class="text-xs" style="line-height: 1.4;">
+                  • <b>指令级细节/微架构验证</b>：优先使用 <code>rvdb</code>，可直接观测 CSR 变动与指令 Trace。<br/>
+                  • <b>复杂 C 语言项目/调用栈</b>：使用 GDB Remote 或 VS Code 调试插件。
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 00.3 -->
+        <section>
+          <h2>❖ Chapter 0x00.3 - 内存与 MMIO 布局概览</h2>
+          <div class="text-xs text-muted" style="margin-bottom: 6px;">
+            <code>HERE</code> 采用规范的 <b>MMIO（Memory Mapped I/O）</b> 机制管理外设，设备均挂载于全局统一地址空间：
+          </div>
+
+          <table class="text-xs">
+            <thead>
+              <tr>
+                <th>设备模块 (Device)</th>
+                <th>起始基地址</th>
+                <th>地址映射长度</th>
+                <th>PLIC 中断号</th>
+                <th>功能定位与说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b><code>power-manager</code></b></td><td><code>0x0010_0000</code></td><td><code>0x1000</code> (4 KiB)</td><td>-</td><td>电源控制，软件写特定值触发优雅关机/重启</td></tr>
+              <tr><td><b><code>test-device</code></b></td><td><code>0x0010_1000</code></td><td><code>0x10</code> (16 B)</td><td><code>0x3F</code> (63)</td><td>自动化测试设备，硬件验证与中断回显</td></tr>
+              <tr><td><b><code>clint</code></b></td><td><code>0x0200_0000</code></td><td><code>0x10000</code> (64 KiB)</td><td>-</td><td>核局部中断：高精度 <code>mtime</code> / <code>mtimecmp</code> 定时器</td></tr>
+              <tr><td><b><code>plic</code></b></td><td><code>0x0C00_0000</code></td><td><code>0x0400_0000</code> (64 MiB)</td><td>-</td><td>平台级中断控制器：集中仲裁外部设备中断请求</td></tr>
+              <tr><td><b><code>uart</code></b> (16550A)</td><td><code>0x1000_0000</code></td><td><code>0x08</code> (8 B)</td><td><code>0x0A</code> (10)</td><td>标准串口通信，桥接宿主机终端完成标准 I/O</td></tr>
+              <tr><td><b><code>virtio-mmio[0]</code></b></td><td><code>0x1000_1000</code></td><td><code>0x1000</code> (4 KiB)</td><td><code>0x01</code> (1)</td><td>VirtIO 半虚拟化传输通道（磁盘/网卡/控制台）</td></tr>
+              <tr><td><b><code>ram</code></b> (物理内存)</td><td><code>0x8000_0000</code></td><td><code>0x2000_0000</code> (512 MiB)</td><td>-</td><td>主物理内存区，<b>CPU 初始 PC 默认指向 <code>0x8000_0000</code></b></td></tr>
+            </tbody>
+          </table>
+
+          <div class="grid-2" style="margin-top: 8px;">
+            <div class="card-blue text-xs">
+              <b>◈ Virt Board 规范对齐</b>：内存基地址 <code>0x8000_0000</code> 与 QEMU Virt 平台及行业标准完全兼容。
+            </div>
+            <div class="card-slate text-xs">
+              <b>◈ 设备树配置源</b>：完整 MMIO 拓扑与中断定义详见仓库中的 <code>dts/virt.dts</code> 文件。
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 01: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 01.1 -->
+        <section>
+          <h2>❖ Chapter 0x01.1 - 裸机程序模型与 ELF 双重视角</h2>
+          <div class="grid-2 mt-1">
+            <div class="space-y">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 裸机程序构建与装载生命周期</div>
+                <pre><code class="language-text">C 源码 / 汇编源文件 (.c / .S)
+    │  [GCC / AS] 编译汇编生成可重定位目标文件
+    ▼
+Relocatable Objects (.o, ELF 格式)
+    │  [LD 链接器] 按 linker.ld 规划地址与节区合并
+    ▼
+Executable ELF (.elf)
+    │  [HERE 模拟器] 解析 Program Header 并载入 RAM
+    ▼
+_start (初始 PC: 0x8000_0000) -> main()</code></pre>
+              </div>
+              <div class="card-blue text-xs">
+                <b>核心认知</b>：裸机程序必须自行负责栈指针（<code>sp</code>）初始化、清零 <code>.bss</code> 段以及跳转到 C 语言 <code>main()</code> 入口。
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• ELF 规范的双重视角 (Dual Views)</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <div class="font-bold" style="color:#4f46e5; margin-bottom:2px;">1. 链接视角 (Linking View) —— 以 Section (节) 为单位</div>
+                  <div>• <b>面向编译器与链接器</b>，由 Section Header Table 描述</div>
+                  <div>• <code>.text</code> (代码指令), <code>.rodata</code> (常量字面量)</div>
+                  <div>• <code>.data</code> (已初始化全局变量), <code>.bss</code> (未初始化零变量)</div>
+                </div>
+                <div class="card-slate">
+                  <div class="font-bold" style="color:#059669; margin-bottom:2px;">2. 运行视角 (Execution View) —— 以 Segment (段) 为单位</div>
+                  <div>• <b>面向 OS 加载器与模拟器</b>，由 Program Header Table 描述</div>
+                  <div>• <b><code>PT_LOAD</code> 可加载段</b>：记录 <code>p_paddr</code>, <code>p_filesz</code>, <code>p_memsz</code> 及权限</div>
+                  <div>• 权限相同的 Section 会被合并映射至同一 Segment 以节省页开销</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 01.2 -->
+        <section>
+          <h2>❖ Chapter 0x01.2 - 极简 RISC-V 汇编与链接脚本</h2>
+          <div class="grid-2 mt-1">
+            <div class="space-y-sm">
+              <div class="font-bold text-xs" style="color: #1d4ed8;">◈ 极简汇编与 ABI 调用约定示例</div>
+              <pre><code class="language-asm">.section .text.ENTRY
+.globl main
+main:
+    addi sp, sp, -16
+    sd   ra, 8(sp)
+    sd   s0, 0(sp)
+
+    li   s0, 0              # s0 为被调用者保存寄存器
+1:
+    la   a0, msg            # a0 传递字符串首地址
+    call printf             # 调用打印函数
+    addi s0, s0, 1
+    li   t1, 10
+    bne  s0, t1, 1b         # 局部标号向前循环 (1b)
+
+    li   a0, 0              # 返回值 a0 = 0
+    ld   s0, 0(sp)
+    ld   ra, 8(sp)
+    addi sp, sp, 16
+    ret</code></pre>
+              <div class="text-xs text-muted">ABI: <code>a0-a7</code> 参数/返回; <code>t0-t6</code> 临时; <code>s0-s11</code> 保存; <code>zero</code> 恒零。</div>
+            </div>
+
+            <div class="space-y-sm">
+              <div class="font-bold text-xs" style="color: #4f46e5;">◈ 链接脚本 (<code>test_resources/linker.ld</code>)</div>
+              <pre><code class="language-c">SECTIONS {
+    . = 0x80000000;         /* 物理 RAM 起始地址 */
+
+    .text : {
+        /* 确保启动入口 _start 排布在 0x80000000 首地址 */
+        *(.text.ENTRY)
+        *(.text .text.*)
+    }
+
+    .rodata : { *(.rodata .rodata.*) }
+    .data   : { *(.data .data.*) }
+    .bss    : { 
+        _bss_start = .;
+        *(.bss .bss.*) 
+        _bss_end = .;
+    }
+    .stack  : { *(.stack) }
+}</code></pre>
+              <div class="card-slate text-xs">
+                <b><code>.</code> (Location Counter)</b>：当前输出地址；脚本规划静态布局，运行时由 <code>boot.S</code> 初始化。
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 01.3 -->
+        <section>
+          <h2>❖ Chapter 0x01.3 - 模拟器装载机制与移植实践</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• HERE 模拟器装载 ELF 核心五步</div>
+              <div class="space-y-sm text-xs text-muted">
+                <div class="items-center"><span class="badge-slate font-mono">Step 1</span> <div><b>校验 ELF Header</b>：验证魔数 <code>0x7F 'E' 'L' 'F'</code>、确认 RV64，读取入口 <code>e_entry</code>。</div></div>
+                <div class="items-center"><span class="badge-slate font-mono">Step 2</span> <div><b>遍历 Program Headers</b>：过滤筛选所有 <code>PT_LOAD</code> 可加载段。</div></div>
+                <div class="items-center"><span class="badge-slate font-mono">Step 3</span> <div><b>搬运数据到 RAM</b>：将文件偏移 <code>p_offset</code> 复制到物理地址 <code>p_paddr</code>。</div></div>
+                <div class="items-center"><span class="badge-slate font-mono">Step 4</span> <div><b>清零 BSS 扩展区</b>：若 <code>p_memsz > p_filesz</code>，将剩余内存清零。</div></div>
+                <div class="items-center"><span class="badge-slate font-mono">Step 5</span> <div><b>初始化 CPU 状态</b>：设置 <code>pc = e_entry</code> (0x8000_0000)，开始执行。</div></div>
+              </div>
+            </div>
+
+            <div class="space-y">
+              <div class="card-emerald">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">◈ 实践任务：移植一个自选裸机程序</div>
+                <div class="text-xs" style="line-height: 1.45;">
+                  选择一个感兴趣的 C 语言程序，将其移植到 <code>HERE</code> 裸机环境运行：
+                  <ul>
+                    <li><b>推荐方向</b>：终端小游戏（贪吃蛇、2048、推箱子）、计算器、字符动画等。</li>
+                    <li><b>I/O 接口</b>：使用 <code>test_resources/lib/io.c</code> 中的串口输入输出与 <code>printf</code>。</li>
+                    <li><b>正常退出</b>：调用 <code>power_off()</code> 向 Power Manager 发送结束信号。</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="card-slate text-xs">
+                <b>常用分析命令</b>：<br/>
+                <code>riscv64-unknown-elf-readelf -l main.elf</code> (查看 Segment 映射)<br/>
+                <code>riscv64-unknown-elf-objdump -d main.elf</code> (反汇编指令)
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 02: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 02.1 -->
+        <section>
+          <h2>❖ Chapter 0x02.1 - RISC-V 指令编码与 Custom 空间</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• 优雅的硬件友好设计理念</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <b>1. 固定寄存器位置 (Fixed Register Location)</b><br/>
+                  <code>rs1[19:15]</code>, <code>rs2[24:20]</code>, <code>rd[11:7]</code> 在所有指令格式中位置恒定不变。硬件在取指后即可并行读取寄存器堆，消除译码延迟！
+                </div>
+                <div class="card-slate">
+                  <b>2. 统一符号位 (Fixed Sign Bit)</b><br/>
+                  所有立即数符号位固定于 <b>bit 31</b>，符号位扩展直接硬连线扇出，无需多路选择器判断。
+                </div>
+                <div class="card-slate">
+                  <b>3. 对称拆分立即数 (Split Immediates)</b><br/>
+                  保证 <code>rs1/rs2</code> 字段位置不受侵占，最大化复用译码多路选择器引脚。
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 6 种标准指令格式 (RV32/64)</div>
+                <div class="text-xs font-mono card-slate" style="line-height: 1.4;">
+                  <div><b>R-type</b>: [funct7][rs2][rs1][funct3][rd][opcode] (算术)</div>
+                  <div><b>I-type</b>: [  imm[11:0] ][rs1][funct3][rd][opcode] (加载)</div>
+                  <div><b>S-type</b>: [imm1][rs2][rs1][funct3][imm0][opcode] (存储)</div>
+                  <div><b>B-type</b>: [imm1][rs2][rs1][funct3][imm0][opcode] (分支)</div>
+                  <div><b>U-type</b>: [    imm[31:12]    ][rd][opcode] (高位立即数)</div>
+                  <div><b>J-type</b>: [    imm[20:1]     ][rd][opcode] (无条件跳转)</div>
+                </div>
+              </div>
+
+              <div class="card-purple">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">◈ 官方保留 Custom Opcode 空间</div>
+                <table class="text-xs">
+                  <thead><tr><th>空间名称</th><th>Opcode (7-bit)</th><th>二进制表示</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>custom-0</code></td><td><code>0x0B</code></td><td><code>0b0001011</code></td></tr>
+                    <tr><td><code>custom-1</code></td><td><code>0x2B</code></td><td><code>0b0101011</code></td></tr>
+                  </tbody>
+                </table>
+                <div class="text-xs" style="margin-top: 4px;">保证与未来官方标准指令永不冲突，供我们扩展专属硬件指令！</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 02.2 -->
+        <section>
+          <h2>❖ Chapter 0x02.2 - 数据驱动的前端译码架构</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 数据驱动与代码生成 (Build-Time)</div>
+              <div class="text-xs text-muted" style="margin-bottom: 4px;">无需手写易错位掩码拆解，模拟器采用 JSON 声明：</div>
+              <pre><code class="language-json">"padd8": {
+  "encoding": "0000000----------000-----0001011",
+  "variable_fields": ["rd", "rs1", "rs2"],
+  "extension": ["rv_custom0"],
+  "match": "0x0b",
+  "mask": "0xfe00707f"
+}</code></pre>
+              <div class="text-xs text-muted" style="margin-top: 4px;">
+                <b>编译期 <code>build.rs</code></b> 自动推导格式（如 R-Type），并在 <code>OUT_DIR</code> 生成枚举与常量表。
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• 运行期双级高效译码器 (Runtime)</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <div class="font-bold">1. <code>icache</code> (取指译码缓存)</div>
+                  <div>按 PC 直接命中缓存已译码指令结构体，避免重复译码。</div>
+                </div>
+                <div class="card-slate">
+                  <div class="font-bold">2. <code>funct_decoder</code> (基数表快速查找)</div>
+                  <div>标准规整指令基于 Opcode/funct 建立直接映射，实现 <b>O(1)</b> 极速定位。</div>
+                </div>
+                <div class="card-slate">
+                  <div class="font-bold">3. <code>mask_decoder</code> (掩码匹配)</div>
+                  <div>用于稀疏自定义指令：校验 <code>(raw_instr & mask) == match</code>。</div>
+                </div>
+              </div>
+              <div class="text-xs text-muted" style="margin-top: 4px;">译码输出 <code>DecodeInstr { instr, info, len }</code>。</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 02.3 -->
+        <section>
+          <h2>❖ Chapter 0x02.3 - 实践：自定义指令扩展与单元测试</h2>
+          <div class="grid-2 mt-1">
+            <div class="space-y-sm">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 1. Rust CPU 单元测试构件</div>
+                <pre><code class="language-rust">#[test]
+#[cfg(feature = "custom-instr")]
+fn test_custom_padd8_decode() {
+    let raw_instr: u32 = 0x0020818B;
+    run_test_exec_decode(
+        raw_instr,
+        |builder| builder.reg(1, 0x01020304).reg(2, 0x05060708),
+        |checker| checker.pc(0x80000004),
+    );
+}</code></pre>
+              </div>
+              <div class="card-slate text-xs">
+                测试命令：<code>cargo test --features custom-instr test_custom_padd8</code>
+              </div>
+            </div>
+
+            <div class="space-y-sm">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 2. C 语言内嵌汇编 <code>.insn</code> 与 API 封装</div>
+                <pre><code class="language-c">static inline uint32_t padd8(uint32_t a, uint32_t b) {
+    uint32_t result;
+    asm volatile (
+        ".insn r 0x0b, 0, 0, %0, %1, %2"
+        : "=r"(result)
+        : "r"(a), "r"(b)
+    );
+    return result;
+}</code></pre>
+              </div>
+              <div class="card-blue text-xs">
+                <b>综合实验任务</b>：构思一组自定义指令，完成 JSON 注入、前端译码、Rust 测试与 C 语言调用验证！
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 03: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 03.1 -->
+        <section>
+          <h2>❖ Chapter 0x03.1 - 模拟器后端执行架构</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• 执行引擎主回路 (<code>RVCPU::execute</code>)</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <b>1. 函数指针分发路由</b><br/>
+                  通过 <code>get_exec_func(instr)</code> 静态映射表，瞬间路由至对应执行函数。
+                </div>
+                <div class="card-slate">
+                  <b>2. 硬件硬连线强约束：<code>x0 ≡ 0</code></b><br/>
+                  无论任何指令尝试向 <code>x0</code> 写入何值，执行完毕硬件强制清零：<code>self.reg_file[0] = 0;</code>
+                </div>
+                <div class="card-slate">
+                  <b>3. 异常捕获与冷路径 (Cold Path)</b><br/>
+                  返回 <code>Result&lt;(), Exception&gt;</code>，发生非法指令或对齐故障时触发 Trap。
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 标准流水推进包装器 <code>normal_exec</code></div>
+                <pre><code class="language-rust">pub(super) fn normal_exec&lt;F&gt;(cpu: &amp;mut RVCPU, f: F) -&gt; Result&lt;(), Exception&gt;
+where F: FnOnce(&amp;mut RVCPU) -&gt; Result&lt;(), Exception&gt; {
+    f(cpu)?;
+    cpu.pc = cpu.pc.wrapping_add(4);
+    cpu.csr.get_by_type_existing::&lt;Minstret&gt;().wrapping_add(1);
+    Ok(())
+}</code></pre>
+              </div>
+              <div class="card-amber text-xs">
+                <b>精妙设计</b>：当计算发生 <code>Err(Exception)</code> 时，<code>?</code> 立即中断，<b>不会推进 PC</b>，确保 <code>mepc</code> 准确捕获故障现场！
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 03.2 -->
+        <section>
+          <h2>❖ Chapter 0x03.2 - 核心计算抽象与 SIMD 进位隔离</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• <code>ExecTrait</code>：纯计算与 CPU 状态解耦</div>
+              <pre><code class="language-rust">pub trait ExecTrait&lt;OUT, IN = WordType&gt; {
+    fn exec(a: IN, b: IN) -&gt; OUT;
+}
+
+pub fn exec_arith&lt;F&gt;(info: RVInstrInfo, cpu: &amp;mut RVCPU) -&gt; Result&lt;(), Exception&gt;
+where F: ExecTrait&lt;Result&lt;WordType, Exception&gt;&gt; {
+    super::normal_exec(cpu, |cpu| {
+        let (rd, rst) = match info {
+            RVInstrInfo::R { rs1, rs2, rd } =&gt; {
+                let (v1, v2) = cpu.reg_file.read(rs1, rs2);
+                (rd, F::exec(v1, v2)?)
+            }
+            // ...
+        };
+        cpu.reg_file.write(rd, rst);
+        Ok(())
+    })
+}</code></pre>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• Packed-SIMD 关键：进位隔离 (Carry Isolation)</div>
+              <div class="text-xs text-muted" style="margin-bottom: 4px;">低位溢出 Carry bit 会污染高位，必须物理阻断：</div>
+              <pre><code class="language-rust">pub struct ExecPadd8;
+
+impl ExecTrait&lt;Result&lt;WordType, Exception&gt;&gt;
+    for ExecPadd8
+{
+    fn exec(a: WordType, b: WordType) -&gt; Result&lt;WordType, Exception&gt; {
+        let (a_b, b_b) = (a.to_le_bytes(), b.to_le_bytes());
+        let mut res = [0u8; 8];
+        for i in 0..8 {
+            res[i] = a_b[i].wrapping_add(b_b[i]);
+        }
+        Ok(WordType::from_le_bytes(res))
+    }
+}</code></pre>
+              <div class="text-xs text-muted" style="margin-top: 4px;">支持扩展：8 位饱和加法 <code>saturating_add</code>、单目操作 <code>ExecUnaryTrait</code>。</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 03.3 -->
+        <section>
+          <h2>❖ Chapter 0x03.3 - 实践：计算单元测试与 Golden Model</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 1. Rust 执行边界单元测试</div>
+              <pre><code class="language-rust">#[test]
+#[cfg(feature = "custom-instr")]
+fn test_custom_padd8_carry_isolation() {
+    let raw_padd8: u32 = 0x0020818B;
+    // byte0: 0x02 + 0xFE = 0x100 -&gt; 0x00 (进位不能溢入 byte1)
+    run_test_exec_decode(
+        raw_padd8,
+        |b| b.reg(1, 0xFF01FE02).reg(2, 0x01FF02FE),
+        |c| c.reg(3, 0x00000000).pc(0x80000004),
+    );
+
+    // 验证写入 x0 必须保持为 0
+    let raw_to_x0: u32 = 0x0020800B;
+    run_test_exec_decode(raw_to_x0, |b| b.reg(1, 0x12).reg(2, 0x34), |c| c.reg(0, 0));
+}</code></pre>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 2. C 语言 Golden Model 比对验证</div>
+              <pre><code class="language-c">// 纯软件参考模型 (Golden Model)
+static uint32_t golden_padd8(uint32_t a, uint32_t b) {
+    uint8_t r0 = (a &amp; 0xFF) + (b &amp; 0xFF);
+    uint8_t r1 = ((a&gt;&gt;8)&amp;0xFF) + ((b&gt;&gt;8)&amp;0xFF);
+    return ((uint32_t)r0) | (((uint32_t)r1) &lt;&lt; 8) | ...;
+}
+
+// 循环对比硬件指令与软件参考模型输出
+for (int i = 0; i &lt; total; i++) {
+    uint32_t hw = padd8(tests[i].a, tests[i].b);
+    uint32_t sw = golden_padd8(tests[i].a, tests[i].b);
+    assert(hw == sw);
+}</code></pre>
+            </div>
+          </div>
+          <div class="card-emerald text-xs" style="margin-top: 8px;">
+            <b>综合任务达成标准</b>：实现自定义算术指令的 <code>ExecTrait</code>，接入 <code>exec_mapping.rs</code> 路由，通过全部 Rust 测试与裸机 Golden Model 验证！
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 04: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 04.1 -->
+        <section>
+          <h2>❖ Chapter 0x04.1 - RISC-V 特权级划分与 Trap 分类</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• 三级特权级体系 (Privilege Modes)</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-rose">
+                  <div class="font-bold">M-mode (Machine Mode) —— 最高特权级</div>
+                  <div>直接访问所有物理硬件资源；运行 OpenSBI 固件与底层 Trap Monitor。</div>
+                </div>
+                <div class="card-amber">
+                  <div class="font-bold">S-mode (Supervisor Mode) —— 中间特权级</div>
+                  <div>运行操作系统内核（如 Linux Kernel）；具备 Sv39 虚拟内存管理权限。</div>
+                </div>
+                <div class="card-blue">
+                  <div class="font-bold">U-mode (User Mode) —— 最低特权级</div>
+                  <div>运行普通用户态应用程序；受硬件隔离保护，通过 <code>ecall</code> 陷入内核。</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• Trap 分类：同步异常 vs 异步中断</div>
+              <table class="text-xs">
+                <thead><tr><th>分类</th><th>触发特性</th><th>典型来源与例子</th></tr></thead>
+                <tbody>
+                  <tr><td><b>异常 (Exception)</b></td><td>与指令执行<b>同步</b>发生</td><td>• 非法指令 (<code>IllegalInstruction</code>)<br/>• 地址未对齐 / 缺页异常<br/>• 环境调用 (<code>ecall</code> 系统调用)</td></tr>
+                  <tr><td><b>中断 (Interrupt)</b></td><td>由外部/时钟<b>异步</b>产生</td><td>• 定时器中断 (<code>MTI</code>/<code>STI</code>)<br/>• 外部设备中断 (<code>MEI</code>/<code>SEI</code>)<br/>• 软件核间中断 (<code>MSI</code>/<code>SSI</code>)</td></tr>
+                </tbody>
+              </table>
+              <div class="card-slate text-xs" style="margin-top: 6px;">
+                <b>Trap 核心价值</b>：拦截异常、实现特权级跨越、硬件资源保护与多任务分时调度。
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 04.2 -->
+        <section>
+          <h2>❖ Chapter 0x04.2 - 核心 CSR 协同与 Trap 全生命周期</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 关键 CSR 控制状态寄存器</div>
+              <table class="text-xs">
+                <thead><tr><th style="width: 28%">CSR 寄存器</th><th>功能说明</th></tr></thead>
+                <tbody>
+                  <tr><td><code>mstatus</code></td><td>全局状态（<code>MIE</code> 中断开关, <code>MPP</code> 前序特权级, <code>MPIE</code>）</td></tr>
+                  <tr><td><code>mcause</code></td><td>最高位指示中断/异常，低位记录具体 Cause ID</td></tr>
+                  <tr><td><code>mepc</code></td><td>记录发生 Trap 时的精确指令 PC 地址</td></tr>
+                  <tr><td><code>mtval</code></td><td>附加信息（如非法访存地址、未识别指令码）</td></tr>
+                  <tr><td><code>mtvec</code></td><td>Trap 处理程序基地址（Direct 或 Vectored 模式）</td></tr>
+                  <tr><td><code>mip</code> / <code>mie</code></td><td>中断挂起位图 (Pending) 与中断使能位图 (Enable)</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• Trap 发生与返回流程 (M-Mode 为例)</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <div class="font-bold">1. 硬件自动保存现场 (Trap Entry)</div>
+                  <div>• <code>mepc &larr; pc</code>; <code>mcause &larr; cause</code>; <code>mtval &larr; bad_addr</code></div>
+                  <div>• <code>mstatus.MPP &larr; 当前特权级</code>; <code>mstatus.MPIE &larr; mstatus.MIE</code></div>
+                  <div>• <code>mstatus.MIE &larr; 0</code> (关中断); <code>pc &larr; mtvec.base</code></div>
+                </div>
+                <div class="card-slate">
+                  <div class="font-bold">2. 软件处理完毕执行 <code>mret</code> 返回</div>
+                  <div>• <code>mstatus.MIE &larr; mstatus.MPIE</code>; <code>mstatus.MPIE &larr; 1</code></div>
+                  <div>• <code>特权级 &larr; mstatus.MPP</code>; <code>pc &larr; mepc</code> (恢复执行现场)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 04.3 -->
+        <section>
+          <h2>❖ Chapter 0x04.3 - 实践任务：构建 M-Mode Monitor</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• M-Mode Monitor 架构与核心职责</div>
+              <div class="text-xs text-muted" style="line-height: 1.45;">实现一个精简可靠的 M-mode 监控程序，管理多个 U-mode 任务：</div>
+              <div class="space-y-sm text-xs" style="margin-top: 6px;">
+                <div class="card-slate">
+                  <b>1. 特权级切换管理</b><br/>
+                  配置 <code>mstatus.MPP=User</code> 并执行 <code>mret</code> 切入 U-mode；Trap 发生后安全返回 M-mode。
+                </div>
+                <div class="card-slate">
+                  <b>2. 统一系统调用服务 (Ecall Dispatcher)</b><br/>
+                  为 U-mode 提供基础接口：字符打印、<code>sleep</code> 毫秒休眠、任务终止退出等。
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y">
+              <div class="card-emerald">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">◈ 进阶任务：多道批处理与定时器抢占式调度</div>
+                <div class="text-xs" style="line-height: 1.45;">
+                  • <b>CLINT 定时器接入</b>：配置 <code>mtimecmp</code> 产生周期性时钟中断。<br/>
+                  • <b>多道批处理调度</b>：在时钟中断中保存任务上下文并切换到下一任务。<br/>
+                  • <b>异常安全隔离</b>：若 U-mode 崩溃，Monitor 捕获并终止该任务，保障其余任务继续运行！
+                </div>
+              </div>
+
+              <div class="card-blue text-xs">
+                <b>认知升华</b>：这正是现代操作系统内核（OS Kernel）与 SBI 固件（如 OpenSBI）最基础的工作原型！
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 05: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 05.1 -->
+        <section>
+          <h2>❖ Chapter 0x05.1 - RISC-V 中断拓扑与统一电平采样</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• 中断拓扑结构：PLIC vs ACLINT/CLINT</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <b>1. 核局部中断 (ACLINT / CLINT)</b><br/>
+                  直连 CPU 核，负责定时器中断（<code>MTIP</code>）与核间软件中断（<code>MSIP</code>）。
+                </div>
+                <div class="card-slate">
+                  <b>2. 平台级外部中断控制器 (PLIC)</b><br/>
+                  收集并仲裁所有外部外设（UART、VirtIO、网卡）中断（<code>MEIP</code>/<code>SEIP</code>）。
+                </div>
+                <div class="card-slate">
+                  <b>3. PLIC 核心机制</b><br/>
+                  <code>Priority</code>, <code>Pending</code>, <code>Enable</code>, <code>Threshold</code>, <code>Claim/Complete</code> 握手机制。
+                </div>
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 统一电平采样接口：<code>PlicDevice</code></div>
+              <pre><code class="language-rust">pub trait DeviceTrait: 'static {
+    fn read(&amp;mut self, addr: WordType, len: u32) -&gt; Result&lt;u64, MemError&gt;;
+    fn write(&amp;mut self, addr: WordType, len: u32, data: u64) -&gt; Result&lt;(), MemError&gt;;
+    fn sync(&amp;mut self);
+}
+
+pub trait PlicDevice: DeviceTrait {
+    /// 返回当前中断引脚的绝对电平状态 (Level-Triggered)
+    fn irq_level(&amp;mut self) -&gt; bool;
+}</code></pre>
+              <div class="text-xs text-muted" style="margin-top: 4px;">
+                <b>集中采样</b>：PLIC 在 Claim/Complete 周期自动调用 <code>irq_level()</code>，杜绝中断丢失！
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 05.2 -->
+        <section>
+          <h2>❖ Chapter 0x05.2 - 异步运行时与内存可见性屏障</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• <code>TaskSpawner</code> 与 Tokio 异步运行时</div>
+              <div class="text-xs text-muted" style="margin-bottom: 4px;">CPU 主循环高速推进，耗时外设任务卸载至后台异步运行时：</div>
+              <pre><code class="language-rust">pub fn spawn_task(&amp;self, task: TaskFuture) {
+    self.spawn.try_send(task).expect("Failed to spawn");
+}</code></pre>
+              <div class="card-slate text-xs" style="margin-top: 6px;">
+                <b>SampleTimer 范例</b>：CPU 写 MMIO 触发异步等待，到期后原子置位 <code>irq_pending</code>，主线程零延迟！
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 跨线程内存屏障 (Acquire-Release 语义)</div>
+              <pre><code class="language-rust">// 1. 后台异步写线程 (Release 语义)：确保 RAM 写入先于 isr 对外可见
+self.isr.fetch_or(1, Ordering::Release);
+
+// 2. 主线程 PLIC 采样 (Acquire 语义)：建立 Synchronizes-With 屏障
+impl PlicDevice for VirtIODevice {
+    fn irq_level(&amp;mut self) -> bool {
+        self.isr.load(Ordering::Acquire) != 0
+    }
+}</code></pre>
+              <div class="card-amber text-xs" style="margin-top: 6px;">
+                <b>安全保证</b>：<code>Release</code> 写与 <code>Acquire</code> 读配对，保证 CPU 响应中断时共享 RAM 数据已就绪！
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 05.3 -->
+        <section>
+          <h2>❖ Chapter 0x05.3 - VirtIO 半虚拟化与系统外设开发</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• VirtIO 规范与 Split Virtqueue 结构</div>
+              <div class="text-xs text-muted" style="margin-bottom: 4px;">半虚拟化让 Guest 与 Host 共享内存环形队列，批量请求仅敲一次 Doorbell：</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate"><b>1. Descriptor Table</b>：记录缓冲区物理地址 <code>paddr</code>、长度 <code>len</code> 与 <code>flags</code>。</div>
+                <div class="card-slate"><b>2. Available Ring</b>：Guest 写 / Host 读，通知 Host 有新待处理请求。</div>
+                <div class="card-slate"><b>3. Used Ring</b>：Host 写 / Guest 读，Host 完成 I/O 后归还 Buffer 并触发中断。</div>
+              </div>
+            </div>
+
+            <div class="space-y">
+              <div class="card-emerald">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">◈ 综合实验任务：开发真实系统外设</div>
+                <table class="text-xs">
+                  <thead><tr><th>选题方向</th><th>规范类型</th><th>Linux 验证方式</th></tr></thead>
+                  <tbody>
+                    <tr><td><b>VirtIO-Net</b></td><td>VirtIO Net</td><td>Linux 中 <code>ping</code> 联网</td></tr>
+                    <tr><td><b>VirtIO-Console</b></td><td>VirtIO Console</td><td>终端输出 <code>/dev/hvc0</code></td></tr>
+                    <tr><td><b>VirtIO-RNG</b></td><td>VirtIO RNG</td><td><code>cat /dev/hwrng</code> 随机数</td></tr>
+                    <tr><td><b>GPIO 控制器</b></td><td>自定义 MMIO</td><td>读写引脚 / 终端模拟电平</td></tr>
+                    <tr><td><b>Watchdog 定时器</b></td><td>自定义 MMIO</td><td>超时未喂狗触发复位</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="card-blue text-xs">
+                VirtIO 设备可直接复用 Linux 原生驱动，无需编写内核驱动即可点亮！
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 06: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 06.1 -->
+        <section>
+          <h2>❖ Chapter 0x06.1 - Linux 内核启动链路与设备树 DTS</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• Linux 全系统启动链路 (Boot Chain)</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <b>1. 复位引导 (Emu &rarr; OpenSBI @ M-Mode)</b><br/>
+                  PC 指向 <code>0x80000000</code>，<code>a0=HartID(0)</code>，<code>a1=DTB 地址</code>；OpenSBI 完成底层硬件初始化与 SBI 服务注册。
+                </div>
+                <div class="card-slate">
+                  <b>2. 特权级交接 (OpenSBI &rarr; Linux Kernel @ S-Mode)</b><br/>
+                  通过 <code>mret</code> 切入 S-mode；内核开启 Sv39 页表、解析 DTB 设备树、初始化外设驱动。
+                </div>
+                <div class="card-slate">
+                  <b>3. 根文件系统挂载 (Kernel &rarr; Init Process @ U-Mode)</b><br/>
+                  挂载 Rootfs，切换至 U-mode 执行首个进程 <code>/sbin/init</code> 进入 Shell。
+                </div>
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 设备树 (Device Tree / DTS) 硬件描述</div>
+              <pre><code class="language-c">chosen {
+    stdout-path = "/soc/uart0@10000000";
+    bootargs = "console=ttyS0 earlycon=sbi";
+};
+memory@80000000 {
+    device_type = "memory";
+    reg = &lt;0x0 0x80000000 0x0 0x20000000&gt;; // 512MB
+};
+uart0: uart0@10000000 {
+    interrupts = &lt;0xa&gt;;
+    compatible = "ns16550a";
+};</code></pre>
+              <div class="text-xs text-muted" style="margin-top: 4px;">使用 <code>dtc -I dts -O dtb -o virt.dtb virt.dts</code> 编译为二进制设备树。</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 06.2 -->
+        <section>
+          <h2>❖ Chapter 0x06.2 - 实践一：Initramfs 与用户程序注入</h2>
+          <div class="grid-2 mt-1">
+            <div class="space-y-sm">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 1. 制作 VirtIO-Block Ext4 磁盘镜像</div>
+                <pre><code class="language-bash"># 创建 40MB 全零镜像并格式化为 Ext4
+dd if=/dev/zero of=block_image bs=4096 count=10240
+mkfs.ext4 block_image
+
+# 宿主机挂载镜像
+sudo mkdir -p /mnt/disk
+sudo mount -o loop block_image /mnt/disk</code></pre>
+              </div>
+
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 2. 交叉编译静态用户态 ELF</div>
+                <pre><code class="language-bash">riscv64-unknown-elf-gcc -static user_app.c -o user_app
+sudo cp user_app /mnt/disk/
+sudo umount /mnt/disk  # 必须 umount 确保写入！</code></pre>
+              </div>
+            </div>
+
+            <div class="space-y-sm">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• 3. 模拟器挂载并运行用户程序</div>
+                <pre><code class="language-bash"># 启动模拟器并挂载 VirtIO-Block 磁盘
+cargo run --release -- ./bin/virtio_blk_test.elf \
+  --device=virtio-block:block_image
+
+# 虚拟机内 Linux 终端执行：
+mount /dev/vda /mnt
+/mnt/user_app</code></pre>
+              </div>
+              <div class="card-emerald text-xs">
+                <b>里程碑达成</b>：成功验证从宿主机镜像制作、VirtIO 块设备传输、Linux Ext4 挂载到用户进程执行的完整穿透！
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 06.3 -->
+        <section>
+          <h2>❖ Chapter 0x06.3 - 实践二：Alpine Linux 部署与 GCC 构建</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 部署 Alpine Linux 为系统 Rootfs</div>
+              <pre><code class="language-bash"># 1. 创建 256MB 磁盘镜像
+dd if=/dev/zero of=alpine_rootfs.img bs=1M count=256
+mkfs.ext4 alpine_rootfs.img
+
+# 2. 解压 mini-rootfs 并配置终端 ttyS0
+sudo mount -o loop alpine_rootfs.img /mnt/alpine
+sudo tar -xvf alpine-minirootfs-*-riscv64.tar.gz -C /mnt/alpine
+# 取消 inittab 中 ttyS0 注释
+sudo umount /mnt/alpine</code></pre>
+              <div class="text-xs text-muted" style="margin-top: 4px;">配置启动参数 <code>root=/dev/vda rw console=ttyS0</code> 直接引导进入 Alpine！</div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 扩展软件包生态 (安装 GCC 编译器)</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <b>途径 A：模拟器内置网卡 (VirtIO-Net)</b><br/>
+                  若 Ch05 实现了 VirtIO-Net，在虚拟机内部直接运行：<br/>
+                  <code>apk update && apk add gcc make libc-dev</code>
+                </div>
+                <div class="card-slate">
+                  <b>途径 B：借用 QEMU 宿主联网更新</b><br/>
+                  使用 QEMU 挂载镜像连网安装 GCC，关机后镜像无缝转回我们的 <code>HERE</code> 模拟器启动！
+                </div>
+              </div>
+              <div class="card-emerald text-xs" style="margin-top: 6px;">
+                <b>极具成就感的终极时刻</b>：在自己实现的 RISC-V 模拟器上，直接在虚拟机内使用 <code>gcc</code> 编译并运行新的 C 程序！
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- CHAPTER 07: VERTICAL SLIDES GROUP -->
+      <!-- ========================================== -->
+      <section>
+        <!-- 07.1 -->
+        <section>
+          <h2>❖ Chapter 0x07.1 - SIMD 原理与 RISC-V V 扩展架构</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• SIMD 概念与端侧 AI 算力诉求</div>
+              <div class="text-xs text-muted" style="line-height: 1.45;">
+                <b>标量 (Scalar) vs SIMD (单指令多数据)</b>：单条向量指令（如 <code>vadd.vv</code>）可同时对数十乃至数百个元素并行计算。
+              </div>
+              <div class="card-blue text-xs" style="margin-top: 6px;">
+                <b>端侧 AI 核心加速引擎</b>：MobileNet 图像分类、Whisper 语音识别、本地大模型推理中，绝大部分算力集中于 <b>GEMM 矩阵乘法、卷积与点积</b>，SIMD 将计算吞吐提升数倍至数百倍！
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• RISC-V V 扩展：VLA 矢量长度无关架构</div>
+              <div class="text-xs text-muted" style="margin-bottom: 4px;">不同于 x86 AVX (固定 128/256/512 位)，RVV 采用 <b>VLA (Vector Length Agnostic)</b>：</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <b>1. 写一次代码，到处高效运行</b><br/>
+                  同一二进制无论在 128-bit 嵌入式 MCU 还是 4096-bit 超算上均可自适应发挥极致性能。
+                </div>
+                <div class="card-slate">
+                  <b>2. 关键控制 CSR 寄存器</b><br/>
+                  • <b><code>vtype</code></b>: <code>SEW</code> (8/16/32/64), <code>LMUL</code> (1/2/4/8)<br/>
+                  • <b><code>vl</code></b>: 当前实际处理元素个数，由 <code>vsetvli</code> 动态计算
+                </div>
+              </div>
+              <div class="text-xs text-muted" style="margin-top: 4px;">模拟器当前已支持 RVV 1.0 标准整型向量指令集！</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 07.2 -->
+        <section>
+          <h2>❖ Chapter 0x07.2 - 编译器对 RISC-V 向量扩展的优化</h2>
+          <div class="grid-2 mt-1">
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 6px;">• LLVM 向量化引擎与专属 Pass 优化</div>
+              <div class="space-y-sm text-xs">
+                <div class="card-slate">
+                  <b>1. <code>RISCVInsertVSETVLI</code> Pass (状态机冗余消除)</b><br/>
+                  遍历控制流图进行数据流分析，消除相邻指令冗余的 <code>vsetvli</code> 配置，并将其提升至循环前驱块（Loop Hoisting），实现循环内纯计算零开销。
+                </div>
+                <div class="card-slate">
+                  <b>2. Tail-Agnostic (<code>ta</code>) 策略优化</b><br/>
+                  指示硬件不关心未激活尾部元素，打破寄存器重命名虚假数据依赖，极大加速乱序发射。
+                </div>
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• Tail-Folding：消灭标量尾循环</div>
+              <pre><code class="language-asm"># a0=a, a1=b, a2=c, a3=N (AVL)
+.LBB0_1:
+    # 动态申请本次计算元素个数 t0 = min(a3, VLMAX)
+    vsetvli  t0, a3, e32, m1, ta, ma
+    vle32.v  v1, (a0)           # 向量加载 a[i]
+    vle32.v  v2, (a1)           # 向量加载 b[i]
+    vadd.vv  v3, v1, v2         # 向量加法
+    vse32.v  v3, (a2)           # 向量存储 c[i]
+    slli     t1, t0, 2          # 字节偏移 = t0 * 4
+    add      a0, a0, t1
+    add      a1, a1, t1
+    add      a2, a2, t1
+    sub      a3, a3, t0         # 剩余元素数 N -= t0
+    bnez     a3, .LBB0_1        # 尾部按实际余数安全计算！</code></pre>
+              <div class="text-xs text-muted" style="margin-top: 4px;">代码极其精炼，无任何冗余标量分支！</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 07.3 -->
+        <section>
+          <h2>❖ Chapter 0x07.3 - 衍生扩展与向量算子实践</h2>
+          <div class="grid-2 mt-1">
+            <div class="space-y-sm">
+              <div class="card-light">
+                <div class="font-bold text-xs" style="margin-bottom: 4px;">• RISC-V 并行扩展全景版图</div>
+                <div class="space-y-sm text-xs">
+                  <div class="card-slate"><b>• V 扩展 (Vector)</b>：1D 通用可伸缩矢量，适用于 HPC 与通用音视频。</div>
+                  <div class="card-slate"><b>• P 扩展 (Packed-SIMD)</b>：复用通用 GPR 寄存器，专为低功耗 DSP/IoT 设计。</div>
+                  <div class="card-slate"><b>• AME 扩展 (Matrix)</b>：引入 2D Tile 矩阵寄存器，专为端侧 AI GEMM 硬件加速。</div>
+                </div>
+              </div>
+
+              <div class="card-blue text-xs">
+                <div class="font-bold" style="margin-bottom: 2px;">◈ 核心数学模型</div>
+                <div>• <b>向量点积</b>：<code>DotProduct(A, B) = &sum; A[i] &times; B[i]</code></div>
+                <div style="margin-top: 2px;">• <b>矩阵乘法</b>：<code>C[i,j] = &sum; A[i,k] &times; B[k,j]</code></div>
+              </div>
+            </div>
+
+            <div class="card-light">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">• 实践任务：向量点积与 GEMM 矩阵乘法</div>
+              <pre><code class="language-c">int32_t vector_dot_product(const int32_t *a,
+                           const int32_t *b,
+                           size_t n) {
+    int32_t sum = 0;
+    size_t vl;
+    for (; n &gt; 0; n -= vl, a += vl, b += vl) {
+        // 动态设置向量长度 (SEW=32, LMUL=1)
+        asm volatile ("vsetvli %0, %1, e32, m1, ta, ma"
+                      : "=r"(vl) : "r"(n));
+        // 向量加载并执行乘加累加 ...
+    }
+    return sum;
+}</code></pre>
+              <div class="card-slate text-xs" style="margin-top: 6px;">
+                <b>运行验证</b>：使用 <code>cargo test vector_op</code> 运行模拟器整型向量算术单元测试，对比标量与向量计算的性能提升！
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SLIDE 11: SUMMARY & CHECKLIST (Horizontal) -->
+      <!-- ========================================== -->
+      <section>
+        <h2>◈ 实验通关路线与首节实验课行动清单</h2>
+        <div class="grid-2 mt-1">
+          <div class="card-light">
+            <div class="font-bold text-xs" style="margin-bottom: 6px;">• 第一节实验课建议完成清单 (Today's Checklist)</div>
+            <div class="space-y-sm text-xs">
+              <div class="items-center"><span class="badge-blue font-mono">Step 1</span> <div><b>拉取源码并配置环境</b>：克隆 <code>here</code> 仓库，安装 Rust nightly 与 RISC-V GCC 交叉编译器。</div></div>
+              <div class="items-center"><span class="badge-blue font-mono">Step 2</span> <div><b>运行 Demo 并熟悉 <code>rvdb</code></b>：使用 <code>-g</code> 体验单步调试、反汇编查看与寄存器打印。</div></div>
+              <div class="items-center"><span class="badge-blue font-mono">Step 3</span> <div><b>完成 Ch01 裸机程序移植</b>：选择一个经典 C 语言小程序移植到模拟器裸机环境运行！</div></div>
+            </div>
+          </div>
+
+          <div class="space-y">
+            <div class="card-emerald">
+              <div class="font-bold text-xs" style="margin-bottom: 4px;">◈ 实验学习方法与建议</div>
+              <div class="text-xs" style="line-height: 1.45;">
+                • <b>软硬协同思考</b>：始终对比观察“软件客户程序在做什么”与“模拟器硬件状态机在如何演进”。<br/>
+                • <b>测试驱动开发 (TDD)</b>：善用 <code>TestCPUBuilder</code> 与 Golden Model 自动化比对。<br/>
+                • <b>善用 AI 与文档辅助</b>：遇到架构疑惑可参考实验手册中的 AI 导引与规范链接。
+              </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: #ffffff; padding: 14px 16px; border-radius: 10px; text-align: center;">
+              <div style="font-weight: 700; font-size: 1.05em; margin-bottom: 2px;">祝大家在 RISC-V 系统体系结构探索中收获满满！</div>
+              <div class="text-xs" style="color: #bfdbfe; font-family: var(--r-code-font);">Happy Hacking in HERE Emulator!</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal.js CDN Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280,
+      height: 720,
+      margin: 0.05,
+      minScale: 0.2,
+      maxScale: 2.0,
+      controls: true,
+      controlsTutorial: true,
+      controlsLayout: 'bottom-right',
+      controlsBackArrows: 'faded',
+      progress: true,
+      slideNumber: true,
+      showSlideNumber: 'all',
+      hash: true,
+      history: true,
+      keyboard: true,
+      overview: true,
+      center: false,
+      touch: true,
+      loop: false,
+      rtl: false,
+      navigationMode: 'default',
+      transition: 'slide',
+      transitionSpeed: 'default',
+      backgroundTransition: 'fade',
+      plugins: [ RevealHighlight, RevealNotes, RevealMath.KaTeX ]
+    });
+  </script>
+</body>
+</html>
