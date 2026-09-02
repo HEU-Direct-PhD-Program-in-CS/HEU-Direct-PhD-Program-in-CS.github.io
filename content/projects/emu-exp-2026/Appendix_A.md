@@ -5,6 +5,12 @@ weight: 100
 draft: false
 ---
 
+# Slides
+
+- [tutorial](../../../slides/emu-exp-2026/tutorial.html)
+- [riscv introduction](../../../slides/riscv_intro/index.html)
+
+
 ## RISC-V 指令集资料
 
 - [RISC-V ISA 手册](https://github.com/riscv/riscv-isa-manual): RISC-V 指令集官方的手册。
