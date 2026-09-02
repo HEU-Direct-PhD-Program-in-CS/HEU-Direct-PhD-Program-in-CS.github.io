@@ -2,15 +2,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
   <title>计算机系统结构课程实践：基于 Rust 的 RISC-V 教学模拟器 HERE</title>
   <!-- Reveal.js CDN Styles -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/monokai.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
-  <!-- Standalone Custom Styles (YSYX Minimalist Theme) -->
+  <!-- Standalone Custom Styles (YSYX Minimalist Theme aligned with riscv_intro) -->
   <style>
     :root {
       --r-background-color: #ffffff;
@@ -35,15 +34,39 @@
       font-size: 20px;
       font-weight: 400;
       line-height: 1.45;
+      font-family: var(--r-main-font);
+      color: #1e293b;
     }
 
     .reveal .slides {
       text-align: left;
+      border-style: groove;
+      border-width: 2px;
+      overflow: hidden;
     }
 
-    .reveal .slides section {
-      padding: 10px 16px;
+    .reveal .slides section,
+    .reveal .slides section > section {
+      padding: 10px 0px;
       box-sizing: border-box;
+      line-height: 1.35;
+      font-weight: inherit;
+    }
+
+    .reveal .slides section > div,
+    .reveal .slides section > h2,
+    .reveal .slides section > p,
+    .reveal .slides section > ul,
+    .reveal .slides section > pre,
+    .reveal .slides section > table {
+      padding-left: 16px;
+      padding-right: 16px;
+      box-sizing: border-box;
+    }
+
+    .reveal .slides section > .cover-container {
+      padding-left: 0;
+      padding-right: 0;
     }
 
     /* Headings (YSYX Style) */
@@ -89,7 +112,10 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      height: 600px;
+      min-height: 520px;
+      height: 100%;
+      padding: 10px 0;
+      box-sizing: border-box;
     }
 
     .cover-tag {
@@ -103,49 +129,53 @@
       color: #1d4ed8;
       font-size: 0.85em;
       font-weight: 600;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .cover-title {
-      font-size: 2.4em;
+      font-size: 2.1em;
       font-weight: 800;
       color: #0f172a;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .cover-subtitle {
-      font-size: 1.15em;
+      font-size: 1.02em;
       color: #475569;
-      max-width: 900px;
-      margin-bottom: 30px;
+      max-width: 840px;
+      margin-bottom: 22px;
     }
 
     /* Grids & Columns */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
       align-items: start;
     }
 
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      gap: 10px;
     }
 
     .grid-4 {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      gap: 8px;
+    }
+
+    .grid-2 > *, .grid-3 > *, .grid-4 > * {
+      min-width: 0;
     }
 
     /* Cards (Minimalist Academic) */
     .card-light {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 12px 14px;
+      border-radius: 8px;
+      padding: 8px 10px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     }
 
@@ -153,7 +183,7 @@
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #334155;
     }
 
@@ -161,7 +191,7 @@
       background: #eff6ff;
       border: 1px solid #bfdbfe;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #1e40af;
     }
 
@@ -169,7 +199,7 @@
       background: #ecfdf5;
       border: 1px solid #a7f3d0;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #065f46;
     }
 
@@ -177,7 +207,7 @@
       background: #fffbeb;
       border: 1px solid #fde68a;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #92400e;
     }
 
@@ -185,7 +215,7 @@
       background: #faf5ff;
       border: 1px solid #e9d5ff;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #6b21a8;
     }
 
@@ -193,7 +223,7 @@
       background: #fff1f2;
       border: 1px solid #fecdd3;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       color: #9f1239;
     }
 
@@ -263,15 +293,21 @@
       font-size: 0.65em;
       line-height: 1.42;
       width: 100%;
+      box-sizing: border-box;
     }
 
     .reveal pre code {
       font-family: var(--r-code-font);
       padding: 8px 10px;
       max-height: 420px;
-      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
       color: #0f172a;
       background: transparent;
+      white-space: pre-wrap;
+      word-break: break-word;
+      word-wrap: break-word;
+      box-sizing: border-box;
     }
 
     .reveal code:not(pre code) {
@@ -342,23 +378,32 @@
     .items-center { display: flex; align-items: center; gap: 6px; }
 
     .reveal .controls {
-      color: #2563eb !important;
+      color: #2563eb;
+      margin-bottom: 50px;
     }
 
     .reveal .progress {
-      color: #2563eb !important;
+      background: rgba(0, 0, 0, 0.2);
+      color: #2563eb;
       height: 3px;
     }
 
+    .reveal .slide-number {
+      font-size: 20px;
+    }
+
     /* Syntax Highlighting Colors */
-    .hljs-keyword { color: #d73a49; font-weight: 600; }
-    .hljs-string { color: #032f62; }
-    .hljs-comment { color: #6a737d; font-style: italic; }
-    .hljs-number { color: #005cc5; }
-    .hljs-title, .hljs-function { color: #6f42c1; font-weight: 600; }
-    .hljs-type, .hljs-built_in { color: #e36209; }
-    .hljs-attr { color: #22863a; }
-    .hljs-params { color: #24292e; }
+    .hljs { color: #0f172a; }
+    .hljs-keyword { color: #d73a49 !important; font-weight: 600; }
+    .hljs-string { color: #032f62 !important; }
+    .hljs-comment { color: #6a737d !important; font-style: italic; }
+    .hljs-number { color: #005cc5 !important; }
+    .hljs-title, .hljs-function, .hljs-class .hljs-title { color: #6f42c1 !important; font-weight: 600; }
+    .hljs-type, .hljs-built_in { color: #e36209 !important; }
+    .hljs-attr { color: #22863a !important; }
+    .hljs-params { color: #24292e !important; }
+    .hljs-symbol { color: #d73a49 !important; }
+    .hljs-literal { color: #005cc5 !important; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -381,7 +426,7 @@
             从裸机程序、指令扩展与前端译码，到特权级中断、系统外设、Linux 引导与 SIMD 向量加速
           </div>
 
-          <div class="grid-4" style="width: 100%; max-width: 1080px;">
+          <div class="grid-4" style="width: 90%; margin: 0 auto;">
             <div class="card-light">
               <div style="font-weight:700; color:#2563eb; margin-bottom:4px;">❖ 极速上手</div>
               <div class="text-xs text-muted">环境配置 · rvdb 调试 · ELF 裸机移植</div>
@@ -899,11 +944,11 @@ main:
         <!-- 02.3 -->
         <section>
           <h2>❖ Chapter 0x02.3 - 实践：自定义指令扩展与单元测试</h2>
-          <div class="grid-2 mt-1">
-            <div class="space-y-sm">
-              <div class="card-light">
+          <div class="grid-2 mt-1" style="align-items: stretch;">
+            <div style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
+              <div class="card-light" style="flex: 1; display: flex; flex-direction: column;">
                 <div class="font-bold text-xs" style="margin-bottom: 4px;">• 1. Rust CPU 单元测试构件</div>
-                <pre><code class="language-rust">#[test]
+                <pre style="flex: 1; display: flex; flex-direction: column; margin-bottom: 0;"><code class="language-rust" style="flex: 1;">#[test]
 #[cfg(feature = "custom-instr")]
 fn test_custom_padd8_decode() {
     let raw_instr: u32 = 0x0020818B;
@@ -914,15 +959,15 @@ fn test_custom_padd8_decode() {
     );
 }</code></pre>
               </div>
-              <div class="card-slate text-xs">
-                测试命令：<code>cargo test --features custom-instr test_custom_padd8</code>
+              <div class="card-slate text-xs" style="height: 52px; display: flex; align-items: center; box-sizing: border-box;">
+                <div>测试命令：<code>cargo test --features custom-instr test_custom_padd8</code></div>
               </div>
             </div>
 
-            <div class="space-y-sm">
-              <div class="card-light">
+            <div style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
+              <div class="card-light" style="flex: 1; display: flex; flex-direction: column;">
                 <div class="font-bold text-xs" style="margin-bottom: 4px;">• 2. C 语言内嵌汇编 <code>.insn</code> 与 API 封装</div>
-                <pre><code class="language-c">static inline uint32_t padd8(uint32_t a, uint32_t b) {
+                <pre style="flex: 1; display: flex; flex-direction: column; margin-bottom: 0;"><code class="language-c" style="flex: 1;">static inline uint32_t padd8(uint32_t a, uint32_t b) {
     uint32_t result;
     asm volatile (
         ".insn r 0x0b, 0, 0, %0, %1, %2"
@@ -932,8 +977,8 @@ fn test_custom_padd8_decode() {
     return result;
 }</code></pre>
               </div>
-              <div class="card-blue text-xs">
-                <b>综合实验任务</b>：构思一组自定义指令，完成 JSON 注入、前端译码、Rust 测试与 C 语言调用验证！
+              <div class="card-blue text-xs" style="height: 52px; display: flex; align-items: center; box-sizing: border-box;">
+                <div><b>综合实验任务</b>：构思一组自定义指令，完成 JSON 注入、前端译码、Rust 测试与 C 语言调用验证！</div>
               </div>
             </div>
           </div>
@@ -969,11 +1014,18 @@ fn test_custom_padd8_decode() {
             <div class="space-y">
               <div class="card-light">
                 <div class="font-bold text-xs" style="margin-bottom: 4px;">• 标准流水推进包装器 <code>normal_exec</code></div>
-                <pre><code class="language-rust">pub(super) fn normal_exec&lt;F&gt;(cpu: &amp;mut RVCPU, f: F) -&gt; Result&lt;(), Exception&gt;
-where F: FnOnce(&amp;mut RVCPU) -&gt; Result&lt;(), Exception&gt; {
+                <pre><code class="language-rust">pub(super) fn normal_exec&lt;F&gt;(
+    cpu: &amp;mut RVCPU,
+    f: F,
+) -&gt; Result&lt;(), Exception&gt;
+where
+    F: FnOnce(&amp;mut RVCPU) -&gt; Result&lt;(), Exception&gt;,
+{
     f(cpu)?;
     cpu.pc = cpu.pc.wrapping_add(4);
-    cpu.csr.get_by_type_existing::&lt;Minstret&gt;().wrapping_add(1);
+    cpu.csr
+        .get_by_type_existing::&lt;Minstret&gt;()
+        .wrapping_add(1);
     Ok(())
 }</code></pre>
               </div>
@@ -987,15 +1039,20 @@ where F: FnOnce(&amp;mut RVCPU) -&gt; Result&lt;(), Exception&gt; {
         <!-- 03.2 -->
         <section>
           <h2>❖ Chapter 0x03.2 - 核心计算抽象与 SIMD 进位隔离</h2>
-          <div class="grid-2 mt-1">
-            <div class="card-light">
+          <div class="grid-2 mt-1" style="align-items: stretch;">
+            <div class="card-light" style="display: flex; flex-direction: column;">
               <div class="font-bold text-xs" style="margin-bottom: 4px;">• <code>ExecTrait</code>：纯计算与 CPU 状态解耦</div>
-              <pre><code class="language-rust">pub trait ExecTrait&lt;OUT, IN = WordType&gt; {
+              <pre style="flex: 1; display: flex; flex-direction: column; margin-bottom: 0;"><code class="language-rust" style="flex: 1;">pub trait ExecTrait&lt;OUT, IN = WordType&gt; {
     fn exec(a: IN, b: IN) -&gt; OUT;
 }
 
-pub fn exec_arith&lt;F&gt;(info: RVInstrInfo, cpu: &amp;mut RVCPU) -&gt; Result&lt;(), Exception&gt;
-where F: ExecTrait&lt;Result&lt;WordType, Exception&gt;&gt; {
+pub fn exec_arith&lt;F&gt;(
+    info: RVInstrInfo,
+    cpu: &amp;mut RVCPU,
+) -&gt; Result&lt;(), Exception&gt;
+where
+    F: ExecTrait&lt;Result&lt;WordType, Exception&gt;&gt;,
+{
     super::normal_exec(cpu, |cpu| {
         let (rd, rst) = match info {
             RVInstrInfo::R { rs1, rs2, rd } =&gt; {
@@ -1010,16 +1067,22 @@ where F: ExecTrait&lt;Result&lt;WordType, Exception&gt;&gt; {
 }</code></pre>
             </div>
 
-            <div class="card-light">
+            <div class="card-light" style="display: flex; flex-direction: column;">
               <div class="font-bold text-xs" style="margin-bottom: 4px;">• Packed-SIMD 关键：进位隔离 (Carry Isolation)</div>
               <div class="text-xs text-muted" style="margin-bottom: 4px;">低位溢出 Carry bit 会污染高位，必须物理阻断：</div>
-              <pre><code class="language-rust">pub struct ExecPadd8;
+              <pre style="flex: 1; display: flex; flex-direction: column;"><code class="language-rust" style="flex: 1;">pub struct ExecPadd8;
 
 impl ExecTrait&lt;Result&lt;WordType, Exception&gt;&gt;
     for ExecPadd8
 {
-    fn exec(a: WordType, b: WordType) -&gt; Result&lt;WordType, Exception&gt; {
-        let (a_b, b_b) = (a.to_le_bytes(), b.to_le_bytes());
+    fn exec(
+        a: WordType,
+        b: WordType,
+    ) -&gt; Result&lt;WordType, Exception&gt; {
+        let (a_b, b_b) = (
+            a.to_le_bytes(),
+            b.to_le_bytes(),
+        );
         let mut res = [0u8; 8];
         for i in 0..8 {
             res[i] = a_b[i].wrapping_add(b_b[i]);
@@ -1035,14 +1098,14 @@ impl ExecTrait&lt;Result&lt;WordType, Exception&gt;&gt;
         <!-- 03.3 -->
         <section>
           <h2>❖ Chapter 0x03.3 - 实践：计算单元测试与 Golden Model</h2>
-          <div class="grid-2 mt-1">
-            <div class="card-light">
+          <div class="grid-2 mt-1" style="align-items: stretch;">
+            <div class="card-light" style="display: flex; flex-direction: column;">
               <div class="font-bold text-xs" style="margin-bottom: 4px;">• 1. Rust 执行边界单元测试</div>
-              <pre><code class="language-rust">#[test]
+              <pre style="flex: 1; display: flex; flex-direction: column; margin-bottom: 0;"><code class="language-rust" style="flex: 1;">#[test]
 #[cfg(feature = "custom-instr")]
 fn test_custom_padd8_carry_isolation() {
     let raw_padd8: u32 = 0x0020818B;
-    // byte0: 0x02 + 0xFE = 0x100 -&gt; 0x00 (进位不能溢入 byte1)
+    // byte0: 0x02 + 0xFE = 0x100 -&gt; 0x00 (进位不溢入 byte1)
     run_test_exec_decode(
         raw_padd8,
         |b| b.reg(1, 0xFF01FE02).reg(2, 0x01FF02FE),
@@ -1051,13 +1114,17 @@ fn test_custom_padd8_carry_isolation() {
 
     // 验证写入 x0 必须保持为 0
     let raw_to_x0: u32 = 0x0020800B;
-    run_test_exec_decode(raw_to_x0, |b| b.reg(1, 0x12).reg(2, 0x34), |c| c.reg(0, 0));
+    run_test_exec_decode(
+        raw_to_x0,
+        |b| b.reg(1, 0x12).reg(2, 0x34),
+        |c| c.reg(0, 0),
+    );
 }</code></pre>
             </div>
 
-            <div class="card-light">
+            <div class="card-light" style="display: flex; flex-direction: column;">
               <div class="font-bold text-xs" style="margin-bottom: 4px;">• 2. C 语言 Golden Model 比对验证</div>
-              <pre><code class="language-c">// 纯软件参考模型 (Golden Model)
+              <pre style="flex: 1; display: flex; flex-direction: column; margin-bottom: 0;"><code class="language-c" style="flex: 1;">// 纯软件参考模型 (Golden Model)
 static uint32_t golden_padd8(uint32_t a, uint32_t b) {
     uint8_t r0 = (a &amp; 0xFF) + (b &amp; 0xFF);
     uint8_t r1 = ((a&gt;&gt;8)&amp;0xFF) + ((b&gt;&gt;8)&amp;0xFF);
@@ -1224,8 +1291,10 @@ for (int i = 0; i &lt; total; i++) {
             <div class="card-light">
               <div class="font-bold text-xs" style="margin-bottom: 4px;">• 统一电平采样接口：<code>PlicDevice</code></div>
               <pre><code class="language-rust">pub trait DeviceTrait: 'static {
-    fn read(&amp;mut self, addr: WordType, len: u32) -&gt; Result&lt;u64, MemError&gt;;
-    fn write(&amp;mut self, addr: WordType, len: u32, data: u64) -&gt; Result&lt;(), MemError&gt;;
+    fn read(&amp;mut self, addr: WordType, len: u32)
+        -&gt; Result&lt;u64, MemError&gt;;
+    fn write(&amp;mut self, addr: WordType, len: u32, data: u64)
+        -&gt; Result&lt;(), MemError&gt;;
     fn sync(&amp;mut self);
 }
 
@@ -1592,37 +1661,49 @@ sudo umount /mnt/alpine</code></pre>
   </div>
 
   <!-- Reveal.js CDN Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/math/math.js"></script>
   <script>
     Reveal.initialize({
-      width: 1280,
-      height: 720,
-      margin: 0.05,
-      minScale: 0.2,
-      maxScale: 2.0,
       controls: true,
       controlsTutorial: true,
       controlsLayout: 'bottom-right',
       controlsBackArrows: 'faded',
       progress: true,
-      slideNumber: true,
+      slideNumber: "c/t",
       showSlideNumber: 'all',
       hash: true,
-      history: true,
+      hashOneBasedIndex: false,
+      respondToHashChanges: true,
+      history: false,
       keyboard: true,
       overview: true,
+      disableLayout: false,
       center: false,
       touch: true,
       loop: false,
       rtl: false,
       navigationMode: 'default',
+      mouseWheel: true,
+      display: 'block',
+      hideInactiveCursor: true,
+      hideCursorTime: 5000,
+      previewLinks: false,
       transition: 'slide',
-      transitionSpeed: 'default',
+      transitionSpeed: 'fast',
       backgroundTransition: 'fade',
-      plugins: [ RevealHighlight, RevealNotes, RevealMath.KaTeX ]
+      viewDistance: 3,
+      mobileViewDistance: 2,
+      plugins: [
+        RevealHighlight,
+        RevealNotes,
+        RevealMath.KaTeX
+      ],
+      highlight: {
+        highlightOnLoad: true
+      }
     });
   </script>
 </body>
